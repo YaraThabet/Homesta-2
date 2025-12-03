@@ -1,10 +1,10 @@
 import React from 'react'
-
+import Footer from './components/footer.jsx'
 const App = () => {
   return (
-    <div>
-      Hello in Homesta app
-    </div>
+    <>
+     <Footer/>
+    </>
   )
 }
 
