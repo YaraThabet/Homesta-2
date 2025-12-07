@@ -99,8 +99,14 @@ const Navbar = () => {
           <Link to="/wishlist" className="relative">
             <CiHeart className="text-2xl text-black" />
           </Link>
-          <Link to="/sign-up" className="relative hidden lg:block">
+          {/* TODO based on difffernt users it will change  */}
+              {/* <Link to="/account" className="relative hidden lg:flex items-center gap-1">
             <CiUser className="text-2xl text-black" />
+            <span className="text-sm font-medium">Account</span>
+          </Link> */}
+          <Link to="/account" className="relative hidden lg:flex items-center gap-1">
+            <CiUser className="text-2xl text-black" />
+            <span className="text-sm font-medium">Account</span>
           </Link>
         </div>
 
