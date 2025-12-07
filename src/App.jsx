@@ -1,9 +1,11 @@
-import React from 'react'
+// import ContactLinks from "./layouts/ContactLinks"
+import Navbar from "./layouts/Navbar"
 
 const App = () => {
   return (
     <div>
-      Hello in Homesta app
+      {/* <ContactLinks /> */}
+      <Navbar />
     </div>
   )
 }
