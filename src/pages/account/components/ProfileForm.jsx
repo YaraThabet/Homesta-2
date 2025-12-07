@@ -50,9 +50,7 @@ const defaultValues = {
 
 const ProfileForm = () => {
   const [isEditing, setIsEditing] = useState(false);
-  const [profileImage, setProfileImage] = useState(
-    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200"
-  );
+  const [profileImage, setProfileImage] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState('EG');
   
   const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm({
@@ -110,7 +108,7 @@ const ProfileForm = () => {
 
   const handleCancel = () => {
     reset();
-    setProfileImage("https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200");
+    setProfileImage(null);
     setSelectedCountry('EG');
     setValue('country', 'EG');
     setIsEditing(false);
@@ -121,12 +119,16 @@ const ProfileForm = () => {
       {/* Profile Photo Section */}
       <div className="flex flex-col sm:flex-row items-start gap-5">
         <div className="relative group">
-          <div className="h-[100px] w-[100px] rounded-full border-4 border-white shadow-md overflow-hidden">
-            <img 
-              src={profileImage}
-              alt="Profile"
-              className="w-full h-full object-cover"
-            />
+          <div className="h-[100px] w-[100px] rounded-full border-4 border-white bg-gray-100 shadow-md overflow-hidden flex items-center justify-center">
+            {profileImage ? (
+              <img 
+                src={profileImage}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <User className="h-12 w-12 text-gray-400" />
+            )}
           </div>
           {isEditing && (
             <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
