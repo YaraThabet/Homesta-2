@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { NavLink } from 'react-router-dom';
 import { 
   User, 
   CreditCard, 
@@ -10,16 +10,16 @@ import {
 } from "lucide-react";
 
 const sidebarItems = [
-  { icon: User, label: "Personal Data", href: "/account", active: true },
-  { icon: CreditCard, label: "Payment Account", href: "/account/payment" },
-  { icon: Package, label: "My Orders", href: "/account/orders" },
-  { icon: Heart, label: "Wishlist", href: "/account/wishlist" },
-  { icon: HelpCircle, label: "Help Center", href: "/account/help" },
+  { icon: User, label: "Personal Data", to: "/account" },
+  { icon: CreditCard, label: "Payment Account", to: "/account/payment" },
+  { icon: Package, label: "My Orders", to: "/account/orders" },
+  { icon: Heart, label: "Wishlist", to: "/account/wishlist" },
+  { icon: HelpCircle, label: "Help Center", to: "/account/help" },
 ];
 
-const AccountSidebar = ({ className = "" }) => {
+const AccountSidebar = ({ className = "", onNavigate }) => {
   return (
-    <aside className={`bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col ${className}`}>
+    <aside className={`bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full ${className}`}>
       {/* User Profile Header */}
       <div className="flex items-center gap-3 mb-5">
         <div className="h-12 w-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium text-sm border-2 border-blue-300">
@@ -38,36 +38,50 @@ const AccountSidebar = ({ className = "" }) => {
         {sidebarItems.map((item) => {
           const Icon = item.icon;
           return (
-            <a
+            <NavLink
               key={item.label}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 ${
-                item.active
-                  ? "bg-blue-100 text-blue-700 shadow-sm"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
+              to={item.to}
+              onClick={onNavigate}
+              className={({ isActive }) => 
+                `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 ${
+                  isActive
+                    ? "bg-blue-100 text-blue-700 shadow-sm"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`
+              }
             >
               <Icon className="h-4 w-4 flex-shrink-0" />
               <span>{item.label}</span>
-            </a>
+            </NavLink>
           );
         })}
       </nav>
       
       {/* Settings - Separate Section */}
       <div className="mt-4 pt-4 border-t border-gray-200">
-        <a
-          href="/account/settings"
-          className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors duration-200"
+        <NavLink
+          to="/account/settings"
+          onClick={onNavigate}
+          className={({ isActive }) =>
+            `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 ${
+              isActive
+                ? "bg-blue-100 text-blue-700 shadow-sm"
+                : "text-gray-700 hover:bg-gray-100"
+            }`
+          }
         >
           <Settings className="h-4 w-4 flex-shrink-0" />
           <span>Settings</span>
-        </a>
+        </NavLink>
       </div>
       
       {/* Logout Button */}
       <div className="mt-auto pt-6">
         <button
+          onClick={() => {
+            // Handle logout logic here
+            if (onNavigate) onNavigate();
+          }}
           className="w-full flex items-center justify-start gap-3 px-4 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-xl transition-colors duration-200"
         >
           <LogOut className="h-4 w-4" />
