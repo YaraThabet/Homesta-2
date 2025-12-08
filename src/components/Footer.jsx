@@ -7,7 +7,7 @@ import { FaYoutube } from "react-icons/fa6";
 
 const footer = () => {
   return (
-    <footer className=" fixed bottom-0 w-full h-[426px] bg-[#205457] text-white">
+    <footer className="w-full bg-[#205457] text-white mt-auto">
       <div className="flex  w-[1243px] h-[202px] my-[72px] mx-auto gap-[32px] ">
         <div className="flex flex-col w-[416px] h-[202px] gap-[32px]">
           <div className="flex flex-row w-[170px] h-[40px] gap-[8px]">
