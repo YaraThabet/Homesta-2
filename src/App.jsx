@@ -9,10 +9,6 @@ const App = () => {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <Home/>
-      <Routes>
-        <Route path="/Category" element={< Category />} />
-      </Routes>
-
       <main className="flex-grow">
         <Routes>
           <Route path="/category" element={<Category />} />
