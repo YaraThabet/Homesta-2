@@ -48,16 +48,21 @@ const defaultValues = {
   zipCode: "09021",
 };
 
-const ProfileForm = () => {
+const ProfileForm = ({ 
+  profileImage, 
+  onProfileImageChange, 
+  profileData, 
+  onProfileUpdate 
+}) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [profileImage, setProfileImage] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState('EG');
   
   const { register, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm({
     resolver: zodResolver(profileSchema),
     defaultValues: {
       ...defaultValues,
-      country: "EG"
+      ...profileData,
+      country: profileData.country || "EG"
     },
     mode: "onChange",
   });
@@ -88,7 +93,7 @@ const ProfileForm = () => {
       }
       
       const imageUrl = URL.createObjectURL(file);
-      setProfileImage(imageUrl);
+      onProfileImageChange && onProfileImageChange(imageUrl);
     }
   };
 
@@ -97,7 +102,7 @@ const ProfileForm = () => {
       ...data,
       profileImage: profileImage
     };
-    console.log('Form data:', formData);
+    onProfileUpdate(formData);
     showToast("Profile updated successfully!");
     setIsEditing(false);
   };
@@ -107,10 +112,11 @@ const ProfileForm = () => {
   };
 
   const handleCancel = () => {
-    reset();
-    setProfileImage(null);
-    setSelectedCountry('EG');
-    setValue('country', 'EG');
+    reset({
+      ...profileData,
+      country: profileData.country || "EG"
+    });
+    setSelectedCountry(profileData.country || 'EG');
     setIsEditing(false);
   };
 
@@ -145,7 +151,7 @@ const ProfileForm = () => {
         
         <div className="flex-1 space-y-2">
           {isEditing ? (
-            <label className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors cursor-pointer w-60">
+            <label className="flex items-center justify-center gap-2 rounded-lg h-10 px-5 text-sm font-medium text-white hover:opacity-90 transition-colors cursor-pointer w-60" style={{ backgroundColor: 'rgb(32, 84, 87)' }}>
               <Camera className="h-4 w-4" />
               Upload new photo
               <input
@@ -386,7 +392,8 @@ const ProfileForm = () => {
           <div className="flex justify-end space-x-4 pt-6">
             <button
               type="submit"
-              className="px-6 py-3 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="px-6 py-3 text-sm font-medium text-white border border-transparent rounded-xl hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              style={{ backgroundColor: 'rgb(32, 84, 87)' }}
             >
               Save Changes
             </button>

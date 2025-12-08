@@ -1,10 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AccountSidebar from "./components/AccountSidebar";
 import ProfileForm from "./components/ProfileForm";
 import { IoClose } from "react-icons/io5";
 
 const Account = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
+  const [profileData, setProfileData] = useState({
+    firstName: "Maram",
+    lastName: "Elamly",
+    email: "maramahmed@gmail.com"
+  });
+
+  // Load profile data from localStorage on component mount
+  useEffect(() => {
+    const savedProfile = localStorage.getItem('userProfile');
+    if (savedProfile) {
+      const parsedProfile = JSON.parse(savedProfile);
+      setProfileData(parsedProfile);
+      if (parsedProfile.profileImage) {
+        setProfileImage(parsedProfile.profileImage);
+      }
+    }
+  }, []);
+
+  const updateProfileData = (newData) => {
+    const updatedProfile = { ...profileData, ...newData };
+    setProfileData(updatedProfile);
+    localStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+  };
+
+  const handleProfileImageChange = (imageUrl) => {
+    setProfileImage(imageUrl);
+    updateProfileData({ profileImage: imageUrl });
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 pt-24 md:pt-32">
@@ -48,7 +77,12 @@ const Account = () => {
               
               {/* Sidebar Content */}
               <div className="pt-16 px-4 overflow-y-auto h-full">
-                <AccountSidebar onNavigate={() => setSidebarOpen(false)} />
+                <AccountSidebar 
+                  onNavigate={() => setSidebarOpen(false)}
+                  profileImage={profileImage}
+                  firstName={profileData.firstName}
+                  lastName={profileData.lastName}
+                />
               </div>
             </div>
           </div>
@@ -57,13 +91,22 @@ const Account = () => {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Desktop Sidebar */}
           <div className="hidden lg:flex w-full lg:w-[280px] flex-shrink-0">
-            <AccountSidebar />
+            <AccountSidebar 
+              profileImage={profileImage}
+              firstName={profileData.firstName}
+              lastName={profileData.lastName}
+            />
           </div>
           
           {/* Main Content */}
           <div className="flex-1 min-w-0">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-10">
-              <ProfileForm />
+              <ProfileForm 
+                profileImage={profileImage}
+                onProfileImageChange={handleProfileImageChange}
+                profileData={profileData}
+                onProfileUpdate={updateProfileData}
+              />
             </div>
           </div>
         </div>

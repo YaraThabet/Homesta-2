@@ -6,7 +6,9 @@ import {
   Heart, 
   HelpCircle, 
   Settings, 
-  LogOut 
+  LogOut, 
+  Notebook,
+  LockIcon
 } from "lucide-react";
 
 const sidebarItems = [
@@ -14,19 +16,37 @@ const sidebarItems = [
   { icon: CreditCard, label: "Payment Account", to: "/account/payment" },
   { icon: Package, label: "My Orders", to: "/account/orders" },
   { icon: Heart, label: "Wishlist", to: "/account/wishlist" },
+  { icon: Notebook, label: "Manage Address", to: "/account/address" },
+  { icon: LockIcon, label: "Password Manager", to: "/account/password" },
   { icon: HelpCircle, label: "Help Center", to: "/account/help" },
 ];
 
-const AccountSidebar = ({ className = "", onNavigate }) => {
+const AccountSidebar = ({ 
+  className = "", 
+  onNavigate, 
+  profileImage, 
+  firstName = "Maram", 
+  lastName = "Elamly" 
+}) => {
   return (
     <aside className={`bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full ${className}`}>
       {/* User Profile Header */}
       <div className="flex items-center gap-3 mb-5">
-        <div className="h-12 w-12 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium text-sm border-2 border-blue-300">
-          MA
+        <div className="h-12 w-12 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center overflow-hidden">
+          {profileImage ? (
+            <img 
+              src={profileImage} 
+              alt={`${firstName} ${lastName}`} 
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <span className="text-gray-600 font-medium text-sm">
+              {firstName?.[0]}{lastName?.[0]}
+            </span>
+          )}
         </div>
         <div className="min-w-0">
-          <h3 className="font-semibold text-gray-900 text-[15px] truncate">Maram Ahmed</h3>
+          <h3 className="font-semibold text-gray-900 text-[15px] truncate">{firstName} {lastName}</h3>
           <p className="text-sm text-gray-500 truncate">Customer Operations</p>
         </div>
       </div>
@@ -45,9 +65,9 @@ const AccountSidebar = ({ className = "", onNavigate }) => {
               className={({ isActive }) => 
                 `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 ${
                   isActive
-                    ? "bg-blue-100 text-blue-700 shadow-sm"
+                    ? "text-white shadow-sm"
                     : "text-gray-700 hover:bg-gray-100"
-                }`
+                } ${isActive ? 'bg-gradient-to-r from-[#46B6BD] to-[#205457]' : ''}`
               }
             >
               <Icon className="h-4 w-4 flex-shrink-0" />
@@ -65,7 +85,7 @@ const AccountSidebar = ({ className = "", onNavigate }) => {
           className={({ isActive }) =>
             `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 ${
               isActive
-                ? "bg-blue-100 text-blue-700 shadow-sm"
+                ? "text-white shadow-sm bg-gradient-to-r from-[#46B6BD] to-[#205457]"
                 : "text-gray-700 hover:bg-gray-100"
             }`
           }
