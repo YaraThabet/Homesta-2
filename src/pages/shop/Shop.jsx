@@ -27,7 +27,7 @@ const products = [
     price: 54.00,
     originalPrice: 60.00,
     rating: 4.9,
-    image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400&h=400&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop&q=80",
     discount: 10,
   },
   {
@@ -45,7 +45,7 @@ const products = [
     price: 54.00,
     originalPrice: 60.00,
     rating: 4.9,
-    image: "https://images.unsplash.com/photo-1621460248083-6271cc4437a8?w=400&h=400&fit=crop&q=80",
+    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop&q=80",
     discount: 10,
   },
   {
