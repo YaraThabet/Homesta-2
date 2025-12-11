@@ -4,6 +4,7 @@ import Footer from './components/footer.jsx';
 import Navbar from "./layouts/Navbar";
 import Category from './pages/Category.jsx';
 import Account from './pages/account/Account';
+import Home from './pages/home/Home.jsx'
 
 const App = () => {
   return (
@@ -11,6 +12,7 @@ const App = () => {
       <Navbar />
       <main className="flex-grow">
         <Routes>
+          <Route path="/" element={<Home/>} />
           <Route path="/category" element={<Category />} />
           <Route path="/account" element={<Account />} />
         </Routes>
