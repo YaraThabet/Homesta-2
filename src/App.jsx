@@ -5,6 +5,8 @@ import Navbar from "./layouts/Navbar";
 import Category from './pages/Category.jsx';
 import Account from './pages/account/Account';
 import Home from './pages/home/Home.jsx'
+import Signup from './pages/Signup.jsx';
+import Login from './pages/Login.jsx';
 
 const App = () => {
   return (
@@ -15,6 +17,8 @@ const App = () => {
           <Route path="/" element={<Home/>} />
           <Route path="/category" element={<Category />} />
           <Route path="/account" element={<Account />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </main>
       <Footer />
