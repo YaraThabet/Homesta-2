@@ -7,7 +7,7 @@ import ProductGrid from "./components/ProductGrid";
 import Pagination from "./components/Pagination";
 import FooterBenefits from "./components/FooterBenefits";
 import SortDropdown from "./components/SortDropdown";
-
+import { products } from "../../data/products";
 const ITEMS_PER_PAGE = 12;
 
 const Shop = () => {
@@ -20,116 +20,7 @@ const Shop = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-const products = [
-  {
-    id: 1,
-    name: "Coffee machine",
-    price: 54.00,
-    originalPrice: 60.00,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop&q=80",
-    discount: 10,
-  },
-  {
-    id: 2,
-    name: "Dishwasher",
-    price: 54.00,
-    originalPrice: 60.00,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1585664811087-47f65abbad64?w=400&h=400&fit=crop&q=80",
-    discount: 10,
-  },
-  {
-    id: 3,
-    name: "Toaster",
-    price: 54.00,
-    originalPrice: 60.00,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop&q=80",
-    discount: 10,
-  },
-  {
-    id: 4,
-    name: "Air Fryer",
-    price: 54.00,
-    originalPrice: 60.00,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?w=400&h=400&fit=crop&q=80",
-    discount: 10,
-  },
-  {
-    id: 5,
-    name: "Air Conditioner",
-    price: 54.00,
-    originalPrice: 60.00,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1625961332771-3f40b0e2bdcf?w=400&h=400&fit=crop&q=80",
-    discount: 10,
-  },
-  {
-    id: 6,
-    name: "Sofa",
-    price: 54.00,
-    originalPrice: 60.00,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop&q=80",
-    discount: 10,
-  },
-  {
-    id: 7,
-    name: "Dinnerware Set",
-    price: 54.00,
-    originalPrice: 60.00,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop&q=80",
-    discount: 10,
-  },
-  {
-    id: 8,
-    name: "Knife Set",
-    price: 54.00,
-    originalPrice: 60.00,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop&q=80",
-    discount: 10,
-  },
-  {
-    id: 9,
-    name: "Cookware Set",
-    price: 54.00,
-    originalPrice: 60.00,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=400&fit=crop&q=80",
-    discount: 10,
-  },
-  {
-    id: 10,
-    name: "Bath Accessories",
-    price: 54.00,
-    originalPrice: 60.00,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1620626011761-996317b8d101?w=400&h=400&fit=crop&q=80",
-    discount: 10,
-  },
-  {
-    id: 11,
-    name: "Glasses Set",
-    price: 54.00,
-    originalPrice: 60.00,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&h=400&fit=crop&q=80",
-    discount: 20,
-  },
-  {
-    id: 12,
-    name: "Chair",
-    price: 54.00,
-    originalPrice: 60.00,
-    rating: 4.9,
-    image: "https://images.unsplash.com/photo-1592078615290-033ee584e267?w=400&h=400&fit=crop&q=80",
-    discount: 20,
-  },
-];
+
 
   const handleCategoryChange = (category) => {
     setSelectedCategories((prev) =>
