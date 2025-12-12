@@ -1,6 +1,6 @@
-import React from 'react'
-import Hero from './components/Hero'
-import Advantages from './components/Advantages'
+import React from 'react';
+import Hero from './components/Hero.jsx';
+import Advantages from './components/Advantages';
 
 const Home = () => {
   return (
@@ -8,7 +8,7 @@ const Home = () => {
       <Hero/>
       <Advantages/>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;

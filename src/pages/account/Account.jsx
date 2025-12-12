@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Outlet, useLocation } from "react-router-dom";
 import AccountSidebar from "./components/AccountSidebar";
 import ProfileForm from "./components/ProfileForm";
 import { IoClose } from "react-icons/io5";
@@ -34,6 +35,9 @@ const Account = () => {
     setProfileImage(imageUrl);
     updateProfileData({ profileImage: imageUrl });
   };
+
+  const location = useLocation();
+  const isRootAccountPath = location.pathname === '/account' || location.pathname === '/account/';
 
   return (
     <div className="min-h-screen bg-gray-100 pt-24 md:pt-32">
@@ -101,12 +105,16 @@ const Account = () => {
           {/* Main Content */}
           <div className="flex-1 min-w-0">
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-10">
-              <ProfileForm 
-                profileImage={profileImage}
-                onProfileImageChange={handleProfileImageChange}
-                profileData={profileData}
-                onProfileUpdate={updateProfileData}
-              />
+              {isRootAccountPath ? (
+                <ProfileForm 
+                  profileImage={profileImage}
+                  onProfileImageChange={handleProfileImageChange}
+                  profileData={profileData}
+                  onProfileUpdate={updateProfileData}
+                />
+              ) : (
+                <Outlet />
+              )}
             </div>
           </div>
         </div>
