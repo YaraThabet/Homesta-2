@@ -33,7 +33,7 @@ const Checkout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pt-[150px]">
+    <div className="min-h-screen bg-background pt-[150px] pl-4 pr-4">
       {/* Header */}
         <header className="bg-[#F6F6F6] py-12">
             <div className="container mx-auto px-4 text-center">
