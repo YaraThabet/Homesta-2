@@ -6,6 +6,7 @@ import Category from './pages/Category.jsx';
 import Account from './pages/account/Account';
 import Shop from './pages/shop/Shop';
 import Home from './pages/home/Home.jsx'
+import Faqs from './pages/faqs/Faqs.jsx';
 import Blogs from './pages/blogs/Blogs.jsx'
 import Wishlist from './pages/account/Wishlist.jsx';
 import Checkout from './pages/checkout/Checkout.jsx';
@@ -16,7 +17,8 @@ const App = () => {
       <Navbar />
       <main className="flex-grow">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home/>} />
+          <Route path="/faqs" element={<Faqs />} />
           <Route path="/category" element={<Category />} />
           <Route path="/account" element={<Account />}>
             <Route index element={null} />
