@@ -95,7 +95,7 @@ const Advantages = () => {
         <div className="w-full md:w-1/2 flex justify-center md:justify-end mt-6 md:mt-0">
           <div className="relative w-[200px] h-[200px] md:w-[300px] md:h-[300px] lg:w-[324px] lg:h-[412px]">
             <img 
-              src="/public/img/Chairs.png" 
+              src="/public/img/item1.png" 
               alt="Chairs"
               className="w-full h-full object-contain"
             />
@@ -141,7 +141,7 @@ const Advantages = () => {
           <div className="w-full md:w-1/2 flex justify-center md:justify-end mt-6 md:mt-0">
             <div className="relative w-[150px] h-[150px] md:w-[200px] md:h-[200px] lg:w-[216px] lg:h-[309px]">
               <img 
-                src="/public/img/Sofa.png" 
+                src="/public/img/item2.png" 
                 alt="Sofa"
                 className="w-full h-full object-contain"
               />
@@ -184,7 +184,7 @@ const Advantages = () => {
           <div className="w-full md:w-1/2 flex justify-center md:justify-end mt-6 md:mt-0">
             <div className="relative w-[150px] h-[150px] md:w-[200px] md:h-[200px] lg:w-[216px] lg:h-[309px]">
               <img 
-                src="/public/img/Lighting.png" 
+                src="/public/img/item3.png" 
                 alt="Lighting"
                 className="w-full h-full object-contain"
               />
@@ -201,4 +201,5 @@ const Advantages = () => {
 };
 
 export default Advantages;
+
 
