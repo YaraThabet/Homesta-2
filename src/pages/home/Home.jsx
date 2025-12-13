@@ -11,7 +11,7 @@ const Home = () => {
       <Deals/>
       <OurLatest/>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
