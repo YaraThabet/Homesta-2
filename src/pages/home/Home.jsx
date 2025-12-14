@@ -15,7 +15,7 @@ const Home = () => {
       <Follow/>
       <NewsLetter/>
     </div>
-  )
-}
+  );
+};
 
-export default Home
+export default Home;
