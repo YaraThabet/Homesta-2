@@ -29,7 +29,7 @@ const Navbar = () => {
     { id: 3, name: "categories", path: "/Category" },
     { id: 4, name: "About Us", path: "/about" },
     { id: 5, name: "Contact Us", path: "/contact" },
-    { id: 6, name: "blog", path: "/blog" },
+    { id: 6, name: "blog", path: "/blogs" },
   ];
   return (
     <header className="w-full fixed z-30 top-0 left-0 font-display bg-white">
