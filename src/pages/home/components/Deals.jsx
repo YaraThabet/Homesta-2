@@ -63,65 +63,71 @@ const Deals = () => {
       </div>
       <div className="w-full h-[820] mx-5 my-15 ">
         <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2  gap-6">
-          {deals.map((item) => (
-            <div
-              key={item.id}
-              className="w-full h-auto p-4 border-zinc-500 rounded-2xl shadow-xl gap-[50px] flex flex-row"
-            >
-              <div
-                className="w-[304px] h-[374px] rounded-3xl shadow-2xl bg-cover flex flex-col"
-                style={{ backgroundImage: `url(${item.image})` }}
-              >
-                <div className="flex items-center justify-center w-[96px] h-[39px] rounded-full bg-[#205457] m-4 px-4 py-2 shadow-md">
-                  <p className="font-outfit font-semibold text-[16px] text-white text-center">
-                    {item.discount}
-                  </p>
-                </div>
-              </div>
-              <div className="flex flex-col w-[225px] h-[311px]  gap-[32px]">
-                <div className="flex flex-col w-[164px] h-[127px] gap-[24px]">
-                  <div className="flex flex-col w-[164px] h-[79px] gap-[8px] ">
-                    <p className="font-[Outfit] font-normal text-[18px] md:text-[20px] lg:text-[20px] leading-[150%]">
-                      {item.category}
-                    </p>
-                    <p className="font-[Outfit] font-normal text-[18px] md:text-[20px] lg:text-[20px] leading-[150%]">
-                      {item.name}
-                    </p>
-                    <p className="font-[Outfit] font-normal text-[16px] md:text-[20px] lg:text-[15px] leading-[150%]">
-                      {item.price}{" "}
-                      <span className="text-[#A4A7AE]">{item.oldPrice}</span>
-                    </p>
-                  </div>
-                  <div className="flex flex-row w-[49px] h-[24px] gap-[4px]">
-                    <FaStar className="w-[24px] h-[24px] text-[#FFCC00]" />
-                    <p className="w-[22px] h-[20px] font-outfit font-normal text-[16px]">
-                      {item.rating}
-                    </p>
-                  </div>
-                </div>
-                <div className="w-[201px] h-[96px]">
-                  <p className="font-[Outfit] font-normal text-[16px] leading-[150%] text-[#4D4A4A]">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed
-                    do eiusmod tempor incididunt
-                  </p>
-                </div>
-                <div className="flex flex-row w-[204px] h-[24px] gap-[8px]">
-                  <button className=" flex justify-center w-[207px] h-[52px] rounded-3xl p-x[16px] py-[8px] gap-[8px] bg-[#205457]">
-                    <span className="flex text-white font-[Outfit] font-medium text-[18px] items-center">
-                      Shop Now
-                    </span>
-                    <span className=" flex items-center text-white">
-                      <FaArrowRightLong />
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+{deals.map((item) => (
+  <div
+    key={item.id}
+    className="
+      w-full h-auto p-4 border-zinc-500 rounded-2xl shadow-xl
+      flex flex-col md:flex-row gap-6 md:gap-[50px]
+    "
+  >
+    {/* الصورة */}
+    <div
+      className="
+        w-full md:w-[304px]
+        h-[250px] md:h-[374px]
+        rounded-3xl shadow-2xl bg-cover bg-center
+        flex flex-col
+      "
+      style={{ backgroundImage: `url(${item.image})` }}
+    >
+      <div className="flex items-center justify-center w-[96px] h-[39px] rounded-full bg-[#205457] m-4 px-4 py-2 shadow-md">
+        <p className="font-outfit font-semibold text-[16px] text-white text-center">
+          {item.discount}
+        </p>
+      </div>
+    </div>
+
+    {/* النص */}
+    <div className="flex flex-col w-full md:w-[225px] gap-6">
+      <div className="flex flex-col gap-2">
+        <p className="font-outfit font-normal text-[18px] md:text-[20px]">
+          {item.category}
+        </p>
+        <p className="font-outfit font-normal text-[18px] md:text-[20px]">
+          {item.name}
+        </p>
+        <p className="font-outfit font-normal text-[16px] md:text-[18px]">
+          {item.price}{" "}
+          <span className="text-[#A4A7AE]">{item.oldPrice}</span>
+        </p>
+      </div>
+
+      <div className="flex items-center gap-1">
+        <FaStar className="w-5 h-5 text-[#FFCC00]" />
+        <p className="font-outfit font-normal text-[16px]">
+          {item.rating}
+        </p>
+      </div>
+
+      <p className="font-outfit font-normal text-[16px] leading-[150%] text-[#4D4A4A]">
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt
+      </p>
+
+      <button className="flex items-center justify-center gap-2 w-full md:w-[207px] h-[52px] rounded-3xl bg-[#205457]">
+        <span className="text-white font-outfit font-medium text-[18px]">
+          Shop Now
+        </span>
+        <FaArrowRightLong className="text-white" />
+      </button>
+    </div>
+  </div>
+))}
+
 
           {
             furnitureCards.map((item)=>(
-              <div key={item} className="w-full h-auto p-4 border-zinc-500 rounded-2xl shadow-xl gap-[50px] flex justify-between" style={{ backgroundColor: item.bgColor }}>
+              <div key={item.id} className="w-full h-auto p-4 border-zinc-500 rounded-2xl shadow-xl gap-[50px] flex justify-between" style={{ backgroundColor: item.bgColor }}>
                 <div className="flex flex-col w-[253px] h-[307px] gap-[24px] ">
                   <p className="w-[253px] h-[25px] font-outfit font-medium text-[20px] text-[#78797a] ">{item.discount}</p>
                   <p className="w-[253px] h-[106px] font-outfit font-medium text-[42px]  ">{item.title}</p>
