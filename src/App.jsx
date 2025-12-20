@@ -1,6 +1,6 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
-import Footer from './components/Footer.jsx';
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import Footer from "./components/Footer.jsx";
 import Navbar from "./layouts/Navbar";
 import Category from './pages/Category.jsx';
 import Account from './pages/account/Account';
@@ -17,7 +17,8 @@ const App = () => {
       <Navbar />
       <main className="flex-grow">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home/>} />
+          <Route path="/faqs" element={<Faqs />} />
           <Route path="/category" element={<Category />} />
           <Route path="/account" element={<Account />}>
             <Route index element={null} />

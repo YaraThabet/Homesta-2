@@ -15,7 +15,7 @@ const sidebarItems = [
   { icon: User, label: "Personal Data", to: "/account" },
   { icon: CreditCard, label: "Payment Account", to: "/account/payment" },
   { icon: Package, label: "My Orders", to: "/account/orders" },
-  { icon: Heart, label: "Wishlist", to: "/account/wishlist" },
+  { icon: Heart, label: "My Collections", to: "/account/collections" },
   { icon: Notebook, label: "Manage Address", to: "/account/address" },
   { icon: LockIcon, label: "Password Manager", to: "/account/password" },
   { icon: HelpCircle, label: "Help Center", to: "/account/help" },
