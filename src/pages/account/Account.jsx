@@ -3,6 +3,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import AccountSidebar from "./components/AccountSidebar";
 import ProfileForm from "./components/ProfileForm";
 import { IoClose } from "react-icons/io5";
+import FooterBenefits from "../shop/components/FooterBenefits";
 
 const Account = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -119,6 +120,7 @@ const Account = () => {
           </div>
         </div>
       </div>
+      <FooterBenefits/>
     </div>
   );
 };

@@ -5,3 +5,7 @@
   --font-outfit: "Outfit", sans-serif;
 }
 
+@theme {
+  --color-dark-green:#205457 ;
+  --color-brown:#D9D9D9;
+}
