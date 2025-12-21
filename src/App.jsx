@@ -15,6 +15,7 @@ import Analytics from './pages/analytics/Analytics.jsx';
 import Addproduct from './pages/addproduct/Addproduct.jsx';
 import Chatai from './pages/chatai/Chatai.jsx';
 
+import PasswordManager from './pages/account/PasswordManager.jsx'
 const App = () => {
   const location = useLocation();
   const hideLayout = location.pathname.startsWith('/chatai');
@@ -30,6 +31,7 @@ const App = () => {
           <Route path="/account" element={<Account />}>
             <Route index element={null} />
             <Route path="wishlist" element={<Wishlist />} />
+            <Route path="password" element={<PasswordManager />} />
           </Route>
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/wishlist" element={<Wishlist />} />
