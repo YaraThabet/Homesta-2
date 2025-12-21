@@ -7,10 +7,13 @@ import Account from './pages/account/Account';
 import Shop from './pages/shop/Shop';
 import Home from './pages/home/Home.jsx'
 import Blogs from './pages/blogs/Blogs.jsx'
+import Faqs from './pages/faqs/Faqs.jsx';
 import Wishlist from './pages/account/Wishlist.jsx';
 import Checkout from './pages/checkout/Checkout.jsx';
 import ProductDetail from './pages/ProductDetail.jsx';
 import Analytics from './pages/analytics/Analytics.jsx';
+import Addproduct from './pages/addproduct/Addproduct.jsx';
+
 const App = () => {
   return (
     <div className="flex flex-col min-h-screen">
@@ -31,6 +34,7 @@ const App = () => {
           <Route path="/blogs" element={<Blogs />} />
            <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/addproduct" element={<Addproduct />} /> 
         </Routes>
       </main>
       <Footer />
