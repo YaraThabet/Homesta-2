@@ -20,11 +20,14 @@ import TrackOrder from "./pages/TrackOrder";
 import Error404 from "./pages/Error404";
 import CustomerSupport from "./pages/CustomerSupport";
 import Electronic from "./pages/Electronic";
-
 import PasswordManager from "./pages/account/PasswordManager.jsx";
+import AIChatApp from "./pages/AIChatApp";
+
 const App = () => {
   const location = useLocation();
-  const hideLayout = location.pathname.startsWith("/chatai");
+  const hideLayout =
+    location.pathname.startsWith("/chatai") ||
+    location.pathname.startsWith("/ai-chat");
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -41,7 +44,6 @@ const App = () => {
           </Route>
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/wishlist" element={<Wishlist />} />
-
           <Route path="/shop" element={<Shop />} />
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/product/:id" element={<ProductDetail />} />
@@ -51,9 +53,10 @@ const App = () => {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/track-order" element={<TrackOrder />} />
-          <Route path="*" element={<Error404 />} />
           <Route path="/customer-support" element={<CustomerSupport />} />
           <Route path="/electronic" element={<Electronic />} />
+          <Route path="/ai-chat" element={<AIChatApp />} />
+          <Route path="*" element={<Error404 />} />
         </Routes>
       </main>
       {!hideLayout && <Footer />}
