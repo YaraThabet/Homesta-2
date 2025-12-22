@@ -1,0 +1,39 @@
+.css-1xhukd7-MuiButtonBase-root-MuiTab-root.Mui-selected{
+    background-color: #B19470;
+    color: #0E0E0E !important;
+    border-right: none !important;
+}
+#vertical-tabpanel-0{
+    width: 800px !important;
+}
+.css-oewvya-MuiTabs-indicator{
+    display: none !important;
+}
+
+.MuiBox-root.css-19kzrtu{
+    padding: 0 0 0 15px  !important;
+}
+
+.MuiPaper-root.MuiPaper-elevation.MuiPaper-rounded,
+.css-1808mag-MuiPaper-root-MuiAccordion-root.Mui-expanded+.css-1808mag-MuiPaper-root-MuiAccordion-root.Mui-expanded
+{
+    --Paper-shadow:0 !important;
+}
+.css-i624xy-MuiButtonBase-root-MuiAccordionSummary-root.Mui-expanded{
+    min-height: 45px !important;
+}
+.css-1om8wwj-MuiPaper-root-MuiAccordion-root::before{
+    display: none !important;
+}
+.faqs-footer-p{
+    color: #0E0E0E;
+    font-weight: 500;
+    font-family: 'Outfit';
+    font-size: 15px;
+}
+.faqs-footer-desc{
+    color: #4D4A4A;
+    font-weight: 400;
+    font-family: 'Outfit';
+    font-size: 14px;
+}

@@ -2,16 +2,23 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Footer from "./components/Footer.jsx";
 import Navbar from "./layouts/Navbar";
-import Category from "./pages/Category.jsx";
-import Account from "./pages/account/Account";
-import Shop from "./pages/shop/Shop";
-import Home from "./pages/home/Home.jsx";
-import Blogs from "./pages/blogs/Blogs.jsx";
-import Wishlist from "./pages/account/Wishlist.jsx";
-import Checkout from "./pages/checkout/Checkout.jsx";
-import ProductDetail from "./pages/ProductDetail.jsx";
+import Category from './pages/Category.jsx';
+import Account from './pages/account/Account';
+import Shop from './pages/shop/Shop';
+import Home from './pages/home/Home.jsx'
+import Faqs from './pages/faqs/Faqs.jsx';
+import Blogs from './pages/blogs/Blogs.jsx'
+import ProductDetail from './pages/ProductDetail.jsx';
+import ShoppingCart from './pages/ShoppingCart.jsx';
+import Payment from './pages/account/Payment.jsx';
+import Collections from './pages/account/Collections.jsx';
+import Orders from './pages/account/Orders.jsx';
 import SummaryOrder from "./pages/summaryOrder/SummaryOrder.jsx";
 import TrackingOrder from "./pages/trackingOrder/TrackingOrder.jsx";
+import Checkout from "./pages/checkout/Checkout.jsx";
+import Wishlist from "./pages/account/Wishlist.jsx";
+import NewPassword from "./pages/newPrassword/NewPassword.jsx";
+import OrderComplete from "./pages/orderComplete/OrderComplete.jsx";
 
 const App = () => {
   return (
@@ -19,21 +26,30 @@ const App = () => {
       <Navbar />
       <main className="flex-grow">
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Home/>} />
+          <Route path="/faqs" element={<Faqs />} />
           <Route path="/category" element={<Category />} />
           <Route path="/account" element={<Account />}>
             <Route index element={null} />
-            <Route path="wishlist" element={<Wishlist />} />
+            {/* <Route path="wishlist" element={<Wishlist />} /> */}
+            <Route path="collections" element={<Collections />} />
+            <Route path="orders" element={<Orders />} />
+
+            <Route path="payment" element={<Payment />} />
           </Route>
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/wishlist" element={<Wishlist />} />
 
           <Route path="/shop" element={<Shop />} />
           <Route path="/blogs" element={<Blogs />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
 
+          <Route path="/cart" element={<ShoppingCart />} />
+         <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/summaryOrder" element={<SummaryOrder />} />
           <Route path="/trackingOrder" element={<TrackingOrder />} />
+          <Route path="/newPassword" element={<NewPassword />} />
+          <Route path="/orderComplete" element={<OrderComplete />} />
 
         </Routes>
       </main>
