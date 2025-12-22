@@ -2,7 +2,7 @@ import React from "react";
 import OrderStatus from "./components/OrderStatus";
 import ProductItem from "./components/ProductItem";
 import TrackingHeader from "./components/TrackingHeader";
-import FooterBenefits from "../shop/components/FooterBenefits";
+import AdvantagesItems from "../../components/AdvantagesItems";
 
 const products = [
   {
@@ -65,7 +65,7 @@ const TrackingOrder = () => {
         </div>
           </div>
           
-   <FooterBenefits />
+    <AdvantagesItems />
 
     </div>
   );
