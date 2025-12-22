@@ -1,5 +1,5 @@
 import FaqsFooter from "./components/FaqsFooter";
-import FaqsTabs from "./components/FaqsTabs";
+// import FaqsTabs from "./components/FaqsTabs";
 
 const Faqs = () => {
   return (
@@ -14,7 +14,7 @@ const Faqs = () => {
         </p>
       </div>
       <div className="container pl-20 pt-15 pb-15">
-        <FaqsTabs />
+        {/* <FaqsTabs /> */}
         <FaqsFooter />
       </div>
     </div>

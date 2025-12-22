@@ -30,7 +30,7 @@ const Sidebar = () => {
   ]
 
   return (
-    <aside className="w-[350px] max-w-[320px] bg-white rounded-lg shadow-sm">
+    <aside className="w-full bg-white rounded-lg shadow-sm">
       <div className="flex items-center gap-4 mt-5 p-5">
         <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden border-2 border-gray-200">
           <img src={logo} alt="CasaLux" className="w-full h-full object-cover" />
@@ -80,24 +80,24 @@ const StatCard = ({ stat }) => (
 )
 
 const ProductRow = ({ item, rankColor }) => (
-  <div className="bg-white rounded-md p-4 flex items-center justify-between shadow-sm">
-    <div className="flex items-center gap-4">
+  <div className="bg-white rounded-md p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between shadow-sm">
+    <div className="flex items-start sm:items-center gap-4 w-full sm:w-auto">
       <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold ${rankColor}`}>{item.id}</div>
       <div>
         <p className="font-medium">{item.title}</p>
         <p className="text-sm text-gray-400">{item.category}</p>
       </div>
     </div>
-    <div className="text-right text-sm text-gray-500 grid grid-cols-3 gap-4 min-w-[220px]">
-      <div>
+    <div className="mt-3 sm:mt-0 text-sm text-gray-500 grid grid-cols-1 sm:grid-cols-3 gap-4 w-full sm:w-auto">
+      <div className="text-left sm:text-right">
         <p className="text-black">{item.sales.split(' ')[0]}</p>
         <p className="text-gray-400">Sales</p>
       </div>
-      <div>
+      <div className="text-left sm:text-right">
         <p className="text-black">{item.percentage}</p>
         <p className="text-gray-400">Percentage</p>
       </div>
-      <div>
+      <div className="text-left sm:text-right">
         <p className="text-black">{item.profit}</p>
         <p className="text-gray-400">Profit</p>
       </div>
@@ -108,7 +108,7 @@ const ProductRow = ({ item, rankColor }) => (
 const Analytics = () => {
   return (
     <div className="w-full min-h-screen bg-gray-50">
-      <div className="w-[90%] lg:w-[85%] mx-auto mt-[168px]">
+      <div className="max-w-7xl mx-auto px-4 mt-[168px]">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="col-span-1">
             <Sidebar />
@@ -118,7 +118,7 @@ const Analytics = () => {
             <div className="space-y-6">
               
               <div >
-                <div className='w-230 h-10 p-1 mb-4 bg-white'>
+                <div className='w-full h-10 p-1 mb-4 bg-white'>
                   <h2 className="text-xl font-semibold mb-4">Sales Analytics</h2>
                 </div>
                 
@@ -129,22 +129,23 @@ const Analytics = () => {
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h3 className="text-lg font-semibold ">Best Selling Products</h3>
-                <div className="mt-4 flex flex-col gap-4 ">
-                  {bestSelling.map((p, i) => (
-                    <ProductRow key={p.id} item={p} rankColor={['bg-gradient-to-b from-[#46B6BD] to-[#205457]','bg-gradient-to-b from-[#46B6BD] to-[#205457]','bg-gradient-to-b from-[#46B6BD] to-[#205457]'][i] || 'bg-gray-300'} />
-                  ))}
+              <div className="grid grid-cols-1 gap-6">
+                <div className="bg-white rounded-lg p-6 shadow-sm">
+                  <h3 className="text-lg font-semibold ">Best Selling Products</h3>
+                  <div className="mt-4 flex flex-col gap-4">
+                    {bestSelling.map((p, i) => (
+                      <ProductRow key={p.id} item={p} rankColor={['bg-gradient-to-b from-[#46B6BD] to-[#205457]','bg-gradient-to-b from-[#46B6BD] to-[#205457]','bg-gradient-to-b from-[#46B6BD] to-[#205457]'][i] || 'bg-gray-300'} />
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h3 className="text-lg font-semibold">Least Selling Products</h3>
-                <div className="mt-4 flex flex-col gap-4">
-                  {leastSelling.map((p, i) => (
-                    <ProductRow key={p.id} item={p} rankColor={['bg-[#DB1E01]','bg-[#DB1E01]','bg-[#DB1E01]'][i] || 'bg-gray-300'} />
-                  ))}
+                <div className="bg-white rounded-lg p-6 shadow-sm">
+                  <h3 className="text-lg font-semibold">Least Selling Products</h3>
+                  <div className="mt-4 flex flex-col gap-4">
+                    {leastSelling.map((p, i) => (
+                      <ProductRow key={p.id} item={p} rankColor={['bg-[#DB1E01]','bg-[#DB1E01]','bg-[#DB1E01]'][i] || 'bg-gray-300'} />
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
