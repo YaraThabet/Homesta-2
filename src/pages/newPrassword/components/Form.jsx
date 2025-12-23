@@ -6,10 +6,9 @@ export default function Form() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
-    <section className="flex flex-col justify-center min-h-screen w-full mx-auto px-4">
+    <section className="flex flex-col w-full justify-center mx-auto px-4 py-8">
       {/* Logo */}
       <div className="flex items-center gap-2 mb-12">
-         {/* using w-10 h-10 or similar to control image size if needed, assuming generic sizing for now based on previous code */}
         <img src="/img/logo.jpg" alt="Homesta Logo" className="w-10 h-10 object-cover rounded-lg" />
         <h1 className="text-[#205457] text-3xl font-bold">Homesta</h1>
       </div>
@@ -68,3 +67,4 @@ export default function Form() {
     </section>
   );
 }
+
