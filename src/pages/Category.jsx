@@ -3,9 +3,9 @@ const Category = () => {
   const categories = [
     { id: 1, name: "Electrical Appliances", imgSrc: "/img/kitchen.jpg" },
     { id: 2, name: "Bedrooms", imgSrc: "/img/Bedrooms.jpg" },
-    { id: 3, name: "Living Room", imgSrc: "/img/living-room.png" },
+    { id: 3, name: "Living Room", imgSrc: "/img/living-room.jpg" },
     { id: 4, name: "Kitchen", imgSrc: "/img/kitchen2.jpg" },
-    { id: 5, name: "Medical Devices", imgSrc: "/img/medical-devices.jpeg" },
+    { id: 5, name: "Sanitary Ware", imgSrc: "/img/Sanitary.jpg" },
     { id: 6, name: "Decor", imgSrc: "/img/decor.jpeg" },
     { id: 7, name: "Home Tools", imgSrc: "/img/home-tools.png" },
     { id: 8, name: "Furniture", imgSrc: "/img/furniture.jpeg" },
