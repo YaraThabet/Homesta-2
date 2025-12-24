@@ -14,6 +14,7 @@ import ProductDetail from './pages/ProductDetail.jsx';
 import Analytics from './pages/analytics/Analytics.jsx';
 import Addproduct from './pages/addproduct/Addproduct.jsx';
 import Chatai from './pages/chatai/Chatai.jsx';
+import Dashboard from './pages/profile/Dashboard.jsx';
 
 const App = () => {
   const location = useLocation();
@@ -39,7 +40,10 @@ const App = () => {
            <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/addproduct" element={<Addproduct />} /> 
-          <Route path="/chatai" element={<Chatai />}   />    
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/chatai" element={<Chatai />}   />   
+          
+          
            </Routes>
       </main>
       {!hideLayout && <Footer />}
