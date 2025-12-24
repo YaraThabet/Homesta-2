@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-import { BarChart2, PlusSquare, Box, TrendingUp, Settings, LogOut } from 'lucide-react'
+import { BarChart2, PlusSquare, Box, TrendingUp, Settings, LogOut, Home } from 'lucide-react'
 import { IoCloudUploadOutline } from "react-icons/io5";
 import { logo } from '../../assets/index'
 
@@ -11,9 +11,9 @@ import { logo } from '../../assets/index'
 
 	const Sidebar = () => {
 		const menu = [
-		{ id: 1, icon: BarChart2, label: 'Company Data', to: '/analytics/company' },
+		{ id: 1, icon: Home, label: 'Dashboard', to: '/dashboard' },
 		{ id: 2, icon: PlusSquare, label: 'Add Product', to: '/addproduct' },
-		{ id: 3, icon: Box, label: 'Product', to: '/analytics/product' },
+		{ id: 3, icon: Box, label: 'Product', to: '/product' },
 		{ id: 4, icon: TrendingUp, label: 'Analytics', to: '/analytics' },
 	]
 
@@ -60,7 +60,7 @@ import { logo } from '../../assets/index'
 	)
 }
 
-const Addproduct = () => {
+const Profile = () => {
 	const [name, setName] = useState('')
 	const [category, setCategory] = useState('')
 	const [description, setDescription] = useState('')
@@ -153,4 +153,4 @@ const Addproduct = () => {
 	)
 }
 
-export default Addproduct
+export default Profile

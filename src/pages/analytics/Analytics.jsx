@@ -1,7 +1,7 @@
 import React from 'react'
 import { logo } from '../../assets/index'
 import { NavLink } from 'react-router-dom'
-import { BarChart2, PlusSquare, Box, TrendingUp, Settings, LogOut } from 'lucide-react'
+import { BarChart2, PlusSquare, Box, TrendingUp, Settings, LogOut, Home } from 'lucide-react'
 
 const stats = [
   { id: 1, label: 'Total Products', value: 6 },
@@ -23,9 +23,9 @@ const leastSelling = [
 
 const Sidebar = () => {
   const menu = [
-    { id: 1, icon: BarChart2, label: 'Company Data', to: '/analytics/company' },
-    { id: 2, icon: PlusSquare, label: 'Add Product', to: '/analytics/add' },
-    { id: 3, icon: Box, label: 'Product', to: '/analytics/product' },
+    { id: 1, icon: Home, label: 'Dashboard', to: '/dashboard' },
+    { id: 2, icon: PlusSquare, label: 'Add Product', to: '/addproduct' },
+    { id: 3, icon: Box, label: 'Product', to: '/product' },
     { id: 4, icon: TrendingUp, label: 'Analytics', to: '/analytics' },
   ]
 
