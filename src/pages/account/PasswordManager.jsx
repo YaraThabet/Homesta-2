@@ -93,7 +93,7 @@ const PasswordManager = () => {
               onClick={() => togglePassword("confirm")}
               className="text-gray-400 hover:text-gray-600"
             >
-              {showPassword.confirm ? <Eye /> :<EyeOff />  }
+              {showPassword.confirm ? <Eye /> :<EyeOff />}
             </button>
           </div>
         </div>
