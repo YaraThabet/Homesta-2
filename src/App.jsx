@@ -15,18 +15,6 @@ import Analytics from './pages/analytics/Analytics.jsx';
 import Addproduct from './pages/addproduct/Addproduct.jsx';
 import Chatai from './pages/chatai/Chatai.jsx';
 import Dashboard from './pages/profile/Dashboard.jsx';
-import Category from "./pages/Category.jsx";
-import Account from "./pages/account/Account";
-import Shop from "./pages/shop/Shop";
-import Home from "./pages/home/Home.jsx";
-import Blogs from "./pages/blogs/Blogs.jsx";
-import Faqs from "./pages/faqs/Faqs.jsx";
-import Wishlist from "./pages/account/Wishlist.jsx";
-import Checkout from "./pages/checkout/Checkout.jsx";
-import ProductDetail from "./pages/ProductDetail.jsx";
-import Analytics from "./pages/analytics/Analytics.jsx";
-import Addproduct from "./pages/addproduct/Addproduct.jsx";
-import Chatai from "./pages/chatai/Chatai.jsx";
 import About from "./pages/AboutUS/components/About.jsx";
 import ContactUs from "./pages/AboutUS/components/ContactUS.jsx";
 import TrackOrder from "./pages/TrackOrder";
@@ -35,7 +23,12 @@ import CustomerSupport from "./pages/CustomerSupport";
 import Electronic from "./pages/Electronic";
 import PasswordManager from "./pages/account/PasswordManager.jsx";
 import AIChatApp from "./pages/AIChatApp";
-
+import Notifications from "./pages/Notifications.jsx";
+import HelpCenter from "./pages/account/HelpCenter.jsx";
+import Orders from "./pages/account/Orders.jsx";
+import Payment from "./pages/account/Payment.jsx";
+import Collections from "./pages/account/Collections.jsx";
+import ShoppingCart from "./pages/ShoppingCart.jsx";
 const App = () => {
   const location = useLocation();
   const hideLayout =
@@ -48,12 +41,19 @@ const App = () => {
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/faqs" element={<Faqs />} />
           <Route path="/category" element={<Category />} />
           <Route path="/account" element={<Account />}>
             <Route index element={null} />
             <Route path="wishlist" element={<Wishlist />} />
             <Route path="password" element={<PasswordManager />} />
+            {/* <Route path="wishlist" element={<Wishlist />} /> */}
+            <Route path="collections" element={<Collections />} />
+            <Route path="help-center" element={<HelpCenter />} />
+            <Route path="orders" element={<Orders />} />
+
+            <Route path="payment" element={<Payment />} />
           </Route>
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/wishlist" element={<Wishlist />} />
@@ -64,11 +64,9 @@ const App = () => {
           <Route path="/addproduct" element={<Addproduct />} /> 
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/chatai" element={<Chatai />}   />   
-          
-          
-           </Routes>
           <Route path="/addproduct" element={<Addproduct />} />
           <Route path="/chatai" element={<Chatai />} />
+          <Route path="/shopping-cart" element={<ShoppingCart />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/track-order" element={<TrackOrder />} />

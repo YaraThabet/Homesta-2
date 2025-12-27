@@ -93,7 +93,7 @@ const Navbar = () => {
 
         {/* lists of faviorites and cart */}
         <div className="flex gap-3 ml-4">
-          <Link to="/cart" className="relative">
+          <Link to="/shopping-cart" className="relative">
             <PiShoppingCartThin className="text-2xl text-white" />
           </Link>
           <Link to="/wishlist" className="relative">
