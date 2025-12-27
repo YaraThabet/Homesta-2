@@ -14,6 +14,8 @@ import ShoppingCart from './pages/ShoppingCart.jsx';
 import Payment from './pages/account/Payment.jsx';
 import Collections from './pages/account/Collections.jsx';
 import Orders from './pages/account/Orders.jsx';
+import HelpCenter from './pages/account/HelpCenter.jsx';
+import Notifications from './pages/Notifications.jsx';
 const App = () => {
   return (
     <div className="flex flex-col min-h-screen">
@@ -21,11 +23,13 @@ const App = () => {
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/notifications" element={<Notifications />} />
           <Route path="/category" element={<Category />} />
           <Route path="/account" element={<Account />}>
             <Route index element={null} />
             {/* <Route path="wishlist" element={<Wishlist />} /> */}
             <Route path="collections" element={<Collections />} />
+            <Route path="help-center" element={<HelpCenter />} />
             <Route path="orders" element={<Orders />} />
 
             <Route path="payment" element={<Payment />} />
