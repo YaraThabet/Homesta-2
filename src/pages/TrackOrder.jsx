@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Package, CreditCard, Headphones } from "lucide-react";
-
+import { Link } from "react-router-dom";
 const TrackOrder = () => {
   const [orderId, setOrderId] = useState("");
   const [email, setEmail] = useState("");
@@ -33,7 +33,7 @@ const TrackOrder = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white pt-[120px]">
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Header */}
@@ -83,7 +83,11 @@ const TrackOrder = () => {
               onClick={handleSubmit}
               className="w-full md:w-auto px-10 py-3 bg-teal-800 text-white font-semibold rounded-lg hover:bg-teal-900 transition-colors shadow-md hover:shadow-lg"
             >
-              Track Order
+
+              <Link to="/tracking-order">
+                Track Order
+              </Link>
+
             </button>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import {
   Award,
   Home,
@@ -34,18 +35,23 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Banner */}
-      <div className="bg-teal-800 text-white py-4 px-6 text-center">
-        <p className="text-sm">
-          Get up to 40% off on selected items | Free shipping on orders over
-          $100
-        </p>
-      </div>
-
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <header className="bg-[#F6F6F6] py-12 pt-[180px]">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-3xl font-semibold text-gray-800 mb-2">About Us</h1>
+          <nav className="text-sm text-gray-500">
+            <Link to="/" className="hover:text-[#205457] transition-colors">
+              Home
+            </Link>
+            <span className="mx-2">/</span>
+            <span className="text-[#205457]">About Us</span>
+          </nav>
+        </div>
+      </header>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 ">
         {/* Header */}
-        <div className="text-center mb-16">
+
+        <div className="text-center mb-16 ">
           <p className="text-teal-700 font-medium mb-3 text-base">
             - Our Story
           </p>
@@ -224,7 +230,7 @@ const About = () => {
                 </div>
 
                 {/* Feature */}
-                <div className="flex items-start gap-3 bg-amber-50 p-3 rounded-lg">
+                {/* <div className="flex items-start gap-3 bg-amber-50 p-3 rounded-lg">
                   <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <span className="text-amber-600 text-lg">📦</span>
                   </div>
@@ -236,7 +242,7 @@ const About = () => {
                       Free shipping for order above $150
                     </p>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -274,7 +280,7 @@ const About = () => {
                 </div>
 
                 {/* Feature */}
-                <div className="flex items-start gap-3 bg-amber-50 p-3 rounded-lg">
+                {/* <div className="flex items-start gap-3 bg-amber-50 p-3 rounded-lg">
                   <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <span className="text-amber-600 text-lg">💳</span>
                   </div>
@@ -286,7 +292,7 @@ const About = () => {
                       Flexible payment options available
                     </p>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -324,7 +330,7 @@ const About = () => {
                 </div>
 
                 {/* Feature */}
-                <div className="flex items-start gap-3 bg-amber-50 p-3 rounded-lg">
+                {/* <div className="flex items-start gap-3 bg-amber-50 p-3 rounded-lg">
                   <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <span className="text-amber-600 text-lg">🤝</span>
                   </div>
@@ -336,7 +342,7 @@ const About = () => {
                       Get support online 24 hours a day
                     </p>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

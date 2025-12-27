@@ -16,13 +16,13 @@ const Footer = () => {
     <footer className="w-full bg-[#205457] text-white">
       <div className="max-w-[1243px] mx-auto px-6 py-16 flex flex-col lg:flex-row gap-12">
         <div className="flex flex-col gap-6 max-w-[416px]">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 cursor-pointer group" onClick={() => handleNavigation("/")}>
             <img
               src="/img/logo.jpg"
               alt="Homesta Logo"
-              className="w-8 h-8 rounded-lg"
+              className="w-8 h-8 rounded-lg group-hover:scale-110 transition-transform"
             />
-            <p className="font-outfit font-medium text-[32px]">Homesta</p>
+            <p className="font-outfit font-medium text-[32px] group-hover:text-white/80 transition-colors">Homesta</p>
           </div>
 
           <p className="font-outfit text-[16px] leading-[150%]">

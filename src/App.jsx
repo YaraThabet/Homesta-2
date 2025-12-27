@@ -20,28 +20,34 @@ import ContactUs from "./pages/AboutUS/components/ContactUS.jsx";
 import TrackOrder from "./pages/TrackOrder";
 import Error404 from "./pages/Error404";
 import CustomerSupport from "./pages/CustomerSupport";
-import Electronic from "./pages/Electronic";
+import SubCategory from "./pages/SubCategory";
 import PasswordManager from "./pages/account/PasswordManager.jsx";
 import AIChatApp from "./pages/AIChatApp";
-<<<<<<< HEAD
 import Notifications from "./pages/Notifications.jsx";
 import HelpCenter from "./pages/account/HelpCenter.jsx";
 import Orders from "./pages/account/Orders.jsx";
 import Payment from "./pages/account/Payment.jsx";
 import Collections from "./pages/account/Collections.jsx";
 import ShoppingCart from "./pages/ShoppingCart.jsx";
-=======
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import ForgetPassword from "./pages/ForgetPassword";
-import AddPassword from "./pages/AddPassword";
-import VerifyCode from "./pages/VerifyCode";
-
->>>>>>> Habiba2
+import SummaryOrder from "./pages/summaryOrder/SummaryOrder.jsx";
+import Login from "./pages/Login.jsx";
+import Signup from "./pages/Signup.jsx";
+import VerifyCode from "./pages/VerifyCode.jsx";
+import ForgetPassword from "./pages/ForgetPassword.jsx";
+import AddPassword from "./pages/AddPassword.jsx";
+import OrderSuccess from "./pages/OrderSuccess.jsx";
+import TrackingOrder from "./pages/trackingOrder/TrackingOrder";
+import AIChatFloatButton from "./components/AIChatFloatButton.jsx";
 const App = () => {
   const location = useLocation();
   const hideLayout =
     location.pathname.startsWith("/chatai") ||
+    location.pathname.startsWith("/ai-chat") ||
+    location.pathname.startsWith("/login") ||
+    location.pathname.startsWith("/signup") ||
+    location.pathname.startsWith("/verify-code") ||
+    location.pathname.startsWith("/forget-password") ||
+    location.pathname.startsWith("/add-password");
     location.pathname.startsWith("/ai-chat") ||
     location.pathname.startsWith("/login") ||
     location.pathname.startsWith("/signup") ||
@@ -69,23 +75,22 @@ const App = () => {
 
             <Route path="payment" element={<Payment />} />
           </Route>
+          <Route path="/payment" element={<Payment />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/wishlist" element={<Wishlist />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/product/:id" element={<ProductDetail />} />
           <Route path="/analytics" element={<Analytics />} />
-          <Route path="/addproduct" element={<Addproduct />} /> 
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/chatai" element={<Chatai />}   />   
           <Route path="/addproduct" element={<Addproduct />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/chatai" element={<Chatai />} />
           <Route path="/shopping-cart" element={<ShoppingCart />} />
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/track-order" element={<TrackOrder />} />
           <Route path="/customer-support" element={<CustomerSupport />} />
-          <Route path="/electronic" element={<Electronic />} />
+          <Route path="/category/:categoryName" element={<SubCategory />} />
           <Route path="/ai-chat" element={<AIChatApp />} />
 
           {/* Authentication Routes */}
@@ -94,10 +99,19 @@ const App = () => {
           <Route path="/forgot-password" element={<ForgetPassword />} />
           <Route path="/new-password" element={<AddPassword />} />
           <Route path="/verify" element={<VerifyCode />} />
-
+        
+          <Route path="/summary-order" element={<SummaryOrder />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/verify-code" element={<VerifyCode />} />
+          <Route path="/forget-password" element={<ForgetPassword />} />
+          <Route path="/add-password" element={<AddPassword />} />
+          <Route path="/order-success" element={<OrderSuccess />} />
+          <Route path="/tracking-order" element={<TrackingOrder />} />
           <Route path="*" element={<Error404 />} />
         </Routes>
       </main>
+      {!hideLayout && <AIChatFloatButton />}
       {!hideLayout && <Footer />}
     </div>
   );
