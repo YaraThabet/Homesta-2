@@ -23,17 +23,31 @@ import CustomerSupport from "./pages/CustomerSupport";
 import Electronic from "./pages/Electronic";
 import PasswordManager from "./pages/account/PasswordManager.jsx";
 import AIChatApp from "./pages/AIChatApp";
+<<<<<<< HEAD
 import Notifications from "./pages/Notifications.jsx";
 import HelpCenter from "./pages/account/HelpCenter.jsx";
 import Orders from "./pages/account/Orders.jsx";
 import Payment from "./pages/account/Payment.jsx";
 import Collections from "./pages/account/Collections.jsx";
 import ShoppingCart from "./pages/ShoppingCart.jsx";
+=======
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import ForgetPassword from "./pages/ForgetPassword";
+import AddPassword from "./pages/AddPassword";
+import VerifyCode from "./pages/VerifyCode";
+
+>>>>>>> Habiba2
 const App = () => {
   const location = useLocation();
   const hideLayout =
     location.pathname.startsWith("/chatai") ||
-    location.pathname.startsWith("/ai-chat");
+    location.pathname.startsWith("/ai-chat") ||
+    location.pathname.startsWith("/login") ||
+    location.pathname.startsWith("/signup") ||
+    location.pathname.startsWith("/forgot-password") ||
+    location.pathname.startsWith("/new-password") ||
+    location.pathname.startsWith("/verify");
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -73,6 +87,14 @@ const App = () => {
           <Route path="/customer-support" element={<CustomerSupport />} />
           <Route path="/electronic" element={<Electronic />} />
           <Route path="/ai-chat" element={<AIChatApp />} />
+
+          {/* Authentication Routes */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/forgot-password" element={<ForgetPassword />} />
+          <Route path="/new-password" element={<AddPassword />} />
+          <Route path="/verify" element={<VerifyCode />} />
+
           <Route path="*" element={<Error404 />} />
         </Routes>
       </main>

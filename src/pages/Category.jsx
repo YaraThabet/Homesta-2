@@ -14,6 +14,55 @@ const Category = () => {
     { id: 7, name: "Home Tools", imgSrc: "/img/home-tools.png" },
     { id: 8, name: "Furniture", imgSrc: "/img/furniture.jpeg" },
     { id: 9, name: "Dinning Room", imgSrc: "/img/dinning-room.jpg" },
+    {
+      id: 1,
+      name: "Electrical Appliances",
+      imgSrc: "/img/kitchen.jpg",
+      path: "/electronic",
+    },
+    {
+      id: 2,
+      name: "Bedrooms",
+      imgSrc: "/img/Bedrooms.jpg",
+      path: "/electronic",
+    },
+    {
+      id: 3,
+      name: "Living Room",
+      imgSrc: "/img/living-room.png",
+      path: "/electronic",
+    },
+    {
+      id: 4,
+      name: "Kitchen",
+      imgSrc: "/img/kitchen2.jpg",
+      path: "/electronic",
+    },
+    {
+      id: 5,
+      name: "Medical Devices",
+      imgSrc: "/img/medical-devices.jpeg",
+      path: "/electronic",
+    },
+    { id: 6, name: "Decor", imgSrc: "/img/decor.jpeg", path: "/electronic" },
+    {
+      id: 7,
+      name: "Home Tools",
+      imgSrc: "/img/home-tools.png",
+      path: "/electronic",
+    },
+    {
+      id: 8,
+      name: "Furniture",
+      imgSrc: "/img/furniture.jpeg",
+      path: "/electronic",
+    },
+    {
+      id: 9,
+      name: "Dinning Room",
+      imgSrc: "/img/dinning-room.jpg",
+      path: "/electronic",
+    },
   ];
 
   const handleCategoryClick = (path) => {

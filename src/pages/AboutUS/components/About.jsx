@@ -253,9 +253,25 @@ const About = () => {
                 <h4 className="text-xl font-bold text-gray-900 mb-1 text-center">
                   Robert Fox
                 </h4>
-                <p className="text-teal-700 font-medium mb-8 text-center">
+                <p className="text-teal-700 font-medium mb-4 text-center">
                   Carpenter
                 </p>
+
+                {/* Social Icons */}
+                <div className="flex justify-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white cursor-pointer hover:bg-blue-700 transition-colors">
+                    <Facebook size={18} />
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-blue-400 flex items-center justify-center text-white cursor-pointer hover:bg-blue-500 transition-colors">
+                    <Twitter size={18} />
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white cursor-pointer hover:bg-blue-800 transition-colors">
+                    <Linkedin size={18} />
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 flex items-center justify-center text-white cursor-pointer hover:opacity-90 transition-opacity">
+                    <Instagram size={18} />
+                  </div>
+                </div>
 
                 {/* Feature */}
                 <div className="flex items-start gap-3 bg-amber-50 p-3 rounded-lg">
@@ -287,9 +303,25 @@ const About = () => {
                 <h4 className="text-xl font-bold text-gray-900 mb-1 text-center">
                   Theresa Webb
                 </h4>
-                <p className="text-teal-700 font-medium mb-8 text-center">
+                <p className="text-teal-700 font-medium mb-4 text-center">
                   Carpenter
                 </p>
+
+                {/* Social Icons */}
+                <div className="flex justify-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white cursor-pointer hover:bg-blue-700 transition-colors">
+                    <Facebook size={18} />
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-blue-400 flex items-center justify-center text-white cursor-pointer hover:bg-blue-500 transition-colors">
+                    <Twitter size={18} />
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white cursor-pointer hover:bg-blue-800 transition-colors">
+                    <Linkedin size={18} />
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 flex items-center justify-center text-white cursor-pointer hover:opacity-90 transition-opacity">
+                    <Instagram size={18} />
+                  </div>
+                </div>
 
                 {/* Feature */}
                 <div className="flex items-start gap-3 bg-amber-50 p-3 rounded-lg">
