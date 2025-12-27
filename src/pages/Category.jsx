@@ -5,15 +5,15 @@ const Category = () => {
   const navigate = useNavigate();
 
   const categories = [
-    { id: 1, name: "Electrical Appliances", imgSrc: "/img/kitchen.jpg" },
-    { id: 2, name: "Bedrooms", imgSrc: "/img/Bedrooms.jpg" },
-    { id: 3, name: "Living Room", imgSrc: "/img/living-room.jpg" },
-    { id: 4, name: "Kitchen", imgSrc: "/img/kitchen2.jpg" },
-    { id: 5, name: "Sanitary Ware", imgSrc: "/img/Sanitary.jpg" },
-    { id: 6, name: "Decor", imgSrc: "/img/decor.jpeg" },
-    { id: 7, name: "Home Tools", imgSrc: "/img/home-tools.png" },
-    { id: 8, name: "Furniture", imgSrc: "/img/furniture.jpeg" },
-    { id: 9, name: "Dinning Room", imgSrc: "/img/dinning-room.jpg" },
+    { id: 1, name: "Electrical Appliances", imgSrc: "/img/kitchen.jpg", path: "/category/electrical-appliances" },
+    { id: 2, name: "Bedrooms", imgSrc: "/img/Bedrooms.jpg", path: "/category/bedrooms" },
+    { id: 3, name: "Living Room", imgSrc: "/img/living-room.jpg", path: "/category/living-room" },
+    { id: 4, name: "Kitchen", imgSrc: "/img/kitchen2.jpg", path: "/category/kitchen" },
+    { id: 5, name: "Sanitary Ware", imgSrc: "/img/Sanitary.jpg", path: "/category/sanitary-ware" },
+    { id: 6, name: "Decor", imgSrc: "/img/decor.jpeg", path: "/category/decor" },
+    { id: 7, name: "Home Tools", imgSrc: "/img/home-tools.png", path: "/category/home-tools" },
+    { id: 8, name: "Furniture", imgSrc: "/img/furniture.jpeg", path: "/category/furniture" },
+    { id: 9, name: "Dinning Room", imgSrc: "/img/dinning-room.jpg", path: "/category/dinning-room" },
   ];
 
   const handleCategoryClick = (path) => {
@@ -22,7 +22,7 @@ const Category = () => {
   };
 
   return (
-    <div className="w-full min-h-[1024px] bg-[#F8FAE5] flex justify-center">
+    <div className="w-full min-h-[1024px] bg-[#F6F6F6] flex justify-center pt-[10px]">
       <div className="w-[1312px] mt-[168px] mx-auto flex flex-col gap-[32px]">
         <p className="font-[Outfit] text-[#43766C] text-[32px] font-medium leading-[100%] text-center">
           Explore by Category

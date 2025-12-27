@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { CreditCard } from "lucide-react";
+import CheckoutStepper from "../summaryOrder/components/CheckoutStepper";
+import { useAppContext } from "../../context/AppContext";
 
 const Payment = () => {
+  const { formatPrice, t } = useAppContext();
   const [paymentMethod, setPaymentMethod] = useState("paypal");
   const [cardData, setCardData] = useState({
     cardHolderName: "",
@@ -29,32 +32,38 @@ const Payment = () => {
     }));
   };
 
+  const navigate = useNavigate();
+
   const handleConfirmPayment = () => {
     console.log("Payment confirmed:", { paymentMethod, cardData });
+    navigate("/summary-order");
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-[120px]">
       {/* Header */}
-      <header className="bg-header-bg py-14 text-center">
-        <h1 className="text-2xl font-semibold text-foreground mb-2 tracking-tight">Payment</h1>
+      <header className="bg-[#F6F6F6] py-14 text-center">
+        <h1 className="text-2xl font-semibold text-foreground mb-2 tracking-tight">{t('payment')}</h1>
         <nav className="text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-foreground cursor-pointer">Home</Link>
+          <Link to="/" className="hover:text-foreground cursor-pointer">{t('home') || 'Home'}</Link>
           <span className="mx-1.5 text-muted-foreground/50">/</span>
-          <Link to="/cart" className="hover:text-foreground cursor-pointer">Shopping Cart</Link>
+          <Link to="/shopping-cart" className="hover:text-foreground cursor-pointer">{t('cart')}</Link>
           <span className="mx-1.5 text-muted-foreground/50">/</span>
-          <Link to="/checkout" className="hover:text-foreground cursor-pointer">Checkout</Link>
+          <Link to="/checkout" className="hover:text-foreground cursor-pointer">{t('shipping')}</Link>
           <span className="mx-1.5 text-muted-foreground/50">/</span>
-          <span className="text-foreground font-medium">Payment</span>
+          <span className="text-foreground font-medium">{t('payment')}</span>
         </nav>
       </header>
+
+      {/* Checkout Stepper */}
+      <CheckoutStepper currentStep={3} />
 
       {/* Content */}
       <div className="container mx-auto px-4 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Payment Methods */}
           <div className="lg:col-span-2">
-            <h2 className="text-2xl font-light text-primary mb-8">Select Payment Method</h2>
+            <h2 className="text-2xl font-light text-primary mb-8">{t('selectPaymentMethod') || 'Select Payment Method'}</h2>
 
             {/* Payment Options */}
             <div className="space-y-4 mb-8">
@@ -74,7 +83,7 @@ const Payment = () => {
                     <span className="text-foreground">Paypal</span>
                   </div>
                 </div>
-                <span className="text-primary text-sm cursor-pointer hover:underline">Link account</span>
+                <span className="text-primary text-sm cursor-pointer hover:underline">{t('linkAccount') || 'Link account'}</span>
               </label>
 
               {/* Google Pay */}
@@ -133,7 +142,7 @@ const Payment = () => {
                 />
                 <div className="flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-foreground">Add New Credit/ Debit Card</span>
+                  <span className="text-foreground">{t('addNewCard') || 'Add New Credit/ Debit Card'}</span>
                 </div>
               </label>
 
@@ -142,7 +151,7 @@ const Payment = () => {
                 {/* Card Holder Name */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Card Holder Name<span className="text-red-500">*</span>
+                    {t('cardHolderName') || 'Card Holder Name'}<span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -157,7 +166,7 @@ const Payment = () => {
                 {/* Card Number */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Card Number<span className="text-red-500">*</span>
+                    {t('cardNumber') || 'Card Number'}<span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -173,7 +182,7 @@ const Payment = () => {
                 <div className="grid grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
-                      Expiry Date<span className="text-red-500">*</span>
+                      {t('expiryDate') || 'Expiry Date'}<span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -186,7 +195,7 @@ const Payment = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
-                      CVV<span className="text-red-500">*</span>
+                      {t('cvv') || 'CVV'}<span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -208,12 +217,12 @@ const Payment = () => {
                     onChange={handleCardChange}
                     className="w-4 h-4 accent-primary rounded"
                   />
-                  <span className="text-sm text-muted-foreground">Save card for future payments</span>
+                  <span className="text-sm text-muted-foreground">{t('saveCard') || 'Save card for future payments'}</span>
                 </label>
 
                 {/* Add Card Button */}
                 <button className="bg-[#205457] text-white px-6 py-2.5 rounded-full font-medium hover:bg-[#205457]/90 transition-colors">
-                  Add Card
+                  {t('addCard') || 'Add Card'}
                 </button>
               </div>
             </div>
@@ -222,34 +231,34 @@ const Payment = () => {
           {/* Order Summary */}
           <div className="lg:col-span-1">
             <div className="bg-background border border-border rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-foreground mb-6">Order Summery</h2>
+              <h2 className="text-xl font-semibold text-foreground mb-6">{t('orderSummary')}</h2>
 
               <div className="space-y-4 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Items</span>
+                  <span className="text-muted-foreground">{t('items')}</span>
                   <span className="text-foreground">{orderSummary.items}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Sub Total</span>
-                  <span className="text-foreground">${orderSummary.subTotal.toFixed(2)}</span>
+                  <span className="text-muted-foreground">{t('subtotal')}</span>
+                  <span className="text-foreground">{formatPrice(orderSummary.subTotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Shipping</span>
-                  <span className="text-foreground">${orderSummary.shipping.toFixed(2)}</span>
+                  <span className="text-muted-foreground">{t('shipping')}</span>
+                  <span className="text-foreground">{formatPrice(orderSummary.shipping)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Taxes</span>
-                  <span className="text-foreground">${orderSummary.taxes.toFixed(2)}</span>
+                  <span className="text-muted-foreground">{t('tax')}</span>
+                  <span className="text-foreground">{formatPrice(orderSummary.taxes)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Coupon Discount</span>
-                  <span className="text-foreground">-${Math.abs(orderSummary.couponDiscount).toFixed(2)}</span>
+                  <span className="text-muted-foreground">{t('couponDiscount')}</span>
+                  <span className="text-foreground">-{formatPrice(Math.abs(orderSummary.couponDiscount))}</span>
                 </div>
 
                 <div className="border-t border-border pt-4 mt-4">
                   <div className="flex justify-between font-semibold">
-                    <span className="text-foreground">Total</span>
-                    <span className="text-foreground">${orderSummary.total.toFixed(2)}</span>
+                    <span className="text-foreground">{t('total')}</span>
+                    <span className="text-foreground">{formatPrice(orderSummary.total)}</span>
                   </div>
                 </div>
               </div>
@@ -258,7 +267,7 @@ const Payment = () => {
                 onClick={handleConfirmPayment}
                 className="w-full bg-[#205457] text-white py-4 rounded-xl mt-6 font-medium hover:bg-[#205457]/90 transition-colors"
               >
-                Confirm Payment
+                {t('confirmPayment')}
               </button>
             </div>
           </div>

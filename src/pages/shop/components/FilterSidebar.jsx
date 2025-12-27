@@ -5,17 +5,17 @@ const FilterSection = ({ title, children, defaultOpen = true }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-<div className="mb-6 last:mb-0 p-4 border-0 rounded-lg shadow-md ">      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between w-full text-left"
-      >
-        <span className="text-sm font-medium text-foreground">{title}</span>
-        {isOpen ? (
-          <ChevronUp className="h-4 w-4 text-muted-foreground" />
-        ) : (
-          <ChevronDown className="h-4 w-4 text-muted-foreground" />
-        )}
-      </button>
+    <div className="mb-6 last:mb-0 p-4 border-0 rounded-lg shadow-md ">      <button
+      onClick={() => setIsOpen(!isOpen)}
+      className="flex items-center justify-between w-full text-left"
+    >
+      <span className="text-sm font-medium text-foreground">{title}</span>
+      {isOpen ? (
+        <ChevronUp className="h-4 w-4 text-muted-foreground" />
+      ) : (
+        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+      )}
+    </button>
       {isOpen && <div className="mt-4 space-y-3">{children}</div>}
     </div>
   );
@@ -25,9 +25,8 @@ const Checkbox = ({ checked, onChange, className = "" }) => (
   <button
     type="button"
     onClick={onChange}
-    className={`h-4 w-4 rounded border border-border flex items-center justify-center transition-colors ${
-      checked ? "bg-primary border-primary" : "bg-background"
-    } ${className}`}
+    className={`h-4 w-4 rounded border border-border flex items-center justify-center transition-colors ${checked ? "bg-primary border-primary" : "bg-background"
+      } ${className}`}
   >
     {checked && <Check className="h-3 w-3 text-primary-foreground" />}
   </button>
@@ -123,9 +122,8 @@ const FilterSidebar = ({
                 onClick={() => onColorChange(color.name)}
               >
                 <div
-                  className={`relative w-5 h-5 rounded-full flex items-center justify-center transition-all ${
-                    color.name === "White" ? "border border-border" : ""
-                  }`}
+                  className={`relative w-5 h-5 rounded-full flex items-center justify-center transition-all ${color.name === "White" ? "border border-border" : ""
+                    }`}
                   style={{ backgroundColor: color.color }}
                 >
                   {isSelected && (
@@ -159,11 +157,11 @@ const FilterSidebar = ({
       <FilterSection title="Availability" defaultOpen={true}>
         <div className="space-y-2.5">
           <label className="flex items-center gap-2.5 cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <Checkbox checked={inStock} onChange={() => onStockChange(true)} />
+            <Checkbox checked={inStock === true} onChange={() => onStockChange(inStock === true ? null : true)} />
             In Stock
           </label>
           <label className="flex items-center gap-2.5 cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors">
-            <Checkbox checked={!inStock} onChange={() => onStockChange(false)} />
+            <Checkbox checked={inStock === false} onChange={() => onStockChange(inStock === false ? null : false)} />
             Out of Stock
           </label>
         </div>
