@@ -48,15 +48,6 @@ const App = () => {
     location.pathname.startsWith("/verify-code") ||
     location.pathname.startsWith("/forget-password") ||
     location.pathname.startsWith("/add-password");
-<<<<<<< Updated upstream
-=======
-  location.pathname.startsWith("/ai-chat") ||
-    location.pathname.startsWith("/login") ||
-    location.pathname.startsWith("/signup") ||
-    location.pathname.startsWith("/forgot-password") ||
-    location.pathname.startsWith("/new-password") ||
-    location.pathname.startsWith("/verify");
->>>>>>> Stashed changes
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -95,8 +86,6 @@ const App = () => {
           <Route path="/customer-support" element={<CustomerSupport />} />
           <Route path="/category/:categoryName" element={<SubCategory />} />
           <Route path="/ai-chat" element={<AIChatApp />} />
-<<<<<<< Updated upstream
-=======
 
           {/* Authentication Routes */}
           <Route path="/login" element={<Login />} />
@@ -105,7 +94,6 @@ const App = () => {
           <Route path="/new-password" element={<AddPassword />} />
           <Route path="/verify" element={<VerifyCode />} />
 
->>>>>>> Stashed changes
           <Route path="/summary-order" element={<SummaryOrder />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />

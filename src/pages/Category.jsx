@@ -13,12 +13,7 @@ const Category = () => {
     { id: 6, name: "Decor", imgSrc: "/img/decor.jpeg", path: "/category/decor" },
     { id: 7, name: "Home Tools", imgSrc: "/img/home-tools.png", path: "/category/home-tools" },
     { id: 8, name: "Furniture", imgSrc: "/img/furniture.jpeg", path: "/category/furniture" },
-<<<<<<< Updated upstream
     { id: 9, name: "Dinning Room", imgSrc: "/img/dinning-room.jpg", path: "/category/dinning-room" },
-=======
-    { id: 9, name: "Dining Room", imgSrc: "/img/dinning-room.jpg", path: "/category/dining-room" },
-    { id: 10, name: "Medical Devices", imgSrc: "/img/medical-devices.jpeg", path: "/category/medical-devices" },
->>>>>>> Stashed changes
   ];
 
   const handleCategoryClick = (path) => {
