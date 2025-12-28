@@ -36,7 +36,7 @@ import VerifyCode from "./pages/VerifyCode.jsx";
 import ForgetPassword from "./pages/ForgetPassword.jsx";
 import AddPassword from "./pages/AddPassword.jsx";
 import OrderSuccess from "./pages/OrderSuccess.jsx";
-import TrackingOrder from "./pages/trackingOrder/TrackingOrder";
+import TrackingOrder from "./pages/trackingOrder/TrackingOrder.jsx";
 import AIChatFloatButton from "./components/AIChatFloatButton.jsx";
 const App = () => {
   const location = useLocation();
