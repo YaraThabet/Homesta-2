@@ -45,9 +45,12 @@ const App = () => {
     location.pathname.startsWith("/ai-chat") ||
     location.pathname.startsWith("/login") ||
     location.pathname.startsWith("/signup") ||
+    location.pathname.startsWith("/verify") ||
     location.pathname.startsWith("/verify-code") ||
     location.pathname.startsWith("/forget-password") ||
-    location.pathname.startsWith("/add-password");
+    location.pathname.startsWith("/forgot-password") ||
+    location.pathname.startsWith("/add-password") ||
+    location.pathname.startsWith("/new-password");
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -62,11 +65,9 @@ const App = () => {
             <Route index element={null} />
             <Route path="wishlist" element={<Wishlist />} />
             <Route path="password" element={<PasswordManager />} />
-            {/* <Route path="wishlist" element={<Wishlist />} /> */}
             <Route path="collections" element={<Collections />} />
             <Route path="help-center" element={<HelpCenter />} />
             <Route path="orders" element={<Orders />} />
-
             <Route path="payment" element={<Payment />} />
           </Route>
           <Route path="/payment" element={<Payment />} />
@@ -90,16 +91,14 @@ const App = () => {
           {/* Authentication Routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/forget-password" element={<ForgetPassword />} />
           <Route path="/forgot-password" element={<ForgetPassword />} />
+          <Route path="/add-password" element={<AddPassword />} />
           <Route path="/new-password" element={<AddPassword />} />
           <Route path="/verify" element={<VerifyCode />} />
+          <Route path="/verify-code" element={<VerifyCode />} />
 
           <Route path="/summary-order" element={<SummaryOrder />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/verify-code" element={<VerifyCode />} />
-          <Route path="/forget-password" element={<ForgetPassword />} />
-          <Route path="/add-password" element={<AddPassword />} />
           <Route path="/order-success" element={<OrderSuccess />} />
           <Route path="/tracking-order" element={<TrackingOrder />} />
           <Route path="*" element={<Error404 />} />
