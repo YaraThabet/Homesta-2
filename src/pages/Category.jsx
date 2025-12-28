@@ -5,64 +5,16 @@ const Category = () => {
   const navigate = useNavigate();
 
   const categories = [
-    { id: 1, name: "Electrical Appliances", imgSrc: "/img/kitchen.jpg" },
-    { id: 2, name: "Bedrooms", imgSrc: "/img/Bedrooms.jpg" },
-    { id: 3, name: "Living Room", imgSrc: "/img/living-room.jpg" },
-    { id: 4, name: "Kitchen", imgSrc: "/img/kitchen2.jpg" },
-    { id: 5, name: "Sanitary Ware", imgSrc: "/img/Sanitary.jpg" },
-    { id: 6, name: "Decor", imgSrc: "/img/decor.jpeg" },
-    { id: 7, name: "Home Tools", imgSrc: "/img/home-tools.png" },
-    { id: 8, name: "Furniture", imgSrc: "/img/furniture.jpeg" },
-    { id: 9, name: "Dinning Room", imgSrc: "/img/dinning-room.jpg" },
-    {
-      id: 1,
-      name: "Electrical Appliances",
-      imgSrc: "/img/kitchen.jpg",
-      path: "/electronic",
-    },
-    {
-      id: 2,
-      name: "Bedrooms",
-      imgSrc: "/img/Bedrooms.jpg",
-      path: "/electronic",
-    },
-    {
-      id: 3,
-      name: "Living Room",
-      imgSrc: "/img/living-room.png",
-      path: "/electronic",
-    },
-    {
-      id: 4,
-      name: "Kitchen",
-      imgSrc: "/img/kitchen2.jpg",
-      path: "/electronic",
-    },
-    {
-      id: 5,
-      name: "Medical Devices",
-      imgSrc: "/img/medical-devices.jpeg",
-      path: "/electronic",
-    },
-    { id: 6, name: "Decor", imgSrc: "/img/decor.jpeg", path: "/electronic" },
-    {
-      id: 7,
-      name: "Home Tools",
-      imgSrc: "/img/home-tools.png",
-      path: "/electronic",
-    },
-    {
-      id: 8,
-      name: "Furniture",
-      imgSrc: "/img/furniture.jpeg",
-      path: "/electronic",
-    },
-    {
-      id: 9,
-      name: "Dinning Room",
-      imgSrc: "/img/dinning-room.jpg",
-      path: "/electronic",
-    },
+    { id: 1, name: "Electrical Appliances", imgSrc: "/img/kitchen.jpg", path: "/category/electrical-appliances" },
+    { id: 2, name: "Bedrooms", imgSrc: "/img/Bedrooms.jpg", path: "/category/bedrooms" },
+    { id: 3, name: "Living Room", imgSrc: "/img/living-room.jpg", path: "/category/living-room" },
+    { id: 4, name: "Kitchen", imgSrc: "/img/kitchen2.jpg", path: "/category/kitchen" },
+    { id: 5, name: "Sanitary Ware", imgSrc: "/img/Sanitary.jpg", path: "/category/sanitary-ware" },
+    { id: 6, name: "Decor", imgSrc: "/img/decor.jpeg", path: "/category/decor" },
+    { id: 7, name: "Home Tools", imgSrc: "/img/home-tools.png", path: "/category/home-tools" },
+    { id: 8, name: "Furniture", imgSrc: "/img/furniture.jpeg", path: "/category/furniture" },
+    { id: 9, name: "Dining Room", imgSrc: "/img/dinning-room.jpg", path: "/category/dining-room" },
+    { id: 10, name: "Medical Devices", imgSrc: "/img/medical-devices.jpeg", path: "/category/medical-devices" },
   ];
 
   const handleCategoryClick = (path) => {
