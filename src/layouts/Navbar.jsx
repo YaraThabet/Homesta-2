@@ -32,7 +32,7 @@ const Navbar = () => {
     { id: 6, name: "blog", path: "/blogs" },
   ];
   return (
-    <header className="w-full fixed z-30 top-0 left-0 font-display ">
+    <header className="sticky top-0 w-full z-50 font-display ">
       <section className='w-full font-display bg-main '>
         <div className='w-[90%] font-display py-5 lg:w-[85%] mx-auto flex justify-between items-center'>
           <a href="tel:+123-456-789" className='text-white'>Call Us:+123-456-789</a>
