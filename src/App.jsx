@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
+
 import Navbar from "./layouts/Navbar";
 import Footer from "./components/Footer.jsx";
 import AIChatFloatButton from "./components/AIChatFloatButton.jsx";
@@ -33,7 +34,15 @@ import ContactUs from "./pages/AboutUS/components/ContactUS.jsx";
 import TrackOrder from "./pages/TrackOrder";
 import CustomerSupport from "./pages/CustomerSupport";
 import Electronic from "./pages/Electronic";
-
+import Error404 from "./pages/Error404";
+import SubCategory from "./pages/SubCategory";
+import PasswordManager from "./pages/account/PasswordManager.jsx";
+import AIChatApp from "./pages/AIChatApp";
+import Notifications from "./pages/Notifications.jsx";
+import HelpCenter from "./pages/account/HelpCenter.jsx";
+import Orders from "./pages/account/Orders.jsx";
+import Payment from "./pages/account/Payment.jsx";
+import Collections from "./pages/account/Collections.jsx";
 import ShoppingCart from "./pages/ShoppingCart.jsx";
 import SummaryOrder from "./pages/summaryOrder/SummaryOrder.jsx";
 import OrderSuccess from "./pages/OrderSuccess.jsx";
