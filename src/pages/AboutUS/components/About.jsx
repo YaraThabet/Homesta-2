@@ -34,21 +34,10 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Banner */}
-      <div className="bg-teal-800 text-white py-4 px-6 text-center">
-        <p className="text-sm">
-          Get up to 40% off on selected items | Free shipping on orders over
-          $100
-        </p>
-      </div>
-
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Header */}
         <div className="text-center mb-16">
-          <p className="text-teal-700 font-medium mb-3 text-base">
-            - Our Story
-          </p>
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-2">
             <span className="text-gray-900">Crafted Comfort: </span>
