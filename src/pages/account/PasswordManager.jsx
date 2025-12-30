@@ -105,7 +105,7 @@ const PasswordManager = () => {
 
       </div>
 
-      <AdvantagesItems />
+      {/* <AdvantagesItems /> */}
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import Footer from "./components/Footer.jsx";
+
 import Navbar from "./layouts/Navbar";
 import Category from './pages/Category.jsx';
 import Account from './pages/account/Account';
@@ -18,8 +18,10 @@ import Dashboard from './pages/profile/Dashboard.jsx';
 import About from "./pages/AboutUS/components/About.jsx";
 import ContactUs from "./pages/AboutUS/components/ContactUS.jsx";
 import TrackOrder from "./pages/TrackOrder";
-import Error404 from "./pages/Error404";
 import CustomerSupport from "./pages/CustomerSupport";
+import Electronic from "./pages/Electronic";
+import Error404 from "./pages/Error404";
+
 import SubCategory from "./pages/SubCategory";
 import PasswordManager from "./pages/account/PasswordManager.jsx";
 import AIChatApp from "./pages/AIChatApp";
@@ -40,6 +42,7 @@ import TrackingOrder from "./pages/trackingOrder/TrackingOrder.jsx";
 import AIChatFloatButton from "./components/AIChatFloatButton.jsx";
 const App = () => {
   const location = useLocation();
+
   const hideLayout =
     location.pathname.startsWith("/chatai") ||
     location.pathname.startsWith("/ai-chat") ||
@@ -53,16 +56,24 @@ const App = () => {
     location.pathname.startsWith("/new-password");
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="min-h-screen flex flex-col">
       {!hideLayout && <Navbar />}
-      <main className="flex-grow">
+
+      <main className="flex-1  ">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/faqs" element={<Faqs />} />
           <Route path="/category" element={<Category />} />
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/blogs" element={<Blogs />} />
+          <Route path="/faqs" element={<Faqs />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/wishlist" element={<Wishlist />} />
+
+          {/* Account */}
           <Route path="/account" element={<Account />}>
-            <Route index element={null} />
             <Route path="wishlist" element={<Wishlist />} />
             <Route path="password" element={<PasswordManager />} />
             <Route path="collections" element={<Collections />} />

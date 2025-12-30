@@ -50,11 +50,7 @@ const About = () => {
       </header>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 ">
         {/* Header */}
-
-        <div className="text-center mb-16 ">
-          <p className="text-teal-700 font-medium mb-3 text-base">
-            - Our Story
-          </p>
+        <div className="text-center mb-16">
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-2">
             <span className="text-gray-900">Crafted Comfort: </span>
