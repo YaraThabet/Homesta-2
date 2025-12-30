@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-
+import Footer from "./components/Footer.jsx";
 import Navbar from "./layouts/Navbar";
 import Category from './pages/Category.jsx';
 import Account from './pages/account/Account';
@@ -21,7 +21,6 @@ import TrackOrder from "./pages/TrackOrder";
 import CustomerSupport from "./pages/CustomerSupport";
 import Electronic from "./pages/Electronic";
 import Error404 from "./pages/Error404";
-
 import SubCategory from "./pages/SubCategory";
 import PasswordManager from "./pages/account/PasswordManager.jsx";
 import AIChatApp from "./pages/AIChatApp";
