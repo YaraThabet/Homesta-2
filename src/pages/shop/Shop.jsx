@@ -15,7 +15,7 @@ const Shop = () => {
   const [priceRange, setPriceRange] = useState([0, 200]);
   const [selectedColors, setSelectedColors] = useState([]);
   const [selectedMaterials, setSelectedMaterials] = useState([]);
-  const [inStock, setInStock] = useState(true);
+  const [inStock, setInStock] = useState(null);
   const [sortBy, setSortBy] = useState("default");
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -53,10 +53,46 @@ const Shop = () => {
   const filteredProducts = useMemo(() => {
     let result = [...products];
 
+    // Filter by category
+    if (selectedCategories.length > 0) {
+      result = result.filter((product) =>
+        selectedCategories.some((category) =>
+          product.category?.toLowerCase() === category.toLowerCase()
+        )
+      );
+    }
+
     // Filter by price range
     result = result.filter(
       (product) => product.price >= priceRange[0] && product.price <= priceRange[1]
     );
+
+    // Filter by color
+    if (selectedColors.length > 0) {
+      result = result.filter((product) =>
+        selectedColors.some((color) =>
+          product.color?.toLowerCase() === color.toLowerCase()
+        )
+      );
+    }
+
+    // Filter by material
+    if (selectedMaterials.length > 0) {
+      result = result.filter((product) =>
+        selectedMaterials.some((material) =>
+          product.material?.toLowerCase() === material.toLowerCase()
+        )
+      );
+    }
+
+    // Filter by stock availability (based on quantity)
+    if (inStock !== null) {
+      if (inStock === true) {
+        result = result.filter((product) => product.quantity > 0);
+      } else {
+        result = result.filter((product) => product.quantity === 0);
+      }
+    }
 
     // Sort products
     switch (sortBy) {
@@ -77,7 +113,7 @@ const Shop = () => {
     }
 
     return result;
-  }, [priceRange, sortBy]);
+  }, [selectedCategories, priceRange, selectedColors, selectedMaterials, inStock, sortBy]);
 
   // Paginate products
   const paginatedProducts = useMemo(() => {
@@ -89,29 +125,43 @@ const Shop = () => {
 
   const activeFilters = useMemo(() => {
     const filters = [];
-    
+
+    selectedCategories.forEach((category) => {
+      filters.push({ type: "category", value: category });
+    });
+
     if (priceRange[0] !== 0 || priceRange[1] !== 200) {
       filters.push({ type: "price", value: `Price: $${priceRange[0]}.00- $${priceRange[1]}.00` });
     }
-    
+
     selectedColors.forEach((color) => {
       filters.push({ type: "color", value: color });
     });
-    
-    if (inStock) {
+
+    selectedMaterials.forEach((material) => {
+      filters.push({ type: "material", value: material });
+    });
+
+    if (inStock === true) {
       filters.push({ type: "stock", value: "In Stock" });
+    } else if (inStock === false) {
+      filters.push({ type: "stock", value: "Out of Stock" });
     }
-    
+
     return filters;
-  }, [priceRange, selectedColors, inStock]);
+  }, [selectedCategories, priceRange, selectedColors, selectedMaterials, inStock]);
 
   const handleRemoveFilter = (type, value) => {
-    if (type === "price") {
+    if (type === "category") {
+      setSelectedCategories((prev) => prev.filter((c) => c !== value));
+    } else if (type === "price") {
       setPriceRange([0, 200]);
     } else if (type === "color") {
       setSelectedColors((prev) => prev.filter((c) => c !== value));
+    } else if (type === "material") {
+      setSelectedMaterials((prev) => prev.filter((m) => m !== value));
     } else if (type === "stock") {
-      setInStock(false);
+      setInStock(null);
     }
     setCurrentPage(1);
   };
@@ -119,7 +169,7 @@ const Shop = () => {
   const handleClearAll = () => {
     setPriceRange([0, 200]);
     setSelectedColors([]);
-    setInStock(false);
+    setInStock(null);
     setSelectedCategories([]);
     setSelectedMaterials([]);
     setCurrentPage(1);
@@ -128,7 +178,7 @@ const Shop = () => {
   return (
     <div className="min-h-screen bg-background pt-[150px]">
       <ShopHeader />
-      
+
       <main className="container mx-auto px-4 py-8">
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Mobile Filter Toggle */}
@@ -146,9 +196,8 @@ const Shop = () => {
 
           {/* Filter Sidebar */}
           <div
-            className={`${
-              isMobileFilterOpen ? "block" : "hidden"
-            } lg:block lg:flex-shrink-0`}
+            className={`${isMobileFilterOpen ? "block" : "hidden"
+              } lg:block lg:flex-shrink-0`}
           >
             <FilterSidebar
               selectedCategories={selectedCategories}

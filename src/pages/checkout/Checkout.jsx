@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import FooterBenefits from "../shop/components/FooterBenefits";
+import CheckoutStepper from "../summaryOrder/components/CheckoutStepper";
 
 const Checkout = () => {
   const [formData, setFormData] = useState({
@@ -35,22 +36,25 @@ const Checkout = () => {
   return (
     <div className="min-h-screen bg-background pt-[150px] pl-4 pr-4">
       {/* Header */}
-        <header className="bg-[#F6F6F6] py-12">
-            <div className="container mx-auto px-4 text-center">
-                <h1 className="text-3xl font-semibold text-gray-800 mb-2">Checkout</h1>
-                <nav className="text-sm text-gray-500">
-                <Link to="/" className="hover:text-[#205457] transition-colors">
-                    Home
-                </Link>
-                <span className="mx-2">/</span>
-                <Link to="/cart" className="hover:text-[#205457] transition-colors">
-                    Shopping Cart    
-                </Link>
-                <span className="mx-2">/</span>
-                <span className="text-[#205457]">Checkout</span>
-                </nav>
-            </div>
-        </header>
+      <header className="bg-[#F6F6F6] py-12">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-3xl font-semibold text-gray-800 mb-2">Shipping</h1>
+          <nav className="text-sm text-gray-500">
+            <Link to="/" className="hover:text-[#205457] transition-colors">
+              Home
+            </Link>
+            <span className="mx-2">/</span>
+            <Link to="/shopping-cart" className="hover:text-[#205457] transition-colors">
+              Shopping Cart
+            </Link>
+            <span className="mx-2">/</span>
+            <span className="text-[#205457]">Shipping</span>
+          </nav>
+        </div>
+      </header>
+
+      {/* Checkout Stepper */}
+      <CheckoutStepper currentStep={2} />
 
       {/* Content */}
       <div className="container mx-auto px-4 py-10">
@@ -58,7 +62,7 @@ const Checkout = () => {
           {/* Billing Details Form */}
           <div className="lg:col-span-2">
             <h2 className="text-2xl font-light text-primary mb-8">Billing Details</h2>
-            
+
             <form className="space-y-6">
               {/* Name Row */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -265,7 +269,7 @@ const Checkout = () => {
           <div className="lg:col-span-1">
             <div className="bg-background border border-border rounded-xl p-6">
               <h2 className="text-xl font-semibold text-foreground mb-6">Order Summery</h2>
-              
+
               <div className="space-y-4 text-sm">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Items</span>
@@ -287,7 +291,7 @@ const Checkout = () => {
                   <span className="text-muted-foreground">Coupon Discount</span>
                   <span className="text-foreground">-${Math.abs(orderSummary.couponDiscount).toFixed(2)}</span>
                 </div>
-                
+
                 <div className="border-t border-border pt-4 mt-4">
                   <div className="flex justify-between font-semibold">
                     <span className="text-foreground">Total</span>
@@ -297,13 +301,15 @@ const Checkout = () => {
               </div>
 
               <button className="w-full bg-[#205457] text-white py-4 rounded-xl mt-6 font-medium hover:bg-[#205457]/90 transition-colors">
-                Proceed to Payment
+                <Link to="/payment">
+                  Proceed to Payment
+                </Link>
               </button>
             </div>
           </div>
         </div>
       </div>
-      <FooterBenefits/>
+      <FooterBenefits />
     </div>
   );
 };

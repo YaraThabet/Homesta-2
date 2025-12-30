@@ -56,18 +56,12 @@ const ContactUs = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Banner */}
-      <div className="bg-teal-800 text-white py-4 px-6 text-center">
-        <p className="text-sm">
-          Call us: +123-456-789 | Sign up and Get 25% Off for your first order.{" "}
-          <span className="underline cursor-pointer">Sign up now</span>
-        </p>
-      </div>
+
 
       {/* Page Header */}
-      <div className="bg-gray-50 py-12">
+      <div className="bg-gray-50 py-12 pt-[180px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
+          <h1 className="text-3xl font-bold text-gray-900 mb-3">
             Contact Us
           </h1>
           <p className="text-gray-600">
@@ -226,12 +220,18 @@ const ContactUs = () => {
       </div>
 
       {/* Map Section */}
-      <div className="w-full h-96 bg-gray-200 relative overflow-hidden">
-        <img
-          src="/img/map.png"
-          alt="Location Map"
-          className="w-full h-full object-cover"
-        />
+      <div className="w-full h-96 relative overflow-hidden border-y border-gray-100">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3403.12345!2d-118.34567!3d33.96789!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80c2b64d50c7657b%3A0x6b498f3b7933161b!2sPreston%20Rd%2C%20Inglewood%2C%20CA%2C%20USA!5e0!3m2!1sen!2s!4v1710000000000!5m2!1sen!2s"
+          width="100%"
+          height="100%"
+          style={{ border: 0 }}
+          allowFullScreen=""
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          title="Homesta Location"
+          className="grayscale hover:grayscale-0 transition-all duration-500"
+        ></iframe>
       </div>
 
       {/* Features Section */}
