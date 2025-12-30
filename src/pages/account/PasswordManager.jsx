@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-// import AdvantagesItems from "../../components/AdvantagesItems";
+import AdvantagesItems from "../home/components/Advantages";
 import { Eye, EyeOff } from "lucide-react";
 
 const PasswordManager = () => {

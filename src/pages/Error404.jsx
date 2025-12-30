@@ -23,10 +23,12 @@ const Error404 = () => {
       {/* Navigation */}
       <nav className="border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-amber-600 rounded"></div>
+          <a href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <div className="w-8 h-8 bg-[#205457] rounded flex items-center justify-center">
+              <div className="w-4 h-4 bg-white/20 rounded-sm"></div>
+            </div>
             <span className="text-xl font-bold text-gray-900">Homesta</span>
-          </div>
+          </a>
 
           <div className="hidden md:flex items-center gap-8">
             <a href="/" className="text-gray-700 hover:text-teal-700">

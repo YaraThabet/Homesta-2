@@ -18,7 +18,7 @@ const sidebarItems = [
   { icon: Heart, label: "My Collections", to: "/account/collections" },
   { icon: Notebook, label: "Manage Address", to: "/account/address" },
   { icon: LockIcon, label: "Password Manager", to: "/account/password" },
-  { icon: HelpCircle, label: "Help Center", to: "/account/help" },
+  { icon: HelpCircle, label: "Help Center", to: "/account/help-center" },
 ];
 
 const AccountSidebar = ({ 
