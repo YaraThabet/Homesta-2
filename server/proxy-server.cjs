@@ -6,7 +6,7 @@ const FormData = require('form-data');
 
 const app = express();
 const PORT = 4000;
-const EXTERNAL_API = 'http://homefinish.runasp.net/api';
+const EXTERNAL_API = 'http://homefinish.runasp.net/index.html';
 
 // Enable CORS for all frontend requests
 app.use(cors());

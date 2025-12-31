@@ -30,7 +30,6 @@ import About from "./pages/AboutUS/components/About.jsx";
 import ContactUs from "./pages/AboutUS/components/ContactUS.jsx";
 import TrackOrder from "./pages/TrackOrder";
 import CustomerSupport from "./pages/CustomerSupport";
-import Electronic from "./pages/Electronic";
 import SubCategory from "./pages/SubCategory";
 import ShoppingCart from "./pages/ShoppingCart.jsx";
 import SummaryOrder from "./pages/summaryOrder/SummaryOrder.jsx";
@@ -67,6 +66,8 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/notifications" element={<Notifications />} />
+          <Route path="/category" element={<Category />} />
+          <Route path="/subcategory/:categoryName" element={<SubCategory />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/faqs" element={<Faqs />} />
@@ -105,7 +106,6 @@ const App = () => {
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/track-order" element={<TrackOrder />} />
           <Route path="/customer-support" element={<CustomerSupport />} />
-          <Route path="/electronic" element={<Electronic />} />
 
           {/* Auth */}
           <Route path="/login" element={<Login />} />
