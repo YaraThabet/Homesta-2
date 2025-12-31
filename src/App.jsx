@@ -1,44 +1,48 @@
 import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import Footer from "./components/Footer.jsx";
+
 import Navbar from "./layouts/Navbar";
-import Category from './pages/Category.jsx';
-import Account from './pages/account/Account';
-import Shop from './pages/shop/Shop';
-import Home from './pages/home/Home.jsx'
-import Blogs from './pages/blogs/Blogs.jsx'
-import Faqs from './pages/faqs/Faqs.jsx';
-import Wishlist from './pages/account/Wishlist.jsx';
-import Checkout from './pages/checkout/Checkout.jsx';
-import ProductDetail from './pages/ProductDetail.jsx';
-import Analytics from './pages/analytics/Analytics.jsx';
-import Addproduct from './pages/addproduct/Addproduct.jsx';
-import Chatai from './pages/chatai/Chatai.jsx';
-import Dashboard from './pages/profile/Dashboard.jsx';
+import Footer from "./components/Footer.jsx";
+import AIChatFloatButton from "./components/AIChatFloatButton.jsx";
+
+// Pages
+import Home from "./pages/home/Home.jsx";
+import Category from "./pages/Category.jsx";
+import Shop from "./pages/shop/Shop";
+import Blogs from "./pages/blogs/Blogs.jsx";
+import Faqs from "./pages/faqs/Faqs.jsx";
+import ProductDetail from "./pages/ProductDetail.jsx";
+import Checkout from "./pages/checkout/Checkout.jsx";
+import Wishlist from "./pages/account/Wishlist.jsx";
+import Account from "./pages/account/Account";
+import PasswordManager from "./pages/account/PasswordManager.jsx";
+import Collections from "./pages/account/Collections.jsx";
+import HelpCenter from "./pages/account/HelpCenter.jsx";
+import Orders from "./pages/account/Orders.jsx";
+import Payment from "./pages/account/Payment.jsx";
+import Dashboard from "./pages/profile/Dashboard.jsx";
+import Analytics from "./pages/analytics/Analytics.jsx";
+import Addproduct from "./pages/addproduct/Addproduct.jsx";
+import Notifications from "./pages/Notifications.jsx";
+import Chatai from "./pages/chatai/Chatai.jsx";
+import AIChatApp from "./pages/AIChatApp";
 import About from "./pages/AboutUS/components/About.jsx";
 import ContactUs from "./pages/AboutUS/components/ContactUS.jsx";
 import TrackOrder from "./pages/TrackOrder";
 import CustomerSupport from "./pages/CustomerSupport";
 import Electronic from "./pages/Electronic";
-import Error404 from "./pages/Error404";
 import SubCategory from "./pages/SubCategory";
-import PasswordManager from "./pages/account/PasswordManager.jsx";
-import AIChatApp from "./pages/AIChatApp";
-import Notifications from "./pages/Notifications.jsx";
-import HelpCenter from "./pages/account/HelpCenter.jsx";
-import Orders from "./pages/account/Orders.jsx";
-import Payment from "./pages/account/Payment.jsx";
-import Collections from "./pages/account/Collections.jsx";
 import ShoppingCart from "./pages/ShoppingCart.jsx";
 import SummaryOrder from "./pages/summaryOrder/SummaryOrder.jsx";
+import OrderSuccess from "./pages/OrderSuccess.jsx";
+import TrackingOrder from "./pages/trackingOrder/TrackingOrder.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import VerifyCode from "./pages/VerifyCode.jsx";
 import ForgetPassword from "./pages/ForgetPassword.jsx";
 import AddPassword from "./pages/AddPassword.jsx";
-import OrderSuccess from "./pages/OrderSuccess.jsx";
-import TrackingOrder from "./pages/trackingOrder/TrackingOrder.jsx";
-import AIChatFloatButton from "./components/AIChatFloatButton.jsx";
+import Error404 from "./pages/Error404";
+
 const App = () => {
   const location = useLocation();
 
@@ -58,18 +62,19 @@ const App = () => {
     <div className="min-h-screen flex flex-col">
       {!hideLayout && <Navbar />}
 
-      <main className="flex-1  ">
+      {/* padding-top لتعويض Navbar fixed */}
+      <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/notifications" element={<Notifications />} />
-          <Route path="/faqs" element={<Faqs />} />
-          <Route path="/category" element={<Category />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/faqs" element={<Faqs />} />
           <Route path="/product/:id" element={<ProductDetail />} />
+
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/wishlist" element={<Wishlist />} />
+          <Route path="/shopping-cart" element={<ShoppingCart />} />
 
           {/* Account */}
           <Route path="/account" element={<Account />}>
@@ -80,25 +85,29 @@ const App = () => {
             <Route path="orders" element={<Orders />} />
             <Route path="payment" element={<Payment />} />
           </Route>
-          <Route path="/payment" element={<Payment />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/wishlist" element={<Wishlist />} />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/blogs" element={<Blogs />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
+
+          {/* Dashboard */}
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/addproduct" element={<Addproduct />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+
+          {/* AI */}
           <Route path="/chatai" element={<Chatai />} />
-          <Route path="/shopping-cart" element={<ShoppingCart />} />
+          <Route path="/ai-chat" element={<AIChatApp />} />
+
+          {/* Orders */}
+          <Route path="/summary-order" element={<SummaryOrder />} />
+          <Route path="/order-success" element={<OrderSuccess />} />
+          <Route path="/tracking-order" element={<TrackingOrder />} />
+
+          {/* Info */}
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/track-order" element={<TrackOrder />} />
           <Route path="/customer-support" element={<CustomerSupport />} />
-          <Route path="/category/:categoryName" element={<SubCategory />} />
-          <Route path="/ai-chat" element={<AIChatApp />} />
+          <Route path="/electronic" element={<Electronic />} />
 
-          {/* Authentication Routes */}
+          {/* Auth */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forget-password" element={<ForgetPassword />} />
@@ -108,12 +117,11 @@ const App = () => {
           <Route path="/verify" element={<VerifyCode />} />
           <Route path="/verify-code" element={<VerifyCode />} />
 
-          <Route path="/summary-order" element={<SummaryOrder />} />
-          <Route path="/order-success" element={<OrderSuccess />} />
-          <Route path="/tracking-order" element={<TrackingOrder />} />
+          {/* 404 */}
           <Route path="*" element={<Error404 />} />
         </Routes>
       </main>
+
       {!hideLayout && <AIChatFloatButton />}
       {!hideLayout && <Footer />}
     </div>
