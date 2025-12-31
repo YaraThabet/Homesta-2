@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Category = () => {
+  const navigate = useNavigate();
+
   const [categories, setCategories] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -9,7 +12,7 @@ const Category = () => {
     const fetchCategories = async () => {
       try {
         const response = await fetch(
-          "http://localhost:3000/proxy/Category"
+          "http://localhost:4000/proxy/Category"
         );
 
         if (!response.ok) {
@@ -58,6 +61,7 @@ const Category = () => {
           {categories.map((category) => (
             <div
               key={category.categoryId}
+              onClick={() => navigate(`/category/${categories.categoriesId}`)}
               className="relative h-[238px] rounded-[15px] overflow-hidden"
               style={{
                 backgroundImage: `url(http://homefinish.runasp.net/${category.imagePath})`,

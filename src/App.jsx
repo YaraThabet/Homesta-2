@@ -8,7 +8,6 @@ import AIChatFloatButton from "./components/AIChatFloatButton.jsx";
 // Pages
 import Home from "./pages/home/Home.jsx";
 import Category from "./pages/Category.jsx";
-import SubCategory from "./pages/SubCategory";
 import Shop from "./pages/shop/Shop";
 import Blogs from "./pages/blogs/Blogs.jsx";
 import Faqs from "./pages/faqs/Faqs.jsx";
@@ -25,35 +24,23 @@ import Dashboard from "./pages/profile/Dashboard.jsx";
 import Analytics from "./pages/analytics/Analytics.jsx";
 import Addproduct from "./pages/addproduct/Addproduct.jsx";
 import Notifications from "./pages/Notifications.jsx";
-
 import Chatai from "./pages/chatai/Chatai.jsx";
 import AIChatApp from "./pages/AIChatApp";
-
 import About from "./pages/AboutUS/components/About.jsx";
 import ContactUs from "./pages/AboutUS/components/ContactUS.jsx";
 import TrackOrder from "./pages/TrackOrder";
 import CustomerSupport from "./pages/CustomerSupport";
 import Electronic from "./pages/Electronic";
-import Error404 from "./pages/Error404";
 import SubCategory from "./pages/SubCategory";
-import PasswordManager from "./pages/account/PasswordManager.jsx";
-import AIChatApp from "./pages/AIChatApp";
-import Notifications from "./pages/Notifications.jsx";
-import HelpCenter from "./pages/account/HelpCenter.jsx";
-import Orders from "./pages/account/Orders.jsx";
-import Payment from "./pages/account/Payment.jsx";
-import Collections from "./pages/account/Collections.jsx";
 import ShoppingCart from "./pages/ShoppingCart.jsx";
 import SummaryOrder from "./pages/summaryOrder/SummaryOrder.jsx";
 import OrderSuccess from "./pages/OrderSuccess.jsx";
 import TrackingOrder from "./pages/trackingOrder/TrackingOrder.jsx";
-
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import VerifyCode from "./pages/VerifyCode.jsx";
 import ForgetPassword from "./pages/ForgetPassword.jsx";
 import AddPassword from "./pages/AddPassword.jsx";
-
 import Error404 from "./pages/Error404";
 
 const App = () => {
@@ -76,14 +63,10 @@ const App = () => {
       {!hideLayout && <Navbar />}
 
       {/* padding-top لتعويض Navbar fixed */}
-      <main className="flex-1 pt-[120px]">
+      <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/notifications" element={<Notifications />} />
-
-          <Route path="/category" element={<Category />} />
-          <Route path="/category/:categoryName" element={<SubCategory />} />
-
           <Route path="/shop" element={<Shop />} />
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/faqs" element={<Faqs />} />
