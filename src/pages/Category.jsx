@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import api from "../lib/axios";
+import PageLoader from "../components/PageLoader";
 
 const Category = () => {
   const navigate = useNavigate();
@@ -11,21 +13,17 @@ const Category = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:4000/proxy/Category"
-        );
+        const response = await api.get("/Category");
 
-        if (!response.ok) {
-          throw new Error("Failed to fetch categories");
+        // api.get returns the response object, data is in response.data
+        const data = response.data;
+        console.log("Categories Data:", data);
+        if (data.length > 0) {
+          console.log("First Image Path Example:", data[0].imagePath);
         }
 
-        const data = await response.json();
-
-        const filteredCategories = data.filter(
-          (category) => ![1, 2, 3, 4, 5, 14].includes(category.categoryId)
-        );
-
-        setCategories(filteredCategories);
+        // Removed filter to verify data visibility
+        setCategories(data);
       } catch (err) {
         console.error(err);
         setError("Error while loading categories ❌");
@@ -39,11 +37,7 @@ const Category = () => {
 
   // ===== حالات التحميل والخطأ =====
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-lg">Loading...</p>
-      </div>
-    );
+    return <PageLoader />;
   }
 
   if (error) {
@@ -51,7 +45,7 @@ const Category = () => {
   }
 
   return (
-    <div className="w-full min-h-[1024px] bg-[#F8FAE5] flex justify-center">
+    <div className="w-full min-h-[1024px] bg-[#F5F5F5] flex justify-center pt-[120px]">
       <div className="w-[1312px] mt-16 mx-auto flex flex-col gap-[32px]">
         <p className="font-[Outfit] text-[#43766C] text-[32px] font-medium text-center">
           Explore by Category
@@ -61,7 +55,7 @@ const Category = () => {
           {categories.map((category) => (
             <div
               key={category.categoryId}
-              onClick={() => navigate(`/category/${categories.categoriesId}`)}
+              onClick={() => navigate(`/category/${category.categoryId}`)}
               className="relative h-[238px] rounded-[15px] overflow-hidden"
               style={{
                 backgroundImage: `url(http://homefinish.runasp.net/${category.imagePath})`,
