@@ -1,7 +1,9 @@
 import React from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, matchPath } from "react-router-dom";
 
 import Navbar from "./layouts/Navbar";
+import SellerNavbar from "./layouts/SellerNavbar.jsx";
+import AdminNavbar from "./layouts/AdminNavbar.jsx";
 import Footer from "./components/Footer.jsx";
 import AIChatFloatButton from "./components/AIChatFloatButton.jsx";
 
@@ -42,24 +44,71 @@ import ForgetPassword from "./pages/ForgetPassword.jsx";
 import AddPassword from "./pages/AddPassword.jsx";
 import Error404 from "./pages/Error404";
 
+// Seller Pages
+import CreateStore from "./pages/CreateStore.jsx";
+import SellerHome from "./pages/SellerHome.jsx";
+import Products from "./pages/sellerproducts/Products.jsx";
+import EditProduct from "./pages/addproduct/EditProduct.jsx";
+import StoreSettings from "./pages/store/StoreSettings.jsx";
+import Reviews from "./pages/sellerproducts/Reviews.jsx";
+// Admin Pages
+import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
+import AdminStores from "./pages/admin/AdminStores.jsx";
+import AdminStoreDetails from "./pages/admin/AdminStoreDetails.jsx";
+import AdminProducts from "./pages/admin/AdminProducts.jsx";
+import AdminCategories from "./pages/admin/AdminCategories.jsx";
+import AdminAnalytics from "./pages/admin/AdminAnalytics.jsx";
+import AdminNotifications from "./pages/admin/AdminNotifications.jsx";
+
 const App = () => {
   const location = useLocation();
 
+  const isSellerPage =
+    location.pathname.startsWith("/seller-home") ||
+    location.pathname.startsWith("/addproduct") ||
+    location.pathname.startsWith("/edit-product") ||
+    location.pathname.startsWith("/seller-products") ||
+    location.pathname.startsWith("/store-settings") ||
+    location.pathname.startsWith("/seller-reviews") ||
+    (location.pathname.startsWith("/analytics") && !location.pathname.startsWith("/admin"));
+
+  const isAdminPage = location.pathname.startsWith("/admin");
+
   const hideLayout =
+    location.pathname.startsWith("/create-store") ||
     location.pathname.startsWith("/chatai") ||
     location.pathname.startsWith("/ai-chat") ||
     location.pathname.startsWith("/login") ||
     location.pathname.startsWith("/signup") ||
-    location.pathname.startsWith("/verify") ||
     location.pathname.startsWith("/verify-code") ||
-    location.pathname.startsWith("/forget-password") ||
     location.pathname.startsWith("/forgot-password") ||
-    location.pathname.startsWith("/add-password") ||
-    location.pathname.startsWith("/new-password");
+    location.pathname.startsWith("/reset-password");
+
+  // Identification of valid routes to hide navbar on 404
+  const validRoutes = [
+    "/", "/notifications", "/category", "/subcategory/:categoryName", "/shop",
+    "/blogs", "/faqs", "/product/:id", "/checkout", "/wishlist", "/shopping-cart",
+    "/account", "/account/*", "/dashboard", "/analytics", "/addproduct",
+    "/chatai", "/ai-chat", "/summary-order", "/order-success", "/tracking-order",
+    "/about", "/contact", "/track-order", "/customer-support", "/login",
+    "/signup", "/forgot-password", "/reset-password", "/verify-code",
+    "/create-store", "/seller-home", "/seller-products", "/edit-product/:id",
+    "/store-settings", "/seller-reviews",
+    // Admin Routes
+    "/admin/dashboard", "/admin/stores", "/admin/products", "/admin/categories", "/admin/analytics", "/admin/notifications"
+  ];
+
+  const isInvalidPage = !validRoutes.some(path =>
+    matchPath({ path, end: true }, location.pathname)
+  );
+
+  const shouldHideNavbar = hideLayout || isInvalidPage;
 
   return (
     <div className="min-h-screen flex flex-col">
-      {!hideLayout && <Navbar />}
+      {!shouldHideNavbar && (
+        isAdminPage ? <AdminNavbar /> : (isSellerPage ? <SellerNavbar /> : <Navbar />)
+      )}
 
       {/* padding-top لتعويض Navbar fixed */}
       <main className="flex-1">
@@ -110,20 +159,34 @@ const App = () => {
           {/* Auth */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/forget-password" element={<ForgetPassword />} />
           <Route path="/forgot-password" element={<ForgetPassword />} />
-          <Route path="/add-password" element={<AddPassword />} />
-          <Route path="/new-password" element={<AddPassword />} />
-          <Route path="/verify" element={<VerifyCode />} />
+          <Route path="/reset-password" element={<AddPassword />} />
           <Route path="/verify-code" element={<VerifyCode />} />
+
+          {/* Seller Routes */}
+          <Route path="/create-store" element={<CreateStore />} />
+          <Route path="/seller-home" element={<SellerHome />} />
+          <Route path="/seller-products" element={<Products />} />
+          <Route path="/edit-product/:id" element={<EditProduct />} />
+          <Route path="/store-settings" element={<StoreSettings />} />
+          <Route path="/seller-reviews" element={<Reviews />} />
+
+          {/* Admin Routes */}
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/admin/stores" element={<AdminStores />} />
+          <Route path="/admin/store/:id" element={<AdminStoreDetails />} />
+          <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/admin/categories" element={<AdminCategories />} />
+          <Route path="/admin/analytics" element={<AdminAnalytics />} />
+          <Route path="/admin/notifications" element={<AdminNotifications />} />
 
           {/* 404 */}
           <Route path="*" element={<Error404 />} />
         </Routes>
       </main>
 
-      {!hideLayout && <AIChatFloatButton />}
-      {!hideLayout && <Footer />}
+      {!shouldHideNavbar && !isSellerPage && <AIChatFloatButton />}
+      {!shouldHideNavbar && !isSellerPage && <Footer />}
     </div>
   );
 };
