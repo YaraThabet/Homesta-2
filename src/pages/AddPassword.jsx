@@ -1,52 +1,141 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Eye, EyeOff } from 'lucide-react';
+import api from "../lib/axios";
+import PageLoader from "../components/PageLoader";
 import forgetPassImg from '../assets/imges/forget-pass-img.jpg';
 
+const schema = z.object({
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
 const AddPassword = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { email, code } = location.state || {}; // Get email and code from previous steps
+
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const { register, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(schema)
+  });
+
+  const onSubmit = async (data) => {
+    setLoading(true);
+    setApiError(null);
+
+    if (!email || !code) {
+      setApiError("Missing reset information. Please start over.");
+      return;
+    }
+
+    try {
+      console.log("Resetting password for:", email);
+      await api.post('Auth/ResetPassword', {
+        email: email,
+        code: code,
+        newPassword: data.password
+      });
+
+      setShowSuccessModal(true);
+
+    } catch (error) {
+      console.error("Reset Failed:", error);
+      const msg = error.response?.data?.message || "Failed to reset password. Please try again.";
+      setApiError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <PageLoader />;
+
   return (
-    <div className="min-h-screen font-sans">
+    <div className="min-h-screen font-sans relative">
       <div className="flex min-h-screen">
         {/* Left Column - Add Password Form */}
         <div className="flex-1 flex flex-col justify-center px-16 bg-white">
           <div className="mb-8">
-            <div className="text-3xl font-bold text-gray-800 mb-4">Homesta</div>
+            <Link to="/">
+              <div className="text-3xl font-bold text-[#205457] mb-4 hover:opacity-80 transition-opacity cursor-pointer">Homesta</div>
+            </Link>
             <h2 className="text-3xl font-semibold text-gray-800 mb-2">Add a new Password</h2>
             <p className="text-gray-600 text-base">The account has been recovered</p>
           </div>
 
-          <form className="max-w-md">
-            <div className="mb-6">
-              <input
-                type="password"
-                placeholder="Password"
-                className="w-full px-4 py-4 border border-gray-300 rounded-lg text-base transition-colors duration-300 bg-gray-50 focus:outline-none focus:border-blue-500 focus:bg-white"
-                required
-              />
+          {/* API Error Message */}
+          {apiError && (
+            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
+              <p className="text-sm text-red-700 font-medium">{apiError}</p>
             </div>
-            
+          )}
+
+          <form onSubmit={handleSubmit(onSubmit)} className="max-w-md">
             <div className="mb-6">
-              <input
-                type="password"
-                placeholder="Confirm Password"
-                className="w-full px-4 py-4 border border-gray-300 rounded-lg text-base transition-colors duration-300 bg-gray-50 focus:outline-none focus:border-blue-500 focus:bg-white"
-                required
-              />
+              <label className="block text-gray-700 font-medium mb-2">New Password</label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  {...register("password")}
+                  placeholder="Password"
+                  className="w-full px-4 py-4 border border-gray-300 rounded-lg text-base transition-colors duration-300 bg-gray-50 focus:outline-none focus:border-blue-500 focus:bg-white pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
             </div>
 
-            <button type="submit" className="w-full py-4 text-white border-none rounded-lg text-base font-semibold cursor-pointer transition-colors duration-300 mb-6 hover:opacity-90" style={{backgroundColor: '#205457'}}>
-              Log In
+            <div className="mb-6">
+              <label className="block text-gray-700 font-medium mb-2">Confirm Password</label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  {...register("confirmPassword")}
+                  placeholder="Confirm Password"
+                  className="w-full px-4 py-4 border border-gray-300 rounded-lg text-base transition-colors duration-300 bg-gray-50 focus:outline-none focus:border-blue-500 focus:bg-white pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+              {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword.message}</p>}
+            </div>
+
+            <button type="submit" className="w-full py-4 text-white border-none rounded-lg text-base font-semibold cursor-pointer transition-colors duration-300 mb-6 hover:opacity-90" style={{ backgroundColor: '#205457' }}>
+              Reset Password
             </button>
           </form>
 
           <div className="text-center text-sm text-gray-600">
-            Already have an account? <Link to="/login" className="font-semibold no-underline hover:underline" style={{color: '#205457'}}>Sign In</Link>
+            Already have an account? <Link to="/login" className="font-semibold no-underline hover:underline" style={{ color: '#205457' }}>Sign In</Link>
           </div>
         </div>
 
         {/* Right Column - Background Image with Overlay */}
-        <div className="flex-1 relative bg-cover bg-center min-h-screen" style={{backgroundImage: `url(${forgetPassImg})`}}>
+        <div className="flex-1 relative bg-cover bg-center min-h-screen" style={{ backgroundImage: `url(${forgetPassImg})` }}>
           <div className="absolute inset-0 bg-gradient-to-br from-black/70 to-black/40 flex flex-col justify-between p-8">
-            <div className="absolute" style={{width: '576px', height: '302px', top: '466px', left: '16px', gap: '32px', opacity: 1}}>
+            <div className="absolute" style={{ width: '576px', height: '302px', top: '466px', left: '16px', gap: '32px', opacity: 1 }}>
               <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
                 <p className="text-white text-xl leading-relaxed mb-8 italic">
                   "Your account has been successfully recovered. Create a strong password to secure your account."
@@ -66,8 +155,30 @@ const AddPassword = () => {
           </div>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-full text-center relative animate-fade-in-up">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-800 mb-2">Password Reset!</h3>
+            <p className="text-gray-600 mb-6 font-medium">
+              Your password has been successfully updated. You can now login with your new password.
+            </p>
+            <button
+              onClick={() => navigate('/login')}
+              className="w-full py-3 bg-[#205457] hover:bg-[#1a4345] text-white rounded-lg font-semibold transition-colors duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              Login Now
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
-
 export default AddPassword;

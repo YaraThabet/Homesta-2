@@ -1,13 +1,16 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import signupImg from '/signup-img.jpg';
+import api from "../lib/axios";
+import PageLoader from "../components/PageLoader";
+import { Eye, EyeOff } from 'lucide-react';
 
 const schema = z.object({
-  firstName: z.string().min(1, t => ({ message: 'First name is required' })),
-  lastName: z.string().min(1, t => ({ message: 'Last name is required' })),
+  firstName: z.string().min(1, { message: 'First name is required' }),
+  lastName: z.string().min(1, { message: 'Last name is required' }),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   role: z.enum(['buyer', 'seller'], {
@@ -17,16 +20,95 @@ const schema = z.object({
 });
 
 const Signup = () => {
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
+  const { register, handleSubmit, getValues, formState: { errors } } = useForm({
     resolver: zodResolver(schema)
   });
 
-  const onSubmit = (data) => {
-    console.log('Form submitted:', data);
-    // Handle signup logic here
+  const onSubmit = async (data) => {
+    setLoading(true);
+    setApiError(null);
+
+    try {
+      // Determine selected role based on UI choice
+      // Buyer -> ID "2", Name "User"
+      // Seller -> ID "3", Name "Seller"
+      const selectedRole = data.role === 'buyer'
+        ? { id: "2", roleName: "User", isSelected: true }
+        : { id: "3", roleName: "Seller", isSelected: true };
+
+      // Format payload for Backend DTO
+      const payload = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        password: data.password,
+        agreeTerms: data.terms,
+        roles: [selectedRole] // Send ONLY the selected role
+      };
+
+      console.log("Registering with:", payload);
+
+      // Call API
+      const response = await api.post('Auth/register', payload);
+
+      console.log("Signup Success:", response.data);
+
+      // Show Success Modal
+      setShowSuccessModal(true);
+
+    } catch (error) {
+      console.error("Signup Failed:", error);
+      const msg = error.response?.data?.message ||
+        error.response?.data?.errors?.[0] ||
+        "Registration failed. Please try again.";
+      setApiError(typeof msg === 'string' ? msg : JSON.stringify(msg));
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (loading) return <PageLoader />;
+
   return (
     <div className="min-h-screen flex">
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center transform transition-all scale-100">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">Registration Successful!</h3>
+            <p className="text-gray-600 mb-6">
+              {getValues('role') === 'seller' ? (
+                <>
+                  We will send you a confirmation email once the admin revise your application, so keep an eye at your email.
+                </>
+              ) : (
+                <>
+                  We've sent a confirmation link to <strong>{getValues('email')}</strong>.
+                  Please check your inbox and confirm your email before logging in.
+                </>
+              )}
+            </p>
+            <button
+              onClick={() => navigate('/login')}
+              className="w-full bg-[#205457] text-white py-3 rounded-lg font-medium hover:bg-[#1a4346] transition-colors"
+            >
+              Go to Login
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Left Column - Signup Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 lg:px-16 xl:px-24">
         <div className="max-w-md w-full mx-auto">
@@ -40,6 +122,24 @@ const Signup = () => {
           {/* Form Title */}
           <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
           <p className="text-gray-600 mb-8">Sign up to get started with Homesta</p>
+
+          {/* API Error Message */}
+          {apiError && (
+            <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
+              <div className="flex">
+                <div className="flex-shrink-0 text-red-500">
+                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-red-700 font-medium">
+                    {apiError}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Signup Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -85,6 +185,7 @@ const Signup = () => {
                 </label>
                 <input
                   type="text"
+                  autoComplete="given-name"
                   {...register('firstName')}
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.firstName ? 'border-red-500' : 'border-gray-300'
                     }`}
@@ -100,6 +201,7 @@ const Signup = () => {
                 </label>
                 <input
                   type="text"
+                  autoComplete="family-name"
                   {...register('lastName')}
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.lastName ? 'border-red-500' : 'border-gray-300'
                     }`}
@@ -117,6 +219,7 @@ const Signup = () => {
               </label>
               <input
                 type="email"
+                autoComplete="email"
                 {...register('email')}
                 className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.email ? 'border-red-500' : 'border-gray-300'
                   }`}
@@ -131,13 +234,23 @@ const Signup = () => {
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Password
               </label>
-              <input
-                type="password"
-                {...register('password')}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.password ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                placeholder="Enter password"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  {...register('password')}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.password ? 'border-red-500' : 'border-gray-300'
+                    } pr-10`}
+                  placeholder="Enter password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                >
+                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
               )}
@@ -161,7 +274,7 @@ const Signup = () => {
 
             <button
               type="submit"
-              className="w-full bg-[#205457] text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+              className="w-full bg-[#205457] text-white py-3 rounded-lg font-medium hover:bg-[#205457]/80 transition-colors"
             >
               Sign Up
             </button>
@@ -204,7 +317,7 @@ const Signup = () => {
           <div className="mt-6 text-center">
             <span className="text-sm text-gray-600">
               Already have an account?{' '}
-              <a href="/login" className="text-blue-600 hover:text-blue-700 font-medium">
+              <a href="/login" className="text-[#205457] hover:text-[#205457]/80 font-medium">
                 Sign In
               </a>
             </span>

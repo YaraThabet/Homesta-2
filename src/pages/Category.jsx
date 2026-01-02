@@ -45,7 +45,7 @@ const Category = () => {
   }
 
   return (
-    <div className="w-full min-h-[1024px] bg-[#F5F5F5] flex justify-center p-4 pt-[120px]">
+    <div className="w-full min-h-[1024px] bg-[#F5F5F5] flex justify-center p-4 pt-[120px] pb-[120px]">
       <div className="w-[1312px] mt-16 mx-auto flex flex-col gap-[32px]">
         <p className="font-[Outfit] text-[#43766C] text-[32px] font-medium text-center">
           Explore by Category

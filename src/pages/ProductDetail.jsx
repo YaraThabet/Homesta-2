@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Heart, Minus, Plus, Star, ArrowLeft, Upload, ShoppingCart, Sparkles } from 'lucide-react';
 import { products } from '../data/products';
@@ -67,6 +68,8 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [activeTab, setActiveTab] = useState('description');
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [modalType, setModalType] = useState('cart'); // 'cart' or 'wishlist'
   const [reviewForm, setReviewForm] = useState({
     fullName: '',
     email: '',
@@ -105,6 +108,29 @@ const ProductDetail = () => {
 
   const increaseQuantity = () => {
     setQuantity(quantity + 1);
+  };
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setModalType('cart');
+      setShowLoginModal(true);
+      return;
+    }
+    // Proceed with Add to Cart logic
+    console.log("Added to cart");
+  };
+
+  const handleWishlistClick = (e) => {
+    e.stopPropagation();
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setModalType('wishlist');
+      setShowLoginModal(true);
+      return;
+    }
+    setIsWishlisted(!isWishlisted);
   };
 
   const handleReviewSubmit = (e) => {
@@ -159,7 +185,7 @@ const ProductDetail = () => {
             <div className="flex justify-between items-start mb-2">
               <h1 className="text-xl font-semibold text-foreground">{product.name}</h1>
               <button
-                onClick={() => setIsWishlisted(!isWishlisted)}
+                onClick={handleWishlistClick}
                 className="p-2 hover:bg-muted rounded-full"
               >
                 <Heart
@@ -231,7 +257,10 @@ const ProductDetail = () => {
             </div>
 
             <div className="flex gap-3">
-              <button className="flex-1 bg-[#5B8A8A] text-white py-3 rounded-lg font-medium hover:bg-[#4a7575] transition-colors text-sm">
+              <button
+                onClick={handleAddToCart}
+                className="flex-1 bg-[#5B8A8A] text-white py-3 rounded-lg font-medium hover:bg-[#4a7575] transition-colors text-sm"
+              >
                 Add to cart
               </button>
               <button className="flex-1 bg-primary text-primary-foreground py-3 rounded-lg font-medium hover:bg-[#4a7575]/90 transition-colors text-sm">
@@ -493,10 +522,7 @@ const ProductDetail = () => {
                       {relatedProduct.name}
                     </h3>
                     <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        // Add to cart functionality here
-                      }}
+                      onClick={handleAddToCart}
                       className="p-1.5 hover:bg-muted rounded transition-colors flex-shrink-0"
                     >
                       <ShoppingCart className="h-4 w-4 text-muted-foreground" />
@@ -524,6 +550,43 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+
+      {/* Login Required Modal */}
+      {showLoginModal && createPortal(
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-full text-center relative animate-fade-in-up">
+            <div className="w-16 h-16 bg-[#205457]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              {modalType === 'wishlist' ? (
+                <Heart className="w-8 h-8 text-[#205457]" />
+              ) : (
+                <ShoppingCart className="w-8 h-8 text-[#205457]" />
+              )}
+            </div>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">Login Required</h3>
+            <p className="text-gray-600 mb-6 font-medium">
+              Please sign in to {modalType === 'wishlist' ? 'add items to your wishlist' : 'add items to your cart'}.
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setShowLoginModal(false)}
+                className="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  setShowLoginModal(false);
+                  navigate('/login');
+                }}
+                className="flex-1 py-2 bg-[#205457] hover:bg-[#1a4345] text-white rounded-lg font-medium transition-colors shadow-md"
+              >
+                Sign In
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };

@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
-import { NavLink, Link, useLocation } from "react-router-dom";
+import { createPortal } from "react-dom";
+import { NavLink, Link, useLocation, useNavigate } from "react-router-dom";
 import { CiHeart } from "react-icons/ci";
 import { PiShoppingCartThin } from "react-icons/pi";
 import { FaBars } from "react-icons/fa";
 import { IoClose } from "react-icons/io5";
-import { CiUser } from "react-icons/ci";
+import { CiUser, CiLogout } from "react-icons/ci";
+import { LayoutDashboard } from "lucide-react";
+import api from "../lib/axios";
 import { logo } from "../assets/index"
 import { FaFacebook } from "react-icons/fa";
 import { FaTwitter } from "react-icons/fa";
@@ -16,16 +19,55 @@ import { useAppContext } from "../context/AppContext";
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [user, setUser] = useState(null);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { language, setLanguage, currency, setCurrency } = useAppContext();
 
+  const handleLogout = async () => {
+    try {
+      await api.post('/Auth/logout');
+    } catch (error) {
+      console.error("Logout failed", error);
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('userId');
+      localStorage.removeItem('userName');
+      setUser(null);
+      setShowLogoutModal(false);
+      navigate('/'); // Stay on Home Page
+    }
+  };
+
+  const handleRestrictedClick = (e) => {
+    if (!user) {
+      e.preventDefault();
+      setShowLoginModal(true);
+    }
+  };
+
   useEffect(() => {
+    // Check auth state on mount and route change
+    const checkAuth = () => {
+      const token = localStorage.getItem('token');
+      const userName = localStorage.getItem('userName');
+      if (token) {
+        setUser({ name: userName || 'Account', isLoggedIn: true });
+      } else {
+        setUser(null);
+      }
+    };
+
+    checkAuth();
+
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [location.pathname]);
 
   const isHomePage = location.pathname === "/";
   const isDarkText = !isHomePage || scrolled;
@@ -135,20 +177,56 @@ const Navbar = () => {
         {/* lists of faviorites and cart */}
         <div className="flex gap-4 lg:gap-6 items-center">
           <div className="flex items-center gap-1">
-            <Link to="/wishlist" className={`p-2 rounded-full transition-all duration-300 group ${isDarkText ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'
-              }`}>
+            <Link
+              to="/wishlist"
+              onClick={(e) => handleRestrictedClick(e)}
+              className={`p-2 rounded-full transition-all duration-300 group ${isDarkText ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'}`}
+            >
               <CiHeart className="text-[24px] group-hover:scale-110 transition-transform" />
             </Link>
-            <Link to="/shopping-cart" className={`p-2 rounded-full transition-all duration-300 group relative ${isDarkText ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'
-              }`}>
+            <Link
+              to="/shopping-cart"
+              onClick={(e) => handleRestrictedClick(e)}
+              className={`p-2 rounded-full transition-all duration-300 group relative ${isDarkText ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'}`}
+            >
               <PiShoppingCartThin className="text-[24px] group-hover:scale-110 transition-transform" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-[#B19470] rounded-full border border-white/20"></span>
             </Link>
-            <Link to="/account" className={`hidden lg:flex items-center gap-2 p-2 px-3 rounded-xl transition-all duration-300 group ml-2 border ${isDarkText ? 'bg-[#205457] text-white hover:bg-[#205457]/90 border-[#205457]' : 'bg-white/10 hover:bg-white/20 text-white border-white/5'
-              }`}>
-              <CiUser className="text-[20px] group-hover:rotate-12 transition-transform" />
-              <span className="text-[14px] font-semibold uppercase tracking-wider">Account</span>
-            </Link>
+
+            {/* User Account / Sign In */}
+            {user ? (
+              <div className="hidden lg:flex items-center gap-2 ml-2">
+                {/* Seller Dashboard Link */}
+                {JSON.parse(localStorage.getItem('userRoles') || '[]').some(r =>
+                  (typeof r === 'string' ? r.toLowerCase() === 'seller' : r.roleName?.toLowerCase() === 'seller')
+                ) && (
+                    <Link
+                      to="/seller-home"
+                      className="flex items-center gap-2 px-4 py-2 bg-[#205457] text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#1a4345] transition-all mr-2 shadow-lg shadow-[#205457]/10"
+                    >
+                      <LayoutDashboard size={14} />
+                      <span>Seller Dashboard</span>
+                    </Link>
+                  )}
+
+                <Link to="/account" className={`p-2 rounded-full transition-all duration-300 group ${isDarkText ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'}`} title="Profile">
+                  <CiUser className="text-[24px] group-hover:scale-110 transition-transform" />
+                </Link>
+                <button
+                  onClick={() => setShowLogoutModal(true)}
+                  className={`p-2 rounded-full transition-all duration-300 group ${isDarkText ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'}`}
+                  title="Logout"
+                >
+                  <CiLogout className="text-[24px] group-hover:scale-110 transition-transform" />
+                </button>
+              </div>
+            ) : (
+              <Link to="/login" className={`hidden lg:flex items-center gap-2 p-2 px-3 rounded-xl transition-all duration-300 group ml-2 border ${isDarkText ? 'bg-transparent text-[#205457] border-[#205457] hover:bg-[#205457] hover:text-white' : 'bg-transparent text-white border-white hover:bg-white hover:text-[#205457]'
+                }`}>
+                <CiUser className="text-[20px] group-hover:rotate-12 transition-transform" />
+                <span className="text-[14px] font-semibold uppercase tracking-wider">Sign In</span>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -211,6 +289,65 @@ const Navbar = () => {
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity duration-300"
             onClick={() => setMenuOpen(false)}
           ></div>
+        )}
+
+        {/* Logout Confirmation Modal */}
+        {showLogoutModal && createPortal(
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-full text-center relative animate-fade-in-up">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CiLogout className="w-8 h-8 text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">Logout?</h3>
+              <p className="text-gray-600 mb-6 font-medium">Are you sure you want to log out of your account?</p>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setShowLogoutModal(false)}
+                  className="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="flex-1 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors shadow-md"
+                >
+                  Logout
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
+
+        {/* Login Required Modal */}
+        {showLoginModal && createPortal(
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+            <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-full text-center relative animate-fade-in-up">
+              <div className="w-16 h-16 bg-[#205457]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CiUser className="w-8 h-8 text-[#205457]" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">Login Required</h3>
+              <p className="text-gray-600 mb-6">Please sign in to access your wishlist, cart, and account details.</p>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setShowLoginModal(false)}
+                  className="flex-1 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setShowLoginModal(false);
+                    navigate('/login');
+                  }}
+                  className="flex-1 py-2 bg-[#205457] hover:bg-[#1a4345] text-white rounded-lg font-medium transition-colors shadow-md"
+                >
+                  Sign In
+                </button>
+              </div>
+            </div>
+          </div>,
+          document.body
         )}
       </nav>
     </header>
