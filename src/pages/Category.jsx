@@ -45,41 +45,46 @@ const Category = () => {
   }
 
   return (
-    <div className="w-full min-h-[1024px] bg-[#F5F5F5] flex justify-center pt-[120px]">
+    <div className="w-full min-h-[1024px] bg-[#F5F5F5] flex justify-center p-4 pt-[120px]">
       <div className="w-[1312px] mt-16 mx-auto flex flex-col gap-[32px]">
         <p className="font-[Outfit] text-[#43766C] text-[32px] font-medium text-center">
           Explore by Category
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-          {categories.map((category) => (
-            <div
-              key={category.categoryId}
-              onClick={() => navigate(`/category/${category.categoryId}`)}
-              className="relative h-[238px] rounded-[15px] overflow-hidden"
-              style={{
-                backgroundImage: `url(http://homefinish.runasp.net/${category.imagePath})`,
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            >
-              {/* Overlay */}
-              <div className="absolute inset-0 bg-black/30"></div>
+          {categories
+            .filter((category) => ![1, 2, 3, 4].includes(category.categoryId))
+            .map((category) => (
+              <button
+                type="button"
+                key={category.categoryId}
+                onClick={() => navigate("/category/SubCategory")}
+                className=" relative h-[238px] rounded-[18px] overflow-hidden
+                 focus:outline-none focus:ring-4 focus:ring-[#43766C]/40
+                 transform transition-all duration-300
+                 hover:scale-[1.03] hover:shadow-xl
+                 active:scale-[0.97]"
+                style={{
+                  backgroundImage: `url(http://homefinish.runasp.net/${category.imagePath})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                }}
+              >
+                {/* Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
 
-              {/* Category Name */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <h2 className="text-white text-2xl font-semibold text-center">
-                  {category.name}
-                </h2>
-              </div>
-            </div>
-          ))}
+                {/* Category Name */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <h2 className="text-white text-2xl font-semibold text-center">
+                    {category.name}
+                  </h2>
+                </div>
+              </button>
+            ))}
         </div>
 
         {categories.length === 0 && (
-          <p className="text-center text-gray-500">
-            No categories available
-          </p>
+          <p className="text-center text-gray-500">No categories available</p>
         )}
       </div>
     </div>
