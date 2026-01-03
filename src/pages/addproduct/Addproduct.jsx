@@ -294,7 +294,7 @@ const AddProduct = () => {
 					<div className="flex items-center gap-4 bg-white/50 backdrop-blur-md p-2 rounded-3xl border border-gray-100 shadow-sm">
 						<button
 							type="button"
-							onClick={() => navigate('/seller-home')}
+							onClick={resetForm}
 							className="px-8 py-4 rounded-2xl font-bold text-gray-400 hover:text-gray-900 transition-all text-xs uppercase tracking-[0.2em]"
 						>
 							Discard
@@ -312,256 +312,270 @@ const AddProduct = () => {
 				</motion.div>
 
 				<form id="product-form" onSubmit={handleSave}>
-					<div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+					<div className="grid grid-cols-1 gap-8">
 
-						{/* LEFT COLUMN: The Visuals & Story */}
-						<div className="lg:col-span-8 space-y-10">
-
-							{/* Product Images */}
-							<motion.div variants={fadeInUp} className={`bg-white p-6 md:p-10 lg:p-14 rounded-[30px] lg:rounded-[50px] shadow-[0_20px_60px_rgba(0,0,0,0.02)] border ${errors.images ? 'border-red-200' : 'border-gray-100'}`}>
-								<div className="flex items-center gap-4 mb-10">
-									<div className={`w-14 h-14 rounded-2xl ${errors.images ? 'bg-red-50 text-red-500' : 'bg-[#89917D]/10 text-[#89917D]'} flex items-center justify-center`}>
-										<ImageIcon size={28} />
-									</div>
-									<div>
-										<h3 className="text-3xl font-bold text-gray-900">Product Images <span className="text-red-500 text-base">*</span></h3>
-										<p className="text-gray-400">Upload up to 5 high-quality images</p>
-									</div>
+						{/* SECTION 1: VISUALS (Full Width) */}
+						<motion.div variants={fadeInUp} className={`bg-white p-8 rounded-[40px] shadow-sm border ${errors.images ? 'border-red-200' : 'border-gray-100'}`}>
+							<div className="flex items-center gap-4 mb-8">
+								<div className={`w-12 h-12 rounded-2xl ${errors.images ? 'bg-red-50 text-red-500' : 'bg-[#205457]/10 text-[#205457]'} flex items-center justify-center`}>
+									<ImageIcon size={24} />
 								</div>
-								{errors.images && <p className="text-red-500 text-xs font-bold mb-6 uppercase tracking-widest">{errors.images}</p>}
+								<div>
+									<h3 className="text-xl font-bold text-gray-900">Showcase Gallery <span className="text-red-500">*</span></h3>
+									<p className="text-gray-400 text-sm">Upload high-quality images to make your product stand out (Max 5).</p>
+								</div>
+							</div>
 
-								<div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-									<AnimatePresence>
-										{imagePreviews.map((preview, index) => (
-											<motion.div
-												key={preview}
-												initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
-												animate={{ opacity: 1, scale: 1, rotate: 0 }}
-												exit={{ opacity: 0, scale: 0.9 }}
-												className="relative aspect-[4/5] rounded-[30px] overflow-hidden shadow-xl group border-4 border-white"
+							<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+								<AnimatePresence>
+									{imagePreviews.map((preview, index) => (
+										<motion.div
+											key={preview}
+											initial={{ opacity: 0, scale: 0.8 }}
+											animate={{ opacity: 1, scale: 1 }}
+											exit={{ opacity: 0, scale: 0.8 }}
+											className="relative aspect-square rounded-2xl overflow-hidden shadow-md group border-2 border-transparent hover:border-[#205457]"
+										>
+											<img src={preview} className="w-full h-full object-cover" alt="Preview" />
+											<button
+												type="button"
+												onClick={() => removeImage(index)}
+												className="absolute top-2 right-2 w-8 h-8 bg-white/80 backdrop-blur-sm rounded-full flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all opacity-0 group-hover:opacity-100"
 											>
-												<img src={preview} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt="Preview" />
-												<div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-center">
-													<button
-														type="button"
-														onClick={() => removeImage(index)}
-														className="px-6 py-2 bg-white/20 backdrop-blur-md text-white rounded-xl text-[10px] font-black tracking-widest uppercase border border-white/30 hover:bg-red-500 hover:border-red-500 transition-all"
-													>
-														Remove
-													</button>
-												</div>
-											</motion.div>
-										))}
-									</AnimatePresence>
+												<X size={16} />
+											</button>
+										</motion.div>
+									))}
+								</AnimatePresence>
 
-									{images.length < 5 && (
-										<label className="aspect-[4/5] rounded-[30px] border-3 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-[#205457]/30 hover:bg-[#205457]/5 transition-all group relative overflow-hidden">
-											<input type="file" multiple onChange={handleImageChange} className="hidden" accept="image/*" />
-											<div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center group-hover:bg-white group-hover:scale-110 transition-all duration-500">
-												<Upload size={28} className="text-[#205457]" />
-											</div>
-											<span className="text-[11px] font-black text-gray-300 mt-5 tracking-[0.2em] uppercase">Upload Photo</span>
-										</label>
-									)}
-								</div>
-							</motion.div>
+								{images.length < 5 && (
+									<label className="aspect-square rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center cursor-pointer hover:border-[#205457] hover:bg-[#205457]/5 transition-all gap-2 group">
+										<input type="file" multiple onChange={handleImageChange} className="hidden" accept="image/*" />
+										<Upload size={24} className="text-gray-400 group-hover:text-[#205457] transition-colors" />
+										<span className="text-[10px] font-bold text-gray-400 group-hover:text-[#205457] uppercase tracking-wider">Add Image</span>
+									</label>
+								)}
+							</div>
+							{errors.images && <p className="text-red-500 text-xs font-bold mt-4">{errors.images}</p>}
+						</motion.div>
 
-							{/* Product Details */}
-							<motion.div variants={fadeInUp} className="bg-white p-6 md:p-10 lg:p-14 rounded-[30px] lg:rounded-[50px] shadow-[0_20px_60px_rgba(0,0,0,0.02)] border border-gray-100">
-								<div className="flex items-center gap-4 mb-12">
-									<div className="w-14 h-14 rounded-2xl bg-[#B19470]/10 flex items-center justify-center text-[#B19470]">
-										<Type size={28} />
+						<div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+							{/* LEFT COLUMN: Identity & Organization */}
+							<div className="space-y-8">
+								<motion.div variants={fadeInUp} className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100 space-y-8">
+									<div className="flex items-center gap-3 border-b border-gray-50 pb-6 mb-6">
+										<div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-500 flex items-center justify-center">
+											<Type size={20} />
+										</div>
+										<h3 className="text-lg font-bold text-gray-900">Basic Information</h3>
 									</div>
-									<div>
-										<h3 className="text-3xl font-bold text-gray-900">Product Details</h3>
-										<p className="text-gray-400">Essential information about your piece</p>
+
+									<div className="space-y-6">
+										<div className="space-y-2">
+											<label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Product Name <span className="text-red-500">*</span></label>
+											<input
+												required
+												value={name}
+												onChange={(e) => setName(e.target.value)}
+												placeholder="e.g. Minimalist Sofa"
+												className="w-full bg-gray-50 border border-transparent focus:bg-white focus:border-[#205457]/30 rounded-2xl px-5 py-4 font-bold text-gray-900 outline-none transition-all"
+											/>
+										</div>
+
+										<div className="space-y-2">
+											<label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Description <span className="text-red-500">*</span></label>
+											<textarea
+												required
+												value={description}
+												onChange={(e) => setDescription(e.target.value)}
+												placeholder="Tell the story of your product..."
+												rows={6}
+												className="w-full bg-gray-50 border border-transparent focus:bg-white focus:border-[#205457]/30 rounded-2xl px-5 py-4 text-gray-700 outline-none transition-all resize-none leading-relaxed"
+											/>
+										</div>
 									</div>
-								</div>
+								</motion.div>
 
-								<div className="space-y-10">
-									<div className="space-y-4">
-										<label className="text-[12px] font-black uppercase tracking-[0.3em] text-gray-500 ml-2">Product Name <span className="text-red-500">*</span></label>
-										<input
-											required
-											value={name}
-											onChange={(e) => setName(e.target.value)}
-											placeholder="e.g. Vintage Oak Table"
-											className="w-full rounded-[25px] px-8 py-6 bg-gray-50/80 border-2 border-transparent focus:border-[#205457]/20 focus:bg-white outline-none transition-all text-2xl font-bold text-gray-900 placeholder:text-gray-200"
-										/>
+								<motion.div variants={fadeInUp} className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100 space-y-8">
+									<div className="flex items-center gap-3 border-b border-gray-50 pb-6 mb-6">
+										<div className="w-10 h-10 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center">
+											<Tag size={20} />
+										</div>
+										<h3 className="text-lg font-bold text-gray-900">Organization</h3>
 									</div>
-									<div className="space-y-4">
-										<label className="text-[12px] font-black uppercase tracking-[0.3em] text-gray-500 ml-2">Description <span className="text-red-500">*</span></label>
-										<textarea
-											required
-											value={description}
-											onChange={(e) => setDescription(e.target.value)}
-											placeholder="Describe your furniture piece..."
-											rows={12}
-											className="w-full rounded-[30px] px-8 py-8 bg-gray-50/80 border-2 border-transparent focus:border-[#205457]/20 focus:bg-white outline-none transition-all resize-none text-lg text-gray-900 leading-relaxed placeholder:text-gray-200"
-										/>
-									</div>
-								</div>
-							</motion.div>
-						</div>
 
-
-						{/* RIGHT COLUMN: Configuration Sidebar */}
-						<div className="lg:col-span-4 space-y-10">
-
-							<div className="sticky top-32 space-y-10">
-								{/* Categorization */}
-								<motion.div variants={fadeInUp} className="bg-white p-10 rounded-[45px] shadow-[0_15px_50px_rgba(0,0,0,0.02)] border border-gray-100">
-									<h4 className="text-[12px] font-black uppercase tracking-[0.3em] text-[#205457] mb-8 px-2 border-l-4 border-[#205457]">Categorization</h4>
-
-									<div className="space-y-8">
-										<div className="space-y-3">
-											<label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Category <span className="text-red-500">*</span></label>
-											<div className="relative group">
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+										<div className="space-y-2">
+											<label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Category <span className="text-red-500">*</span></label>
+											<div className="relative">
 												<select
 													required
 													value={category}
 													onChange={(e) => setCategory(e.target.value)}
-													className="w-full rounded-2xl px-6 py-4 bg-gray-50/50 border-2 border-transparent focus:border-[#205457]/10 focus:bg-white outline-none transition-all appearance-none cursor-pointer pr-16 text-gray-900 font-bold"
+													className="w-full bg-gray-50 border border-transparent focus:bg-white focus:border-[#205457]/30 rounded-2xl px-5 py-4 font-bold text-gray-900 outline-none appearance-none cursor-pointer"
 												>
-													<option value="">Select Category</option>
+													<option value="">Select...</option>
 													{categories.map(cat => (
 														<option key={cat.categoryId} value={cat.categoryId}>{cat.name}</option>
 													))}
 												</select>
-												<ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-[#205457] transition-colors" size={18} />
+												<ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
 											</div>
 										</div>
 
-										<div className="space-y-3">
-											<label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Subcategory <span className="text-red-500">*</span></label>
-											<div className="relative group">
+										<div className="space-y-2">
+											<label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Subcategory <span className="text-red-500">*</span></label>
+											<div className="relative">
 												<select
 													required
 													disabled={!category}
 													value={subCategoryId}
 													onChange={(e) => setSubCategoryId(e.target.value)}
-													className="w-full rounded-2xl px-6 py-4 bg-gray-50/50 border-2 border-transparent focus:border-[#205457]/10 focus:bg-white outline-none transition-all appearance-none cursor-pointer pr-16 text-gray-900 font-bold disabled:opacity-40 disabled:bg-gray-100/50"
+													className="w-full bg-gray-50 border border-transparent focus:bg-white focus:border-[#205457]/30 rounded-2xl px-5 py-4 font-bold text-gray-900 outline-none appearance-none cursor-pointer disabled:opacity-50"
 												>
-													<option value="">{category ? 'Select Subcategory' : 'Select Category'}</option>
+													<option value="">{category ? 'Select...' : 'Waiting for Category'}</option>
 													{subCategories.map(sub => (
 														<option key={sub.subCategoryId} value={sub.subCategoryId}>{sub.name}</option>
 													))}
 												</select>
-												<ChevronDown className="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none group-hover:text-[#205457] transition-colors" size={18} />
+												<ChevronDown size={18} className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
 											</div>
 										</div>
 									</div>
 								</motion.div>
+							</div>
 
-								{/* Pricing & Quantity */}
-								<motion.div variants={fadeInUp} className="bg-white p-6 md:p-10 rounded-[30px] lg:rounded-[45px] shadow-[0_15px_50px_rgba(0,0,0,0.02)] border border-gray-100">
-									<h4 className="text-[12px] font-black uppercase tracking-[0.3em] text-[#B19470] mb-8 px-2 border-l-4 border-[#B19470]">Pricing & Quantity</h4>
+							{/* RIGHT COLUMN: Settings & Specs */}
+							<div className="space-y-8">
+								<motion.div variants={fadeInUp} className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100 space-y-8">
+									<div className="flex items-center gap-3 border-b border-gray-50 pb-6 mb-6">
+										<div className="w-10 h-10 rounded-xl bg-green-50 text-green-500 flex items-center justify-center">
+											<DollarSign size={20} />
+										</div>
+										<h3 className="text-lg font-bold text-gray-900">Pricing & Inventory</h3>
+									</div>
 
-									<div className="space-y-8">
-										<div className="space-y-3">
-											<label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Price <span className="text-red-500">*</span></label>
-											<div className="relative group">
-												<span className="absolute left-6 top-1/2 -translate-y-1/2 text-[#B19470] font-bold text-lg pointer-events-none transition-colors">$</span>
+									<div className="grid grid-cols-2 gap-6">
+										<div className="space-y-2">
+											<label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Price <span className="text-red-500">*</span></label>
+											<div className="relative">
+												<span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">$</span>
 												<input
 													required
 													type="number"
 													value={price}
 													onChange={(e) => setPrice(e.target.value)}
 													placeholder="0.00"
-													className="w-full rounded-2xl pl-12 pr-6 py-4 bg-gray-50/50 border-2 border-transparent focus:border-[#205457]/10 focus:bg-white outline-none transition-all text-xl font-black tabular-nums no-spinner"
+													className="w-full bg-gray-50 border border-transparent focus:bg-white focus:border-[#205457]/30 rounded-2xl pl-8 pr-4 py-4 font-black text-gray-900 outline-none transition-all"
 												/>
 											</div>
 										</div>
-										<div className="space-y-3">
-											<label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Quantity <span className="text-red-500">*</span></label>
+
+										<div className="space-y-2">
+											<label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Discount %</label>
+											<input
+												type="number"
+												min="0"
+												max="100"
+												value={discount}
+												onChange={(e) => setDiscount(e.target.value)}
+												placeholder="0"
+												className="w-full bg-gray-50 border border-transparent focus:bg-white focus:border-[#205457]/30 rounded-2xl px-5 py-4 font-bold text-gray-900 outline-none transition-all"
+											/>
+										</div>
+
+										<div className="space-y-2">
+											<label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Stock <span className="text-red-500">*</span></label>
 											<input
 												required
 												type="number"
 												value={stock}
 												onChange={(e) => setStock(e.target.value)}
 												placeholder="0"
-												className="w-full rounded-2xl px-6 py-4 bg-gray-50/50 border-2 border-transparent focus:border-[#205457]/10 focus:bg-white outline-none transition-all font-bold"
+												className="w-full bg-gray-50 border border-transparent focus:bg-white focus:border-[#205457]/30 rounded-2xl px-5 py-4 font-bold text-gray-900 outline-none transition-all"
 											/>
 										</div>
 
-										{/* Discount */}
-										<div className="space-y-3">
-											<label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Discount (%)</label>
-											<div className="relative group">
-												<span className="absolute right-6 top-1/2 -translate-y-1/2 text-[#B19470] font-bold text-lg pointer-events-none">%</span>
-												<input
-													type="number"
-													min="0"
-													max="100"
-													step="0.01"
-													value={discount}
-													onChange={(e) => setDiscount(e.target.value)}
-													placeholder="0"
-													className="w-full rounded-2xl px-6 pr-12 py-4 bg-gray-50/50 border-2 border-transparent focus:border-[#205457]/10 focus:bg-white outline-none transition-all font-bold"
-												/>
-											</div>
-										</div>
-
-										{/* Delivery Time */}
-										<div className="space-y-3">
-											<label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Delivery Time (Days)</label>
+										<div className="space-y-2">
+											<label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Delivery (Days)</label>
 											<input
 												type="number"
-												min="0"
 												value={deliveryTime}
 												onChange={(e) => setDeliveryTime(e.target.value)}
 												placeholder="0"
-												className="w-full rounded-2xl px-6 py-4 bg-gray-50/50 border-2 border-transparent focus:border-[#205457]/10 focus:bg-white outline-none transition-all font-bold"
+												className="w-full bg-gray-50 border border-transparent focus:bg-white focus:border-[#205457]/30 rounded-2xl px-5 py-4 font-bold text-gray-900 outline-none transition-all"
 											/>
 										</div>
+									</div>
+								</motion.div>
 
-										{/* Rating */}
+								<motion.div variants={fadeInUp} className="bg-white p-8 rounded-[40px] shadow-sm border border-gray-100 space-y-8">
+									<div className="flex items-center gap-3 border-b border-gray-50 pb-6 mb-6">
+										<div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-500 flex items-center justify-center">
+											<Palette size={20} />
+										</div>
+										<h3 className="text-lg font-bold text-gray-900">Attributes</h3>
+									</div>
+
+									<div className="space-y-6">
 										<div className="space-y-3">
-											<label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">
-												Initial Rating (0-5) {errors.rating && <span className="text-red-500 normal-case">• {errors.rating}</span>}
-											</label>
-											<div className="flex items-center gap-4 bg-gray-50/50 rounded-2xl p-4 border-2 border-transparent focus-within:border-[#205457]/10 transition-all">
-												{/* Star Rating Visual */}
-												<div className="flex gap-1">
-													{[1, 2, 3, 4, 5].map((star) => {
-														const ratingValue = parseFloat(rating) || 0;
-														const isFilled = star <= ratingValue;
-														const isPartial = star > ratingValue && star - 1 < ratingValue;
-														const fillPercentage = isPartial ? ((ratingValue - (star - 1)) * 100) : 0;
-
-														return (
-															<button
-																key={star}
-																type="button"
-																onClick={() => setRating(star.toString())}
-																className="transition-all hover:scale-110 active:scale-95 relative"
-															>
-																{isPartial ? (
-																	<div className="relative">
-																		{/* Background (empty) star */}
-																		<Star size={28} className="fill-gray-200 text-gray-300" />
-																		{/* Foreground (filled) star with gradient mask */}
-																		<div
-																			className="absolute inset-0 overflow-hidden"
-																			style={{ width: `${fillPercentage}%` }}
-																		>
-																			<Star size={28} className="fill-[#F59E0B] text-[#F59E0B]" />
-																		</div>
-																	</div>
-																) : (
-																	<Star
-																		size={28}
-																		className={`${isFilled
-																			? 'fill-[#F59E0B] text-[#F59E0B]'
-																			: 'fill-gray-200 text-gray-300'
-																			} transition-colors`}
-																	/>
-																)}
-															</button>
-														);
-													})}
+											<label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Colors <span className="text-red-500">*</span></label>
+											<div className="flex flex-wrap gap-2">
+												<AnimatePresence>
+													{colors.map(c => (
+														<motion.span
+															key={c}
+															initial={{ opacity: 0, scale: 0.8 }}
+															animate={{ opacity: 1, scale: 1 }}
+															exit={{ opacity: 0, scale: 0.8 }}
+															className="px-3 py-1 bg-[#205457] text-white rounded-lg text-xs font-bold flex items-center gap-2"
+														>
+															{c}
+															<X size={12} className="cursor-pointer opacity-70 hover:opacity-100" onClick={() => removeColor(c)} />
+														</motion.span>
+													))}
+												</AnimatePresence>
+											</div>
+											<div className="flex gap-2">
+												<div className="relative flex-1">
+													<input
+														value={currentColor}
+														onChange={(e) => setCurrentColor(e.target.value)}
+														onKeyDown={addColor}
+														placeholder="#000000"
+														className="w-full bg-gray-50 border border-transparent focus:bg-white focus:border-[#205457]/30 rounded-xl pl-12 pr-4 py-3 text-sm font-medium outline-none transition-all"
+													/>
+													<input
+														type="color"
+														value={currentColor.startsWith('#') && currentColor.length === 7 ? currentColor : '#000000'}
+														onChange={(e) => setCurrentColor(e.target.value)}
+														className="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded cursor-pointer border-0 bg-transparent p-0 overflow-hidden"
+													/>
 												</div>
-												{/* Numeric Input */}
+												<button
+													type="button"
+													onClick={(e) => {
+														const event = { key: 'Enter', preventDefault: () => { } };
+														addColor(event);
+													}}
+													className="bg-[#205457] text-white p-3 rounded-xl hover:bg-[#1a4345] transition-colors"
+												>
+													<PlusCircle size={20} />
+												</button>
+											</div>
+										</div>
+
+										<div className="space-y-3">
+											<label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Initial Rating</label>
+											<div className="flex items-center gap-4">
+												<div className="flex text-yellow-400">
+													<Star size={20} className={parseInt(rating) >= 1 ? "fill-current" : "text-gray-200"} onClick={() => setRating('1')} />
+													<Star size={20} className={parseInt(rating) >= 2 ? "fill-current" : "text-gray-200"} onClick={() => setRating('2')} />
+													<Star size={20} className={parseInt(rating) >= 3 ? "fill-current" : "text-gray-200"} onClick={() => setRating('3')} />
+													<Star size={20} className={parseInt(rating) >= 4 ? "fill-current" : "text-gray-200"} onClick={() => setRating('4')} />
+													<Star size={20} className={parseInt(rating) >= 5 ? "fill-current" : "text-gray-200"} onClick={() => setRating('5')} />
+												</div>
 												<input
 													type="number"
 													min="0"
@@ -569,51 +583,12 @@ const AddProduct = () => {
 													step="0.1"
 													value={rating}
 													onChange={(e) => {
-														const val = parseFloat(e.target.value);
-														if (val >= 0 && val <= 5) {
-															setRating(e.target.value);
-														}
+														const v = parseFloat(e.target.value);
+														if (v >= 0 && v <= 5) setRating(e.target.value);
 													}}
-													placeholder="0.0"
-													className="w-20 text-center rounded-xl px-3 py-2 bg-white border border-gray-200 outline-none font-bold text-lg tabular-nums"
+													className="w-16 bg-gray-50 rounded-xl px-2 py-1 text-center font-bold text-gray-900 border-none outline-none"
 												/>
-												<span className="text-sm text-gray-400 font-medium">/ 5.0</span>
 											</div>
-										</div>
-									</div>
-								</motion.div>
-
-								{/* Available Colors */}
-								<motion.div variants={fadeInUp} className={`bg-white p-6 md:p-10 rounded-[30px] lg:rounded-[45px] shadow-[0_15px_50px_rgba(0,0,0,0.02)] border ${errors.colors ? 'border-red-200' : 'border-gray-100'}`}>
-									<h4 className={`text-[12px] font-black uppercase tracking-[0.3em] ${errors.colors ? 'text-red-500' : 'text-[#205457]'} mb-8 px-2 border-l-4 ${errors.colors ? 'border-red-500' : 'border-[#205457]'}`}>
-										Available Colors <span className="text-red-500 text-base">*</span>
-									</h4>
-
-									{errors.colors && <p className="text-red-500 text-[10px] font-bold mb-6 uppercase tracking-widest">{errors.colors}</p>}
-
-									<div className="space-y-6">
-										<div className="flex flex-wrap gap-2 min-h-[50px]">
-											<AnimatePresence>
-												{colors.map(c => (
-													<motion.span
-														key={c}
-														initial={{ opacity: 0, scale: 0.8 }}
-														animate={{ opacity: 1, scale: 1 }}
-														exit={{ opacity: 0, scale: 0.8 }}
-														className="px-5 py-3 bg-[#205457] text-white rounded-2xl text-[11px] font-black border border-gray-100 flex items-center gap-3 transition-all hover:bg-[#205457]/90 hover:shadow-xl uppercase tracking-widest"
-													>
-														{c}
-														<X size={14} className="cursor-pointer text-white/50 hover:text-red-300" onClick={() => removeColor(c)} />
-													</motion.span>
-												))}
-											</AnimatePresence>
-											<input
-												value={currentColor}
-												onChange={(e) => setCurrentColor(e.target.value)}
-												onKeyDown={addColor}
-												placeholder="Add a color..."
-												className="flex-1 bg-gray-50/50 rounded-2xl px-6 py-4 text-xs font-bold border-2 border-transparent focus:border-[#205457]/10 outline-none placeholder-gray-300"
-											/>
 										</div>
 									</div>
 								</motion.div>

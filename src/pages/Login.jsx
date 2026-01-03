@@ -60,10 +60,7 @@ const Login = () => {
       // Store Token & UserID
       // Response format: { token: "...", userId: "..." } OR { token: "...", user: { ... } }
       const userData = response.data.user || {};
-      const userId = userData.id || response.data.userId;
-
       localStorage.setItem('token', response.data.token);
-      localStorage.setItem('userId', userId);
 
       // Decode JWT to get user information (email, role, etc.)
       let decodedToken = null;
@@ -114,6 +111,14 @@ const Login = () => {
       localStorage.setItem('userName', fullName);
 
       localStorage.setItem('userRoles', JSON.stringify(rolesArray));
+
+      // Store User ID
+      let userId = userData.id || response.data.user?.id;
+      if (!userId && decodedToken) {
+        const nameIdKey = "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier";
+        userId = decodedToken[nameIdKey];
+      }
+      if (userId) localStorage.setItem('userId', userId);
 
       // Check if user is a seller - based on exact format: roles = ["Seller"]
       const isSeller = rolesArray.some(role => {
@@ -257,6 +262,9 @@ const Login = () => {
                   {...register("password", { required: "Password is required" })}
                   placeholder="Enter your password"
                   autoComplete="current-password"
+                  onKeyDown={(e) => {
+                    if (e.key === ' ') e.preventDefault();
+                  }}
                   className="w-full px-4 py-4 border border-gray-300 rounded-lg text-base transition-colors duration-300 bg-gray-50 focus:outline-none focus:border-blue-500 focus:bg-white pr-12"
                 />
                 <button

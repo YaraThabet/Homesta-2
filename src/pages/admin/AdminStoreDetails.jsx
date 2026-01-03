@@ -34,7 +34,7 @@ const StoreProductCard = ({ product, onDeleteClick }) => {
 
     // Helper to format image URL
     const getImageUrl = (url) => {
-        if (!url) return null;
+        if (!url || typeof url !== 'string') return null;
         if (url.startsWith('http')) return url;
         return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
     };
