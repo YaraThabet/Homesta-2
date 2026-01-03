@@ -32,7 +32,7 @@ const Navbar = () => {
     { id: 6, name: "blog", path: "/blogs" },
   ];
   return (
-    <header className="w-full fixed z-30 top-0 left-0 font-display bg-white">
+    <header className="w-full fixed z-30 top-0 left-0 font-display ">
       <section className='w-full font-display bg-main '>
         <div className='w-[90%] font-display py-5 lg:w-[85%] mx-auto flex justify-between items-center'>
           <a href="tel:+123-456-789" className='text-white'>Call Us:+123-456-789</a>
@@ -66,12 +66,12 @@ const Navbar = () => {
         </div>
 
       </section>
-      <nav className=" my-2 w-[90%] lg:w-[85%]  mx-auto flex justify-between relative items-center">
+      <nav className="w-full px-7 h-15 flex justify-between relative items-center bg-[#e3d6bc94] ">
         {/* Logo */}
         <div className="logo">
           <Link to='/' className="flex gap-2  items-center ">
             <img src={logo} alt="logo" />
-            <h1 className="capitalize text-main text-[25px] lg:text-[32px] font-medium">homesta</h1>
+            <h1 className="capitalize text-white text-[25px] lg:text-[32px] font-medium">homesta</h1>
           </Link>
         </div>
         {/* Desktop Links */}
@@ -82,8 +82,8 @@ const Navbar = () => {
               to={link.path}
               className={({ isActive }) =>
                 isActive
-                  ? "font-medium border-b-2 text-main text-6 border-b-main cursor-pointer capitalize"
-                  : "font-medium cursor-pointer text-6 capitalize"
+                  ? "font-medium border-b-2 text-white text-6 border-b-main cursor-pointer capitalize"
+                  : "font-medium cursor-pointer text-6 capitalize text-white "
               }
             >
               {link.name}
@@ -94,19 +94,14 @@ const Navbar = () => {
         {/* lists of faviorites and cart */}
         <div className="flex gap-3 ml-4">
           <Link to="/cart" className="relative">
-            <PiShoppingCartThin className="text-2xl text-black" />
+            <PiShoppingCartThin className="text-2xl text-white" />
           </Link>
           <Link to="/wishlist" className="relative">
-            <CiHeart className="text-2xl text-black" />
+            <CiHeart className="text-2xl text-white" />
           </Link>
-          {/* TODO based on difffernt users it will change  */}
-              {/* <Link to="/account" className="relative hidden lg:flex items-center gap-1">
-            <CiUser className="text-2xl text-black" />
-            <span className="text-sm font-medium">Account</span>
-          </Link> */}
           <Link to="/account" className="relative hidden lg:flex items-center gap-1">
-            <CiUser className="text-2xl text-black" />
-            <span className="text-sm font-medium">Account</span>
+            <CiUser className="text-2xl text-white" />
+            <span className="text-sm font-medium text-white ">Account</span>
           </Link>
         </div>
 
@@ -115,7 +110,7 @@ const Navbar = () => {
           className="lg:hidden cursor-pointer z-50"
           onClick={() => setMenuOpen(!menuOpen)}
         >
-          {menuOpen ? <IoClose className="text-2xl text-black" /> : <FaBars className="text-2xl text-black" />}
+          {menuOpen ? <IoClose className="text-2xl text-white" /> : <FaBars className="text-2xl text-white" />}
         </div>
 
         {/* Mobile Menu */}
