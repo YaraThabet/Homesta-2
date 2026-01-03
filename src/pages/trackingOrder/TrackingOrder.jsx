@@ -32,12 +32,12 @@ const products = [
 ];
 
 const TrackingOrder = () => {
-  
+
 
   return (
-      <div className="bg-white min-h-screen pb-10">
-          
-        <TrackingHeader  />
+    <div className="bg-white min-h-screen pb-10">
+
+      <TrackingHeader />
       {/* Header Section */}
       <div className="bg-gray-50 py-10 text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-800">Track Your Order</h1>
@@ -49,23 +49,23 @@ const TrackingOrder = () => {
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-800">Order Status</h2>
           <p className="text-gray-500 mt-1">Order ID: #SDGT1254FD</p>
-              </div>
-              
-         <OrderStatus />
+        </div>
+
+        <OrderStatus />
 
         {/* Product List Section */}
         <div className="border border-gray-200 rounded-xl p-6 shadow-sm bg-white">
-          <h2 className="text-xl font-bold text-gray-800 mb-6 border-b pb-4">Product</h2>
-          
+          <h2 className="text-xl font-bold text-gray-800 mb-6 border-b pb-4">Products</h2>
+
           <div className="space-y-6">
             {products.map((product) => (
               <ProductItem key={product.id} product={product} />
             ))}
           </div>
         </div>
-          </div>
-          
-   <FooterBenefits />
+      </div>
+
+      <FooterBenefits />
 
     </div>
   );

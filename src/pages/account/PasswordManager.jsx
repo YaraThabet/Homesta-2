@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import AdvantagesItems from "../../components/AdvantagesItems";
+import AdvantagesItems from "../home/components/Advantages";
 import { Eye, EyeOff } from "lucide-react";
 
 const PasswordManager = () => {
@@ -30,6 +30,9 @@ const PasswordManager = () => {
             <input
               type={showPassword.current ? "text" : "password"}
               placeholder="Enter Password"
+              onKeyDown={(e) => {
+                if (e.key === ' ') e.preventDefault();
+              }}
               className="w-full outline-none bg-transparent"
             />
 
@@ -38,7 +41,7 @@ const PasswordManager = () => {
               onClick={() => togglePassword("current")}
               className="text-gray-400 hover:text-gray-600"
             >
-              {showPassword.current ? <Eye /> :<EyeOff />  }
+              {showPassword.current ? <Eye /> : <EyeOff />}
             </button>
           </div>
 
@@ -62,6 +65,9 @@ const PasswordManager = () => {
             <input
               type={showPassword.new ? "text" : "password"}
               placeholder="Enter Password"
+              onKeyDown={(e) => {
+                if (e.key === ' ') e.preventDefault();
+              }}
               className="w-full outline-none bg-transparent"
             />
 
@@ -70,7 +76,7 @@ const PasswordManager = () => {
               onClick={() => togglePassword("new")}
               className="text-gray-400 hover:text-gray-600"
             >
-              {showPassword.new ? <Eye /> :<EyeOff /> }
+              {showPassword.new ? <Eye /> : <EyeOff />}
             </button>
           </div>
         </div>
@@ -85,6 +91,9 @@ const PasswordManager = () => {
             <input
               type={showPassword.confirm ? "text" : "password"}
               placeholder="Enter Password"
+              onKeyDown={(e) => {
+                if (e.key === ' ') e.preventDefault();
+              }}
               className="w-full outline-none bg-transparent"
             />
 
@@ -93,7 +102,7 @@ const PasswordManager = () => {
               onClick={() => togglePassword("confirm")}
               className="text-gray-400 hover:text-gray-600"
             >
-              {showPassword.confirm ? <Eye /> :<EyeOff />  }
+              {showPassword.confirm ? <Eye /> : <EyeOff />}
             </button>
           </div>
         </div>
