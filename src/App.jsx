@@ -27,7 +27,7 @@ import Analytics from "./pages/analytics/Analytics.jsx";
 import Addproduct from "./pages/addproduct/Addproduct.jsx";
 import Notifications from "./pages/Notifications.jsx";
 import Chatai from "./pages/chatai/Chatai.jsx";
-import AIChatApp from "./pages/AIChatApp";
+import AIChatApp from "./pages/chatai/AIChatApp";
 import About from "./pages/AboutUS/components/About.jsx";
 import ContactUs from "./pages/AboutUS/components/ContactUS.jsx";
 import TrackOrder from "./pages/TrackOrder";
