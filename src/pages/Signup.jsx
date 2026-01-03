@@ -239,6 +239,9 @@ const Signup = () => {
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
                   {...register('password')}
+                  onKeyDown={(e) => {
+                    if (e.key === ' ') e.preventDefault();
+                  }}
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${errors.password ? 'border-red-500' : 'border-gray-300'
                     } pr-10`}
                   placeholder="Enter password"

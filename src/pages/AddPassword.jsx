@@ -89,6 +89,9 @@ const AddPassword = () => {
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
                   placeholder="Password"
+                  onKeyDown={(e) => {
+                    if (e.key === ' ') e.preventDefault();
+                  }}
                   className="w-full px-4 py-4 border border-gray-300 rounded-lg text-base transition-colors duration-300 bg-gray-50 focus:outline-none focus:border-blue-500 focus:bg-white pr-12"
                 />
                 <button
@@ -109,6 +112,9 @@ const AddPassword = () => {
                   type={showConfirmPassword ? "text" : "password"}
                   {...register("confirmPassword")}
                   placeholder="Confirm Password"
+                  onKeyDown={(e) => {
+                    if (e.key === ' ') e.preventDefault();
+                  }}
                   className="w-full px-4 py-4 border border-gray-300 rounded-lg text-base transition-colors duration-300 bg-gray-50 focus:outline-none focus:border-blue-500 focus:bg-white pr-12"
                 />
                 <button

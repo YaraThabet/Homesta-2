@@ -95,7 +95,7 @@ const App = () => {
     "/create-store", "/seller-home", "/seller-products", "/edit-product/:id",
     "/store-settings", "/seller-reviews",
     // Admin Routes
-    "/admin/dashboard", "/admin/stores", "/admin/products", "/admin/categories", "/admin/analytics", "/admin/notifications"
+    "/admin/dashboard", "/admin/stores", "/admin/products", "/admin/categories", "/admin/analytics", "/admin/notifications", "/admin/store/:id"
   ];
 
   const isInvalidPage = !validRoutes.some(path =>
