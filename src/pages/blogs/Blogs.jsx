@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import FooterBenefits from "../shop/components/FooterBenefits";
 
@@ -93,16 +94,20 @@ const indexOfFirstPost = indexOfLastPost - postsPerPage;
 const currentPosts = blogPosts.slice(indexOfFirstPost, indexOfLastPost);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-[150px]">
       {/* Header */}
-      <header className="bg-[#F6F6F6] py-14 text-center">
-        <h1 className="text-2xl font-semibold text-foreground mb-2 tracking-tight">Our Blog</h1>
-        <nav className="text-sm text-muted-foreground">
-          <span className="hover:text-foreground cursor-pointer">Home</span>
-          <span className="mx-1.5 text-muted-foreground/50">/</span>
-          <span className="text-foreground font-medium">Our Blog</span>
+     <header className="bg-[#F6F6F6] py-12">
+      <div className="container mx-auto px-4 text-center">
+        <h1 className="text-3xl font-semibold text-gray-800 mb-2">Our Blogs</h1>
+        <nav className="text-sm text-gray-500">
+          <Link to="/" className="hover:text-[#205457] transition-colors">
+            Home
+          </Link>
+          <span className="mx-2">/</span>
+          <span className="text-[#205457]">Blogs</span>
         </nav>
-      </header>
+      </div>
+    </header>
 
       {/* Content */}
       <div className="container mx-auto px-4 py-10">

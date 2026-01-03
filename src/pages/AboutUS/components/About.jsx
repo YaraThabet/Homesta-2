@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import {
   Award,
   Home,
@@ -34,21 +35,22 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Banner */}
-      <div className="bg-teal-800 text-white py-4 px-6 text-center">
-        <p className="text-sm">
-          Get up to 40% off on selected items | Free shipping on orders over
-          $100
-        </p>
-      </div>
-
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <header className="bg-[#F6F6F6] py-12 pt-[180px]">
+        <div className="container mx-auto px-4 text-center">
+          <h1 className="text-3xl font-semibold text-gray-800 mb-2">About Us</h1>
+          <nav className="text-sm text-gray-500">
+            <Link to="/" className="hover:text-[#205457] transition-colors">
+              Home
+            </Link>
+            <span className="mx-2">/</span>
+            <span className="text-[#205457]">About Us</span>
+          </nav>
+        </div>
+      </header>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 ">
         {/* Header */}
         <div className="text-center mb-16">
-          <p className="text-teal-700 font-medium mb-3 text-base">
-            - Our Story
-          </p>
 
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-2">
             <span className="text-gray-900">Crafted Comfort: </span>
@@ -224,7 +226,7 @@ const About = () => {
                 </div>
 
                 {/* Feature */}
-                <div className="flex items-start gap-3 bg-amber-50 p-3 rounded-lg">
+                {/* <div className="flex items-start gap-3 bg-amber-50 p-3 rounded-lg">
                   <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <span className="text-amber-600 text-lg">📦</span>
                   </div>
@@ -236,7 +238,7 @@ const About = () => {
                       Free shipping for order above $150
                     </p>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -253,12 +255,28 @@ const About = () => {
                 <h4 className="text-xl font-bold text-gray-900 mb-1 text-center">
                   Robert Fox
                 </h4>
-                <p className="text-teal-700 font-medium mb-8 text-center">
+                <p className="text-teal-700 font-medium mb-4 text-center">
                   Carpenter
                 </p>
 
+                {/* Social Icons */}
+                <div className="flex justify-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white cursor-pointer hover:bg-blue-700 transition-colors">
+                    <Facebook size={18} />
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-blue-400 flex items-center justify-center text-white cursor-pointer hover:bg-blue-500 transition-colors">
+                    <Twitter size={18} />
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white cursor-pointer hover:bg-blue-800 transition-colors">
+                    <Linkedin size={18} />
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 flex items-center justify-center text-white cursor-pointer hover:opacity-90 transition-opacity">
+                    <Instagram size={18} />
+                  </div>
+                </div>
+
                 {/* Feature */}
-                <div className="flex items-start gap-3 bg-amber-50 p-3 rounded-lg">
+                {/* <div className="flex items-start gap-3 bg-amber-50 p-3 rounded-lg">
                   <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <span className="text-amber-600 text-lg">💳</span>
                   </div>
@@ -270,7 +288,7 @@ const About = () => {
                       Flexible payment options available
                     </p>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
 
@@ -287,12 +305,28 @@ const About = () => {
                 <h4 className="text-xl font-bold text-gray-900 mb-1 text-center">
                   Theresa Webb
                 </h4>
-                <p className="text-teal-700 font-medium mb-8 text-center">
+                <p className="text-teal-700 font-medium mb-4 text-center">
                   Carpenter
                 </p>
 
+                {/* Social Icons */}
+                <div className="flex justify-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-white cursor-pointer hover:bg-blue-700 transition-colors">
+                    <Facebook size={18} />
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-blue-400 flex items-center justify-center text-white cursor-pointer hover:bg-blue-500 transition-colors">
+                    <Twitter size={18} />
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-blue-700 flex items-center justify-center text-white cursor-pointer hover:bg-blue-800 transition-colors">
+                    <Linkedin size={18} />
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 via-pink-600 to-orange-500 flex items-center justify-center text-white cursor-pointer hover:opacity-90 transition-opacity">
+                    <Instagram size={18} />
+                  </div>
+                </div>
+
                 {/* Feature */}
-                <div className="flex items-start gap-3 bg-amber-50 p-3 rounded-lg">
+                {/* <div className="flex items-start gap-3 bg-amber-50 p-3 rounded-lg">
                   <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                     <span className="text-amber-600 text-lg">🤝</span>
                   </div>
@@ -304,7 +338,7 @@ const About = () => {
                       Get support online 24 hours a day
                     </p>
                   </div>
-                </div>
+                </div> */}
               </div>
             </div>
           </div>

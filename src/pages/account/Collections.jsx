@@ -17,7 +17,7 @@ const Collections = () => {
       name: 'Kitchen',
       savedCount: 4,
       images: [
-        'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=200&h=200&fit=crop',
+        'https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=200&h=200&fit=crop',
         'https://images.unsplash.com/photo-1556909172-54557c7e4fb7?w=200&h=200&fit=crop',
         'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&h=200&fit=crop',
         'https://images.unsplash.com/photo-1484154218962-a197022b5858?w=200&h=200&fit=crop',
