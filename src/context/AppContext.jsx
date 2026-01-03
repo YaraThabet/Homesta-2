@@ -124,13 +124,14 @@ export const AppProvider = ({ children }) => {
     };
 
     const formatPrice = (price) => {
+        const numPrice = Number(price) || 0;
         if (currency === 'eg') {
-            const egpPrice = price * 50;
+            const egpPrice = numPrice * 50;
             return language === 'ar'
                 ? `${egpPrice.toLocaleString('ar-EG')} جنيه مصري`
                 : `${egpPrice.toLocaleString('en-EG')} EGP`;
         }
-        return `$${price.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+        return `$${numPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
     };
 
     const value = {

@@ -55,7 +55,7 @@ const EditProduct = () => {
                 const [catRes, storeRes, prodRes, imgRes] = await Promise.all([
                     api.get('/Category'),
                     api.get('/Store'),
-                    api.get(`/Product/${id}`),
+                    api.get(`/Product/GetProductById/${id}`),
                     api.get(`/ProductImages/product/${id}`)
                 ]);
 
@@ -560,13 +560,33 @@ const EditProduct = () => {
                                             </span>
                                         ))}
                                     </div>
-                                    <input
-                                        value={currentColor}
-                                        onChange={(e) => setCurrentColor(e.target.value)}
-                                        onKeyDown={addColor}
-                                        placeholder="Add color..."
-                                        className="w-full bg-gray-50/50 rounded-2xl px-6 py-4 text-xs font-bold border-2 border-transparent focus:border-[#205457]/10 outline-none"
-                                    />
+                                    <div className="flex gap-2">
+                                        <div className="relative flex-1">
+                                            <input
+                                                value={currentColor}
+                                                onChange={(e) => setCurrentColor(e.target.value)}
+                                                onKeyDown={addColor}
+                                                placeholder="#000000"
+                                                className="w-full bg-gray-50/50 rounded-2xl pl-12 pr-4 py-4 text-xs font-bold border-2 border-transparent focus:border-[#205457]/10 outline-none"
+                                            />
+                                            <input
+                                                type="color"
+                                                value={currentColor.startsWith('#') && currentColor.length === 7 ? currentColor : '#000000'}
+                                                onChange={(e) => setCurrentColor(e.target.value)}
+                                                className="absolute left-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded cursor-pointer border-0 bg-transparent p-0 overflow-hidden"
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                const event = { key: 'Enter', preventDefault: () => { } };
+                                                addColor(event);
+                                            }}
+                                            className="bg-[#205457] text-white p-3 rounded-2xl hover:bg-[#1a4345] transition-colors"
+                                        >
+                                            <PlusCircle size={20} />
+                                        </button>
+                                    </div>
                                 </motion.div>
                             </div>
                         </div>

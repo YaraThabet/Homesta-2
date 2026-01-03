@@ -23,10 +23,19 @@ const Products = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+    const [viewMode, setViewMode] = useState('grid');
     const [deleteId, setDeleteId] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState(null);
+
+    // Data Maps for Filters & Display
+    const [categoryMap, setCategoryMap] = useState({});
+    const [subCategoryMap, setSubCategoryMap] = useState({});
+    const [allSubCategories, setAllSubCategories] = useState([]); // List of objects for logic
+
+    // Filters State
+    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [selectedSubCategory, setSelectedSubCategory] = useState('All');
 
     const storeId = localStorage.getItem('storeId');
 
@@ -38,46 +47,60 @@ const Products = () => {
                 const userEmail = localStorage.getItem('userEmail');
 
                 if (!userEmail) {
-                    console.warn("No user email found in storage.");
                     setError("Session expired. Please login again.");
                     navigate('/login');
                     return;
                 }
 
-                console.log("🔍 Resolving store for:", userEmail);
+                // 1. Fetch Global Data (Categories) & Stores
+                const [catRes, storesRes] = await Promise.all([
+                    api.get('/Category'),
+                    api.get('/Store')
+                ]);
 
-                // Fetch all stores to find the one belonging to this email
-                const storesRes = await api.get('/Store');
-                console.log("📊 All stores response:", storesRes.data);
+                // Process Categories
+                const cats = Array.isArray(catRes.data) ? catRes.data : [];
+                const cMap = {};
+                cats.forEach(c => cMap[c.id || c.categoryId] = c.name);
+                setCategoryMap(cMap);
+
+                // Fetch Subcategories (for all cats)
+                // In production, we'd want a generic "GetAll" endpoint, but we loop here
+                const subsPromises = cats.map(c =>
+                    api.get(`/SubCategory/by-category/${c.id || c.categoryId}`).catch(e => ({ data: [] }))
+                );
+                const subsResults = await Promise.all(subsPromises);
+                const sMap = {};
+                const sList = [];
+                subsResults.forEach(res => {
+                    if (Array.isArray(res.data)) {
+                        res.data.forEach(s => {
+                            sMap[s.id || s.subCategoryId] = s.name;
+                            sList.push({ ...s, categoryId: s.categoryId }); // ensure sub objects have categoryId
+                        });
+                    }
+                });
+                setSubCategoryMap(sMap);
+                setAllSubCategories(sList);
+
+                // 2. Resolve Owner Store
                 const stores = Array.isArray(storesRes.data) ? storesRes.data : [storesRes.data];
-                console.log("📊 Stores array:", stores);
-
                 const myStore = stores.find(s => s.email?.toLowerCase() === userEmail?.toLowerCase());
-                console.log("🏪 My store:", myStore);
 
                 if (myStore) {
                     const sid = myStore.storeId || myStore.id;
-                    console.log("✅ Store ID found:", sid);
                     localStorage.setItem('storeId', sid.toString());
 
-                    console.log(`🔄 Fetching products from: /Store/${sid}/products`);
+                    // 3. Fetch Products
                     const productsRes = await api.get(`/Store/${sid}/products`);
-                    console.log("📦 Products response:", productsRes);
-                    console.log("📦 Products data:", productsRes.data);
-                    console.log("📦 Products count:", productsRes.data?.length || 0);
-
                     const productsList = Array.isArray(productsRes.data) ? productsRes.data : [];
-                    console.log("📦 Final products list:", productsList);
                     setProducts(productsList);
                 } else {
-                    console.warn("❌ No store linked to this email.");
                     setError("No store found for your account. Please create a store first.");
                     navigate('/create-store');
                 }
             } catch (err) {
-                console.error("❌ Failed to resolve store or products:", err);
-                console.error("❌ Error response:", err.response);
-                console.error("❌ Error data:", err.response?.data);
+                console.error("Failed to load inventory:", err);
                 const backendMsg = err.response?.data?.message || err.response?.data || err.message;
                 setError(`Failed to load inventory: ${typeof backendMsg === 'object' ? JSON.stringify(backendMsg) : backendMsg}`);
             } finally {
@@ -88,30 +111,11 @@ const Products = () => {
         resolveStoreAndFetch();
     }, [navigate]);
 
-    const fetchProducts = async () => {
-        // Redundant now as it's handled in the effect, but kept for potential manual refreshes
-        const sid = localStorage.getItem('storeId');
-        if (!sid) return;
-        try {
-            setLoading(true);
-            const response = await api.get(`/Store/${sid}/products`);
-            setProducts(Array.isArray(response.data) ? response.data : []);
-        } catch (err) {
-            console.error("Failed to fetch products:", err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     const handleDelete = async () => {
         if (!deleteId) return;
-
         try {
             setIsDeleting(true);
-            // DELETE /api/Product/Delete?productId={productId}
             await api.delete(`/Product/Delete?productId=${deleteId}`);
-
-            // Remove from local state
             setProducts(products.filter(p => (p.productId || p.id) !== deleteId));
             setDeleteId(null);
         } catch (err) {
@@ -122,26 +126,45 @@ const Products = () => {
         }
     };
 
-    const filteredProducts = products.filter(p =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.description?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // --- Filter Logic ---
+    const categoryNames = ['All', ...new Set(Object.values(categoryMap))];
+    const selectedCategoryId = Object.keys(categoryMap).find(key => categoryMap[key] === selectedCategory);
+
+    const availableSubCategories = selectedCategory === 'All'
+        ? []
+        : allSubCategories
+            .filter(sub => sub.categoryId == selectedCategoryId)
+            .map(sub => sub.name);
+
+    const filteredProducts = products.filter(product => {
+        const matchesSearch =
+            product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            product.description?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        // Category Filter
+        const catName = categoryMap[product.categoryId] || 'Uncategorized';
+        // Fallback: checks if product has categoryName string from backend
+        const productCatName = product.categoryName || catName;
+        const matchesCategory = selectedCategory === 'All' || productCatName === selectedCategory || catName === selectedCategory;
+
+        // SubCategory Filter
+        let matchesSubCategory = true;
+        if (selectedCategory !== 'All' && selectedSubCategory !== 'All') {
+            const subName = subCategoryMap[product.subCategoryId];
+            matchesSubCategory = subName === selectedSubCategory;
+        }
+
+        return matchesSearch && matchesCategory && matchesSubCategory;
+    });
 
     const containerVariants = {
         hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: { staggerChildren: 0.1 }
-        }
+        visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
     };
 
     const itemVariants = {
         hidden: { y: 20, opacity: 0 },
-        visible: {
-            y: 0,
-            opacity: 1,
-            transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] }
-        }
+        visible: { y: 0, opacity: 1, transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }
     };
 
     return (
@@ -174,38 +197,82 @@ const Products = () => {
                 </div>
 
                 {/* Toolbar Section */}
-                <motion.div variants={itemVariants} className="bg-white p-4 rounded-[30px] shadow-[0_10px_40px_rgba(0,0,0,0.02)] border border-gray-100 mb-10 flex flex-col md:flex-row gap-4 items-center justify-between">
-                    <div className="relative w-full md:w-96 group">
-                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 transition-colors group-focus-within:text-[#205457]" size={20} />
-                        <input
-                            type="text"
-                            placeholder="Search your inventory..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-14 pr-6 py-4 bg-gray-50 rounded-2xl border border-transparent focus:border-[#205457]/10 focus:bg-white outline-none transition-all font-medium text-gray-700"
-                        />
-                    </div>
-
-                    <div className="flex items-center gap-4 w-full md:w-auto">
-                        <div className="flex bg-gray-50 p-1.5 rounded-2xl border border-gray-100">
-                            <button
-                                onClick={() => setViewMode('grid')}
-                                className={`p-2.5 rounded-xl transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-[#205457]' : 'text-gray-400'}`}
-                            >
-                                <LayoutGrid size={20} />
-                            </button>
-                            <button
-                                onClick={() => setViewMode('list')}
-                                className={`p-2.5 rounded-xl transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-[#205457]' : 'text-gray-400'}`}
-                            >
-                                <List size={20} />
-                            </button>
+                <motion.div variants={itemVariants} className="flex flex-col gap-6 mb-10">
+                    <div className="bg-white p-4 rounded-[30px] shadow-[0_10px_40px_rgba(0,0,0,0.02)] border border-gray-100 flex flex-col md:flex-row gap-4 items-center justify-between">
+                        <div className="relative w-full md:w-96 group">
+                            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 transition-colors group-focus-within:text-[#205457]" size={20} />
+                            <input
+                                type="text"
+                                placeholder="Search your inventory..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-14 pr-6 py-4 bg-gray-50 rounded-2xl border border-transparent focus:border-[#205457]/10 focus:bg-white outline-none transition-all font-medium text-gray-700"
+                            />
                         </div>
 
-                        <button className="flex items-center gap-2 px-6 py-4 bg-gray-50 rounded-2xl text-gray-400 font-bold text-sm hover:bg-gray-100 transition-all border border-gray-100">
-                            <Filter size={18} />
-                            <span>Filter</span>
-                        </button>
+                        <div className="flex items-center gap-4 w-full md:w-auto">
+                            <div className="flex bg-gray-50 p-1.5 rounded-2xl border border-gray-100">
+                                <button
+                                    onClick={() => setViewMode('grid')}
+                                    className={`p-2.5 rounded-xl transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-[#205457]' : 'text-gray-400'}`}
+                                >
+                                    <LayoutGrid size={20} />
+                                </button>
+                                <button
+                                    onClick={() => setViewMode('list')}
+                                    className={`p-2.5 rounded-xl transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-[#205457]' : 'text-gray-400'}`}
+                                >
+                                    <List size={20} />
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Filters Row */}
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        {/* Category List */}
+                        <div className="flex gap-2 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm overflow-x-auto max-w-full md:max-w-2xl no-scrollbar">
+                            {categoryNames.map(cat => (
+                                <button
+                                    key={cat}
+                                    onClick={() => { setSelectedCategory(cat); setSelectedSubCategory('All'); }}
+                                    className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all flex-shrink-0 ${selectedCategory === cat
+                                        ? 'bg-[#205457] text-white shadow-lg shadow-[#205457]/20 dashed-border'
+                                        : 'text-gray-400 hover:bg-gray-50'
+                                        }`}
+                                >
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* SubCategory List - Only if Category Selected */}
+                        {selectedCategory !== 'All' && availableSubCategories.length > 0 && (
+                            <div className="flex gap-2 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm overflow-x-auto max-w-full md:max-w-xl no-scrollbar items-center">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-300 px-2 flex-shrink-0">Subcategory:</span>
+                                <button
+                                    onClick={() => setSelectedSubCategory('All')}
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border ${selectedSubCategory === 'All'
+                                        ? 'bg-[#205457]/10 text-[#205457] border-[#205457]/20'
+                                        : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
+                                        }`}
+                                >
+                                    All
+                                </button>
+                                {availableSubCategories.map(sub => (
+                                    <button
+                                        key={sub}
+                                        onClick={() => setSelectedSubCategory(sub)}
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border ${selectedSubCategory === sub
+                                            ? 'bg-[#205457]/10 text-[#205457] border-[#205457]/20'
+                                            : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
+                                            }`}
+                                    >
+                                        {sub}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </motion.div>
 
@@ -238,14 +305,14 @@ const Products = () => {
                         </div>
                         <h3 className="text-2xl font-bold text-gray-900 mb-4">No products found</h3>
                         <p className="text-gray-400 max-w-sm mx-auto mb-10 leading-relaxed">
-                            {searchTerm ? "Try adjusting your search terms to find what you're looking for." : "Start by adding your first furniture masterpiece to your store."}
+                            {selectedCategory !== 'All'
+                                ? `Try changing filters or add a new piece to ${selectedCategory}.`
+                                : "Start by adding your first furniture masterpiece to your store."}
                         </p>
-                        {!searchTerm && (
-                            <Link to="/addproduct" className="inline-flex items-center gap-3 bg-[#205457] text-white px-10 py-5 rounded-[22px] font-bold hover:shadow-2xl hover:shadow-[#205457]/20 transition-all active:scale-95 shadow-xl">
-                                <Plus size={20} />
-                                <span>Create My First Product</span>
-                            </Link>
-                        )}
+                        <Link to="/addproduct" className="inline-flex items-center gap-3 bg-[#205457] text-white px-10 py-5 rounded-[22px] font-bold hover:shadow-2xl hover:shadow-[#205457]/20 transition-all active:scale-95 shadow-xl">
+                            <Plus size={20} />
+                            <span>Create Product</span>
+                        </Link>
                     </motion.div>
                 ) : viewMode === 'grid' ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
@@ -253,6 +320,8 @@ const Products = () => {
                             <ProductCard
                                 key={product.productId || product.id}
                                 product={product}
+                                categoryMap={categoryMap} // Pass map for proper name display
+                                subCategoryMap={subCategoryMap}
                                 onEdit={() => navigate(`/edit-product/${product.productId || product.id}`)}
                                 onDelete={() => setDeleteId(product.productId || product.id)}
                             />
@@ -275,6 +344,8 @@ const Products = () => {
                                     <ProductRow
                                         key={product.productId || product.id}
                                         product={product}
+                                        categoryMap={categoryMap}
+                                        subCategoryMap={subCategoryMap}
                                         onEdit={() => navigate(`/edit-product/${product.productId || product.id}`)}
                                         onDelete={() => setDeleteId(product.productId || product.id)}
                                     />
@@ -334,10 +405,15 @@ const Products = () => {
 
 const backendBase = 'http://homefinish.runasp.net';
 
-const ProductCard = ({ product, onEdit, onDelete }) => {
+const ProductCard = ({ product, onEdit, onDelete, categoryMap }) => {
+    // Basic image fallback logic for this simpler view
+    // Note: AdminProducts has robust multi-image fetching, but here we stick to simple logic for now
+    // or we could upgrade it. User asked for FILTERS here essentially.
     const imageUrl = product.image
         ? (product.image.startsWith('http') ? product.image : `${backendBase}${product.image}`)
-        : 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80';
+        : product.images && product.images.length > 0 && product.images[0].url
+            ? product.images[0].url
+            : 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80';
 
     return (
         <motion.div
@@ -351,6 +427,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
                     src={imageUrl}
                     alt={product.name}
                     className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                    onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80'; }}
                 />
                 <div className="absolute top-6 left-6 flex flex-col gap-2">
                     {product.quantity <= 5 && (
@@ -381,7 +458,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
                     <div>
                         <h4 className="font-bold text-gray-900 text-lg leading-tight mb-2 truncate max-w-[180px]">{product.name}</h4>
                         <span className="text-[10px] font-black uppercase tracking-widest text-[#B19470] bg-[#B19470]/10 px-3 py-1 rounded-lg">
-                            {product.categoryName || 'Furniture'}
+                            {categoryMap[product.categoryId] || product.categoryName || 'Furniture'}
                         </span>
                     </div>
                     <p className="text-xl font-black text-[#205457] tabular-nums">${product.price}</p>
@@ -395,7 +472,7 @@ const ProductCard = ({ product, onEdit, onDelete }) => {
     );
 };
 
-const ProductRow = ({ product, onEdit, onDelete }) => {
+const ProductRow = ({ product, onEdit, onDelete, subCategoryMap }) => {
     const imageUrl = product.image
         ? (product.image.startsWith('http') ? product.image : `${backendBase}${product.image}`)
         : 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80';
@@ -409,11 +486,12 @@ const ProductRow = ({ product, onEdit, onDelete }) => {
                             src={imageUrl}
                             alt={product.name}
                             className="w-full h-full object-cover"
+                            onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80'; }}
                         />
                     </div>
                     <div>
                         <p className="font-bold text-gray-900 text-base">{product.name}</p>
-                        <p className="text-xs text-gray-400 font-light mt-1">{product.subCategoryName || 'Standard Edition'}</p>
+                        <p className="text-xs text-gray-400 font-light mt-1">{subCategoryMap[product.subCategoryId] || product.subCategoryName || 'Standard Edition'}</p>
                     </div>
                 </div>
             </td>
