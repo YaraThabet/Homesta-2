@@ -189,27 +189,27 @@ const ProfileForm = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <p className="text-sm text-gray-500">First Name</p>
-              <p className="mt-1 text-gray-900">{defaultValues.firstName}</p>
+              <p className="mt-1 text-gray-900">{profileData?.firstName}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Last Name</p>
-              <p className="mt-1 text-gray-900">{defaultValues.lastName}</p>
+              <p className="mt-1 text-gray-900">{profileData?.lastName}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Email</p>
-              <p className="mt-1 text-gray-900">{defaultValues.email}</p>
+              <p className="mt-1 text-gray-900">{profileData?.email}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Mobile Number</p>
-              <p className="mt-1 text-gray-900">{defaultValues.mobileNumber}</p>
+              <p className="mt-1 text-gray-900">{profileData?.mobileNumber}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">Address</p>
-              <p className="mt-1 text-gray-900">{defaultValues.address}</p>
+              <p className="mt-1 text-gray-900">{profileData?.address}</p>
             </div>
             <div>
               <p className="text-sm text-gray-500">ZIP/Postal Code</p>
-              <p className="mt-1 text-gray-900">{defaultValues.zipCode}</p>
+              <p className="mt-1 text-gray-900">{profileData?.zipCode}</p>
             </div>
           </div>
         </div>
