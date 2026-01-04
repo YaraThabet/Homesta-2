@@ -30,10 +30,28 @@ const ContactUs = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    alert("Message sent successfully!");
-    // Reset form
-    setFormData({ name: "", email: "", subject: "", message: "" });
+    // validate required fields
+    if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
+      alert('Please fill name, email and message.');
+      return;
+    }
+
+    const recipient = 'mohamedabozahda21@gmail.com';
+    const subject = `${formData.subject || 'New message'}`;
+    const bodyLines = [
+      `Name: ${formData.name}`,
+      `Email: ${formData.email}`,
+      '',
+      formData.message,
+    ];
+    const body = encodeURIComponent(bodyLines.join('\n'));
+    const mailto = `mailto:${recipient}?subject=${encodeURIComponent(subject)}&body=${body}`;
+
+    // open user's default mail client with prefilled message
+    window.location.href = mailto;
+
+    // reset form locally
+    setFormData({ name: '', email: '', subject: '', message: '' });
   };
 
   const features = [

@@ -13,7 +13,7 @@ import Category from "./pages/Category.jsx";
 import Shop from "./pages/shop/Shop";
 import Blogs from "./pages/blogs/Blogs.jsx";
 import Faqs from "./pages/faqs/Faqs.jsx";
-import ProductDetail from "./pages/ProductDetail.jsx";
+import ProductDetail from "./pages/shop/components/ProductDetail.jsx";
 import Checkout from "./pages/checkout/Checkout.jsx";
 import Wishlist from "./pages/account/Wishlist.jsx";
 import Account from "./pages/account/Account";
