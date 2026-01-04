@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Heart, Minus, Plus, Star, ArrowLeft, Upload, ShoppingCart, Check, X } from 'lucide-react';
-import api from '../lib/axios';
+import api from '../../../lib/axios';
 
 const COLOR_MAP = {
   "brown": "#A67B5B",
@@ -240,8 +240,44 @@ const ProductDetail = () => {
       setShowLoginModal(true);
       return;
     }
-    setIsWishlisted(!isWishlisted);
+    try {
+      const raw = localStorage.getItem('wishlist');
+      const arr = raw ? JSON.parse(raw) : [];
+      const exists = arr.some((it) => String(it.id) === String(id));
+      if (exists) {
+        const filtered = arr.filter((it) => String(it.id) !== String(id));
+        localStorage.setItem('wishlist', JSON.stringify(filtered));
+        setIsWishlisted(false);
+      } else {
+        const item = {
+          id: id,
+          name: product?.name || '',
+          price: product?.price || 0,
+          dateAdded: new Date().toLocaleDateString(),
+          image: images?.[0] || ''
+        };
+        const cleaned = arr.filter((it) => String(it.id) !== String(id));
+        cleaned.push(item);
+        localStorage.setItem('wishlist', JSON.stringify(cleaned));
+        setIsWishlisted(true);
+      }
+    } catch (err) {
+      console.error('Wishlist error', err);
+    }
   };
+
+  // initialize wishlist state from localStorage
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('wishlist');
+      const arr = raw ? JSON.parse(raw) : [];
+      const exists = arr.some((it) => String(it.id) === String(id));
+      setIsWishlisted(!!exists);
+    } catch (err) {
+      console.error('Failed to read wishlist', err);
+      setIsWishlisted(false);
+    }
+  }, [id]);
 
 
 

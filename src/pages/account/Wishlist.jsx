@@ -1,65 +1,79 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import FooterBenefits from "../shop/components/FooterBenefits";
 
-const initialWishlistItems = [
-  {
-    id: 1,
-    name: "Wingback Chair",
-    color: "Light Brown",
-    price: 160.00,
-    dateAdded: "18 April 2025",
-    inStock: true,
-    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&h=200&fit=crop"
-  },
-  {
-    id: 2,
-    name: "Wooden Sofa Chair",
-    color: "Grey",
-    price: 80.00,
-    dateAdded: "17 April 2025",
-    inStock: true,
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=200&h=200&fit=crop"
-  },
-  {
-    id: 3,
-    name: "Bar Stool",
-    color: "Brown",
-    price: 48.00,
-    dateAdded: "11 April 2025",
-    inStock: true,
-    image: "https://images.unsplash.com/photo-1503602642458-232111445657?w=200&h=200&fit=crop"
-  },
-  {
-    id: 4,
-    name: "Wooden Nightstand",
-    color: "Light Grey",
-    price: 54.00,
-    dateAdded: "05 April 2025",
-    inStock: true,
-    image: "https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=200&h=200&fit=crop"
-  },
-  {
-    id: 5,
-    name: "Brown Bean Bag Chair",
-    color: "Brown",
-    price: 90.00,
-    dateAdded: "05 April 2025",
-    inStock: true,
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=200&h=200&fit=crop"
-  }
-];
+// const initialWishlistItems = [
+//   {
+//     id: 1,
+//     name: "Wingback Chair",
+//     color: "Light Brown",
+//     price: 160.00,
+//     dateAdded: "18 April 2025",
+//     inStock: true,
+//     image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=200&h=200&fit=crop"
+//   },
+//   {
+//     id: 2,
+//     name: "Wooden Sofa Chair",
+//     color: "Grey",
+//     price: 80.00,
+//     dateAdded: "17 April 2025",
+//     inStock: true,
+//     image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=200&h=200&fit=crop"
+//   },
+//   {
+//     id: 3,
+//     name: "Bar Stool",
+//     color: "Brown",
+//     price: 48.00,
+//     dateAdded: "11 April 2025",
+//     inStock: true,
+//     image: "https://images.unsplash.com/photo-1503602642458-232111445657?w=200&h=200&fit=crop"
+//   },
+//   {
+//     id: 4,
+//     name: "Wooden Nightstand",
+//     color: "Light Grey",
+//     price: 54.00,
+//     dateAdded: "05 April 2025",
+//     inStock: true,
+//     image: "https://images.unsplash.com/photo-1532372320572-cda25653a26d?w=200&h=200&fit=crop"
+//   },
+//   {
+//     id: 5,
+//     name: "Brown Bean Bag Chair",
+//     color: "Brown",
+//     price: 90.00,
+//     dateAdded: "05 April 2025",
+//     inStock: true,
+//     image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=200&h=200&fit=crop"
+//   }
+// ];
 
 const Wishlist = () => {
-  const [items, setItems] = useState(initialWishlistItems);
+  const [items, setItems] = useState([]);
   const [wishlistLink] = useState("https://www.example.com");
 
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('wishlist');
+      const parsed = raw ? JSON.parse(raw) : [];
+      setItems(Array.isArray(parsed) ? parsed : []);
+    } catch (err) {
+      console.error('Failed to load wishlist from localStorage', err);
+      setItems([]);
+    }
+  }, []);
+
   const removeItem = (id) => {
-    setItems(items.filter(item => item.id !== id));
+    const next = items.filter(item => item.id !== id);
+    setItems(next);
+    try { localStorage.setItem('wishlist', JSON.stringify(next)); } catch (e) { console.error(e); }
   };
 
   const clearWishlist = () => {
     setItems([]);
+    try { localStorage.removeItem('wishlist'); } catch (e) { console.error(e); }
   };
 
   const copyLink = () => {
