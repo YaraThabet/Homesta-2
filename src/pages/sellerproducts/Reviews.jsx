@@ -123,7 +123,7 @@ const Reviews = () => {
                     <div className="space-y-6">
                         {filteredReviews.map((review, idx) => (
                             <motion.div
-                                key={review.id || idx}
+                                key={review.reviewId || idx}
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: idx * 0.05 }}
@@ -141,7 +141,7 @@ const Reviews = () => {
                                     <div className="flex-1">
                                         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
                                             <div>
-                                                <h4 className="text-xl font-bold text-gray-900 mb-1">{review.fullName || 'Verified Buyer'}</h4>
+                                                <h4 className="text-xl font-bold text-gray-900 mb-1">{review.userName || review.fullName || 'Verified Buyer'}</h4>
                                                 <div className="flex gap-1">
                                                     {[1, 2, 3, 4, 5].map(s => (
                                                         <Star key={s} size={14} className={s <= review.rating ? "fill-[#B19470] text-[#B19470]" : "text-gray-200"} />
@@ -149,14 +149,16 @@ const Reviews = () => {
                                                 </div>
                                             </div>
                                             <span className="text-xs font-bold text-gray-300 uppercase tracking-widest">
-                                                {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : 'Recent'}
+                                                {(review.reviewDate || review.createdAt) ? new Date(review.reviewDate || review.createdAt).toLocaleDateString() : 'Recent'}
                                             </span>
                                         </div>
                                         <p className="text-gray-500 text-lg leading-relaxed font-light mb-6 italic">
-                                            "{review.review || review.comment || 'No comment provided.'}"
+                                            "{review.comment || review.review || 'No comment provided.'}"
                                         </p>
                                         <div className="flex items-center gap-4 text-sm font-bold text-[#205457]">
-                                            <span className="bg-[#205457]/5 px-4 py-2 rounded-xl">Product Piece #{review.productId}</span>
+                                            <span className="bg-[#205457]/5 px-4 py-2 rounded-xl">
+                                                {review.productName ? `Product: ${review.productName}` : `Product ID: ${review.productId}`}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>

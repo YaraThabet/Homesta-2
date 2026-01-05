@@ -193,7 +193,7 @@ const AddProduct = () => {
 				description: description,
 				colors: colors,
 				price: parseFloat(price),
-				rating: parseFloat(rating) || 0,
+				rating: Math.round(parseFloat(rating)) || 0,
 				quantity: parseInt(stock),
 				discount: parseFloat(discount) || 0,
 				deliveryTime: parseInt(deliveryTime) || 0,
@@ -580,10 +580,10 @@ const AddProduct = () => {
 													type="number"
 													min="0"
 													max="5"
-													step="0.1"
+													step="1"
 													value={rating}
 													onChange={(e) => {
-														const v = parseFloat(e.target.value);
+														const v = parseInt(e.target.value);
 														if (v >= 0 && v <= 5) setRating(e.target.value);
 													}}
 													className="w-16 bg-gray-50 rounded-xl px-2 py-1 text-center font-bold text-gray-900 border-none outline-none"

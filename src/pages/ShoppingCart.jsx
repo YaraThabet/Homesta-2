@@ -44,14 +44,20 @@ const ShoppingCart = () => {
         mappedItems.forEach(async (item) => {
           try {
             const imgRes = await api.get(`/ProductImages/product/${item.productId}`);
-            if (imgRes.data && imgRes.data.length > 0 && imgRes.data[0].imageUrls) {
-              const url = imgRes.data[0].imageUrls[0];
-              if (url && typeof url === 'string') {
-                const fullUrl = url.startsWith('http') ? url : `http://homefinish.runasp.net${url}`;
-                setCartItems(prev => prev.map(p => p.id === item.id ? { ...p, image: fullUrl } : p));
-              }
+            let url = null;
+            if (imgRes.data && Array.isArray(imgRes.data.images) && imgRes.data.images.length > 0) {
+              url = imgRes.data.images[0].imageUrl;
+            } else if (imgRes.data && Array.isArray(imgRes.data.imageUrls) && imgRes.data.imageUrls.length > 0) {
+              url = imgRes.data.imageUrls[0];
             }
-          } catch (e) { console.log('Failed to load image for cart item', item.id); }
+
+            if (url && typeof url === 'string') {
+              const fullUrl = url.startsWith('http') ? url : `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+              setCartItems(prev => prev.map(p => p.id === item.id ? { ...p, image: fullUrl } : p));
+            }
+          } catch (e) {
+            console.log('Failed to load image for cart item', item.id);
+          }
         });
 
       } else {

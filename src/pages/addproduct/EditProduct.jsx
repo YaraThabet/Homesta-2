@@ -44,6 +44,8 @@ const EditProduct = () => {
     const [storeId, setStoreId] = useState(null);
     const [errors, setErrors] = useState({});
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+    const [reviews, setReviews] = useState([]);
+    const [reviewsLoading, setReviewsLoading] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -52,14 +54,16 @@ const EditProduct = () => {
                 const userEmail = localStorage.getItem('userEmail');
 
                 // Fetch Categories, Stores, Product Data, AND the specific product images
-                const [catRes, storeRes, prodRes, imgRes] = await Promise.all([
+                const [catRes, storeRes, prodRes, imgRes, revRes] = await Promise.all([
                     api.get('/Category'),
                     api.get('/Store'),
                     api.get(`/Product/GetProductById/${id}`),
-                    api.get(`/ProductImages/product/${id}`)
+                    api.get(`/ProductImages/product/${id}`),
+                    api.get(`/Review/product/${id}`).catch(() => ({ data: [] }))
                 ]);
 
                 setCategories(catRes.data);
+                setReviews(Array.isArray(revRes.data) ? revRes.data : []);
 
                 const stores = Array.isArray(storeRes.data) ? storeRes.data : [storeRes.data];
                 const myStore = stores.find(s => s.email?.toLowerCase() === userEmail?.toLowerCase());
@@ -205,7 +209,7 @@ const EditProduct = () => {
                 description: description,
                 colors: colors,
                 price: parseFloat(price),
-                rating: parseFloat(rating) || 0,
+                rating: Math.round(parseFloat(rating)) || 0,
                 quantity: parseInt(stock),
                 discount: parseFloat(discount) || 0,
                 deliveryTime: parseInt(deliveryTime) || 0,
@@ -390,6 +394,58 @@ const EditProduct = () => {
                                     </div>
                                 </div>
                             </motion.div>
+
+                            {/* Product Reviews */}
+                            <motion.div variants={fadeInUp} className="bg-white p-6 md:p-10 rounded-[30px] lg:rounded-[50px] shadow-[0_20px_60px_rgba(0,0,0,0.02)] border border-gray-100">
+                                <div className="flex items-center justify-between mb-10">
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-14 h-14 rounded-2xl bg-[#F59E0B]/10 text-[#F59E0B] flex items-center justify-center">
+                                            <Star size={28} />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-3xl font-bold text-gray-900">Customer Feedback</h3>
+                                            <p className="text-gray-400">What buyers are saying about this piece</p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-3xl font-black text-gray-900 leading-none mb-1">
+                                            {reviews.length > 0
+                                                ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)
+                                                : rating}
+                                        </div>
+                                        <div className="text-[10px] font-black uppercase tracking-widest text-gray-300">Avg Rating</div>
+                                    </div>
+                                </div>
+
+                                {reviews.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {reviews.map((rev, idx) => (
+                                            <div key={rev.reviewId || idx} className="bg-gray-50/50 p-6 rounded-[30px] border border-gray-100/50">
+                                                <div className="flex justify-between items-start mb-4">
+                                                    <div>
+                                                        <p className="font-bold text-gray-900 text-sm mb-1">{rev.userName || 'Verified Buyer'}</p>
+                                                        <div className="flex gap-0.5">
+                                                            {[1, 2, 3, 4, 5].map(s => (
+                                                                <Star key={s} size={10} className={s <= rev.rating ? "fill-[#F59E0B] text-[#F59E0B]" : "text-gray-200"} />
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                    <span className="text-[9px] font-bold text-gray-300 uppercase tracking-widest">
+                                                        {rev.reviewDate ? new Date(rev.reviewDate).toLocaleDateString() : 'Recent'}
+                                                    </span>
+                                                </div>
+                                                <p className="text-gray-500 text-sm italic font-light leading-relaxed line-clamp-3">
+                                                    "{rev.comment || 'No comment provided.'}"
+                                                </p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="py-12 text-center border-2 border-dashed border-gray-50 rounded-[40px]">
+                                        <p className="text-gray-400 font-medium italic">No reviews yet for this specific product.</p>
+                                    </div>
+                                )}
+                            </motion.div>
                         </div>
 
                         {/* RIGHT COLUMN */}
@@ -504,10 +560,10 @@ const EditProduct = () => {
                                                     type="number"
                                                     min="0"
                                                     max="5"
-                                                    step="0.1"
+                                                    step="1"
                                                     value={rating}
                                                     onChange={(e) => {
-                                                        const val = parseFloat(e.target.value);
+                                                        const val = parseInt(e.target.value);
                                                         if (val >= 0 && val <= 5) {
                                                             setRating(e.target.value);
                                                         }
