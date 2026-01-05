@@ -53,7 +53,7 @@ const BlogDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB] pt-[120px] pb-20 font-outfit">
+    <div className="min-h-screen bg-[#FDFCFB]  pb-20 font-outfit">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-[120px]">
         {/* Back Button */}
         <motion.div
