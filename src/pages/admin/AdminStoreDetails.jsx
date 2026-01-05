@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAppContext } from '../../context/AppContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Store, Package, Mail, Phone, MapPin, ArrowLeft, Trash2, Search, AlertCircle, Eye, Star, X, Image as ImageIcon } from 'lucide-react';
@@ -375,6 +376,7 @@ const StoreProductCard = ({ product, onDeleteClick, onViewClick }) => {
 const AdminStoreDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { showAlert } = useAppContext();
     const [store, setStore] = useState(null);
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -438,8 +440,17 @@ const AdminStoreDetails = () => {
             setProducts(prev => prev.filter(p => (p.productId || p.id) !== deleteModal.productId));
             setDeleteModal({ show: false, productId: null });
         } catch (err) {
-            console.error("Failed to delete product:", err);
-            alert("Failed to delete product. Please try again.");
+            console.error("Delete product failed", err);
+            showAlert("Failed to delete product.", "error", "Error");
+        }
+    };
+
+    const handleViewProductById = (productId) => {
+        const product = products.find(p => (p.productId || p.id).toString() === productId?.toString());
+        if (product) {
+            setSelectedProduct(product);
+        } else {
+            showAlert("Product details not found in this store's inventory.", "info", "Product Info");
         }
     };
 
@@ -639,7 +650,10 @@ const AdminStoreDetails = () => {
                                                         {/* Product thumbnail could go here if rev has productId */}
                                                         <Package size={14} className="m-auto text-gray-300 mt-2" />
                                                     </div>
-                                                    <span className="text-xs font-bold text-[#205457] hover:underline cursor-pointer">
+                                                    <span
+                                                        onClick={() => handleViewProductById(rev.productId)}
+                                                        className="text-xs font-bold text-[#205457] hover:underline cursor-pointer"
+                                                    >
                                                         Review for Product #{rev.productId}
                                                     </span>
                                                 </div>

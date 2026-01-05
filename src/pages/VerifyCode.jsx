@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useAppContext } from '../context/AppContext';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import api from "../lib/axios";
 import PageLoader from "../components/PageLoader";
 import verifyCodeImg from '../assets/imges/verify-code-img.jpg';
 
 const VerifyCode = () => {
+  const { showAlert } = useAppContext();
   const location = useLocation();
   const navigate = useNavigate();
   const email = location.state?.email || "example@gmail.com";
@@ -67,10 +69,10 @@ const VerifyCode = () => {
     try {
       // Use the specified resend-reset-code endpoint
       await api.post('Auth/resend-reset-code', { email });
-      alert("Code resent successfully!");
+      showAlert("Code resent successfully!", "success", "Success");
     } catch (error) {
       console.error("Resend failed:", error);
-      alert("Failed to resend code. Please try again.");
+      showAlert("Failed to resend code. Please try again.", "error", "Error");
     }
   };
 

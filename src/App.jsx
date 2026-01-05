@@ -45,6 +45,7 @@ import VerifyCode from "./pages/VerifyCode.jsx";
 import ForgetPassword from "./pages/ForgetPassword.jsx";
 import AddPassword from "./pages/AddPassword.jsx";
 import Error404 from "./pages/Error404";
+import Privacy from "./pages/Privacy.jsx";
 
 // Seller Pages
 import CreateStore from "./pages/CreateStore.jsx";
@@ -90,13 +91,13 @@ const App = () => {
   // Identification of valid routes to hide navbar on 404
   const validRoutes = [
     "/", "/notifications", "/category", "/subcategory/:categoryName", "/shop",
-    "/blogs", "/faqs", "/product/:id", "/checkout", "/wishlist", "/shopping-cart",
+    "/blogs", "/blogs/:id", "/faqs", "/product/:id", "/checkout", "/wishlist", "/shopping-cart",
     "/account", "/account/*", "/dashboard", "/analytics", "/addproduct",
     "/chatai", "/ai-chat", "/summary-order", "/order-success", "/tracking-order",
     "/about", "/contact", "/track-order", "/customer-support", "/login",
     "/signup", "/forgot-password", "/reset-password", "/verify-code",
     "/create-store", "/seller-home", "/seller-products", "/edit-product/:id",
-    "/store-settings", "/seller-reviews",
+    "/store-settings", "/seller-reviews", "/privacy",
     // Admin Routes
     "/admin/dashboard", "/admin/stores", "/admin/products", "/admin/categories", "/admin/analytics", "/admin/notifications", "/admin/store/:id"
   ];
@@ -160,6 +161,7 @@ const App = () => {
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/track-order" element={<TrackOrder />} />
           <Route path="/customer-support" element={<CustomerSupport />} />
+          <Route path="/privacy" element={<Privacy />} />
 
           {/* Auth */}
           <Route path="/login" element={<Login />} />
@@ -192,7 +194,7 @@ const App = () => {
       </main>
 
       {!shouldHideNavbar && !isSellerPage && <AIChatFloatButton />}
-      {!shouldHideNavbar && !isSellerPage && <Footer />}
+      {!shouldHideNavbar && !isSellerPage && !isAdminPage && <Footer />}
     </div>
   );
 };

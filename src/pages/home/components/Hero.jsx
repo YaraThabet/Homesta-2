@@ -1,12 +1,11 @@
+import { useNavigate } from "react-router-dom";
 import { GiSofa } from "react-icons/gi";
 import { FaArrowRightLong } from "react-icons/fa6";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-
-
-
 const Hero = () => {
+  const navigate = useNavigate();
   const [offsetY, setOffsetY] = useState(0);
 
   useEffect(() => {
@@ -20,10 +19,10 @@ const Hero = () => {
 
   const fadeUpVariants = {
     hidden: { opacity: 0, y: 100 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      transition: { duration: 2, ease: "easeOut" } 
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 2, ease: "easeOut" }
     },
   };
 
@@ -49,18 +48,6 @@ const Hero = () => {
         animate="visible"
         variants={fadeUpVariants}
       >
-        {/* <motion.div
-          className="flex flex-row bg-white rounded-3xl w-[282px] h-[48px] px-2 py-1 gap-1"
-          variants={fadeUpVariants}
-        > */}
-          {/* <GiSofa className="bg-[#D9D9D9] text-[#205457] w-[40px] h-[40px] rounded-3xl" /> */}
-          {/* <div className="flex w-[222px] h-[20px] items-center">
-            <p className="font-[Outfit] font-medium text-[16px] leading-normal text-white">
-              The Best Online Furniture Store
-            </p>
-          </div> */}
-        {/* </motion.div> */}
-
         {/* العنوان على سطرين */}
         <motion.div variants={fadeUpVariants}>
           <p className="font-[Outfit] font-bold text-[42px] md:text-[56px] text-white leading-tight text-left">
@@ -71,20 +58,19 @@ const Hero = () => {
 
         <motion.div className="flex flex-col md:flex-row gap-4 mt-4" variants={fadeUpVariants}>
           <motion.button
+            onClick={() => navigate('/shop')}
             className="flex justify-center items-center w-[207px] h-[52px] rounded-3xl px-4 py-2 gap-2 bg-[#89917D] text-white font-[Outfit] font-medium hover:scale-105 transition-transform duration-300"
             whileHover={{ scale: 1.05, boxShadow: "0px 0px 15px rgba(0,0,0,0.3)" }}
           >
             Shop Now <FaArrowRightLong />
           </motion.button>
 
-          <motion.a
-            href="#"
-            className="flex items-center font-[Outfit] font-medium text-[16px] text-white hover:underline"
-            variants={fadeUpVariants}
-            transition={{ delay: 0.3 }}
+          <motion.div
+            onClick={() => navigate('/shop')}
+            className="flex items-center font-[Outfit] font-medium text-[16px] text-white hover:underline cursor-pointer"
           >
             View All Products
-          </motion.a>
+          </motion.div>
         </motion.div>
       </motion.div>
     </div>

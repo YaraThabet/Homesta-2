@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import AccountSidebar from "./components/AccountSidebar";
 import ProfileForm from "./components/ProfileForm";
 import { IoClose } from "react-icons/io5";
 import FooterBenefits from "../shop/components/FooterBenefits";
+import api from "../../lib/axios";
+import { useAppContext } from "../../context/AppContext";
 
 /* ===============================
    Initial Profile Data
@@ -36,25 +38,163 @@ const getInitialProfileImage = () => {
   const savedProfile = localStorage.getItem("userProfile");
   if (savedProfile) {
     const parsedProfile = JSON.parse(savedProfile);
-    return parsedProfile.profileImage || null;
+    // Only return the image URL if it's not a blob URL (starts with 'blob:')
+    if (parsedProfile.profileImage && !parsedProfile.profileImage.startsWith('blob:')) {
+      return parsedProfile.profileImage;
+    }
   }
   return null;
 };
 
 const Account = () => {
+  const { showAlert } = useAppContext();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileData, setProfileData] = useState(getInitialProfileData);
   const [profileImage, setProfileImage] = useState(getInitialProfileImage);
+  const [loading, setLoading] = useState(true);
+  const userId = localStorage.getItem("userId");
 
-  const updateProfileData = (newData) => {
-    const updatedProfile = { ...profileData, ...newData };
-    setProfileData(updatedProfile);
-    localStorage.setItem("userProfile", JSON.stringify(updatedProfile));
+  // Fetch user profile from API
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await api.get(`/User/${userId}`);
+        const userData = response.data;
+
+        const profileFromApi = {
+          firstName: userData.firstName || "",
+          lastName: userData.lastName || "",
+          email: userData.email || "",
+          mobileNumber: userData.phoneNumber || "",
+          gender: userData.gender || "",
+          birthday: userData.birthdate || "",
+          country: userData.country || "EG",
+          address: userData.address || "",
+          zipCode: userData.zipCode || "",
+          // Only set profileImage if it's a valid URL from the server
+          ...(userData.imageUrl && { profileImage: userData.imageUrl })
+        };
+
+        setProfileData(prev => ({
+          ...prev,
+          ...profileFromApi
+        }));
+
+        // Update profile image if we have one from the server
+        if (userData.imageUrl) {
+          setProfileImage(userData.imageUrl);
+        } else {
+          // Clear any existing image if the server doesn't return one
+          setProfileImage(null);
+        }
+
+        // Update localStorage with the complete profile data including the image URL
+        localStorage.setItem("userProfile", JSON.stringify({
+          ...profileFromApi,
+          ...(userData.imageUrl && { profileImage: userData.imageUrl })
+        }));
+      } catch (error) {
+        console.error("Failed to fetch user profile:", error);
+        // Keep using localStorage data if API fails
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserProfile();
+  }, [userId]);
+
+  const updateProfileData = async (newData) => {
+    if (!userId) {
+      showAlert("User ID not found. Please log in again.", "error", "Error");
+      return;
+    }
+
+    try {
+      // Prepare FormData for multipart/form-data
+      const formData = new FormData();
+      formData.append("FirstName", newData.firstName || "");
+      formData.append("LastName", newData.lastName || "");
+      formData.append("Email", newData.email || "");
+      formData.append("PhoneNumber", newData.mobileNumber || "");
+      formData.append("Gender", newData.gender || "");
+      formData.append("Birthdate", newData.birthday || "");
+      formData.append("Country", newData.country || "");
+      formData.append("ZipCode", newData.zipCode || "");
+      formData.append("Address", newData.address || "");
+
+      // If there's a new profile image file, append it
+      if (newData.imageFile) {
+        formData.append("ImageFile", newData.imageFile);
+      }
+
+      // Update via API
+      const updateResponse = await api.put(`/User/${userId}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      // Get the updated user data from the response
+      const userData = updateResponse.data;
+
+      // Create a clean profile object with all the fields
+      const updatedProfile = {
+        ...profileData, // Keep existing data
+        firstName: userData.firstName || "",
+        lastName: userData.lastName || "",
+        email: userData.email || "",
+        mobileNumber: userData.phoneNumber || "",
+        gender: userData.gender || "",
+        birthday: userData.birthdate || "",
+        country: userData.country || "EG",
+        address: userData.address || "",
+        zipCode: userData.zipCode || "",
+      };
+
+      // If we have a new image URL from the server, update it
+      if (userData.imageUrl) {
+        updatedProfile.profileImage = userData.imageUrl;
+        setProfileImage(userData.imageUrl);
+      }
+
+      // Update both state and localStorage
+      setProfileData(prev => ({
+        ...prev,
+        ...updatedProfile,
+        // Clear the imageFile after successful upload
+        imageFile: null
+      }));
+
+      // Save to localStorage without the imageFile
+      const { imageFile, ...profileForStorage } = updatedProfile;
+      localStorage.setItem("userProfile", JSON.stringify(profileForStorage));
+
+      showAlert("Profile updated successfully!", "success", "Success");
+    } catch (error) {
+      console.error("Failed to update profile:", error);
+      showAlert(
+        error.response?.data?.message || "Failed to update profile. Please try again.",
+        "error",
+        "Error"
+      );
+    }
   };
 
-  const handleProfileImageChange = (imageUrl) => {
+  const handleProfileImageChange = (imageUrl, imageFile) => {
+    // Only update the local state with the blob URL for preview
     setProfileImage(imageUrl);
-    updateProfileData({ profileImage: imageUrl });
+    // Store the file in the profile data for form submission
+    // We don't store the blob URL in localStorage as it will be invalid after refresh
+    setProfileData(prev => ({
+      ...prev,
+      imageFile: imageFile  // Store the file for upload
+    }));
   };
 
   const location = useLocation();
@@ -89,25 +229,22 @@ const Account = () => {
 
           {/* Mobile Sidebar */}
           <div
-            className={`fixed inset-0 z-50 flex lg:hidden ${
-              sidebarOpen ? "block" : "hidden"
-            }`}
+            className={`fixed inset-0 z-50 flex lg:hidden ${sidebarOpen ? "block" : "hidden"
+              }`}
           >
             {/* Overlay */}
             <div
-              className={`fixed inset-0 bg-black transition-opacity duration-300 ${
-                sidebarOpen
-                  ? "opacity-50"
-                  : "opacity-0 pointer-events-none"
-              }`}
+              className={`fixed inset-0 bg-black transition-opacity duration-300 ${sidebarOpen
+                ? "opacity-50"
+                : "opacity-0 pointer-events-none"
+                }`}
               onClick={() => setSidebarOpen(false)}
             ></div>
 
             {/* Sidebar */}
             <div
-              className={`relative flex flex-col w-4/5 max-w-sm bg-white h-full shadow-xl transform transition-transform duration-300 ease-in-out ${
-                sidebarOpen ? "translate-x-0" : "-translate-x-full"
-              }`}
+              className={`relative flex flex-col w-4/5 max-w-sm bg-white h-full shadow-xl transform transition-transform duration-300 ease-in-out ${sidebarOpen ? "translate-x-0" : "-translate-x-full"
+                }`}
             >
               {/* Close Button */}
               <button

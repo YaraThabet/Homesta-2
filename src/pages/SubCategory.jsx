@@ -64,9 +64,15 @@ const SubCategory = () => {
                 {/* Image Container */}
                 <div className=" h-56 bg-gray-100 overflow-hidden">
                   <img
-                    src={`http://homefinish.runasp.net/${item.imagePath}`}
+                    src={item.imagePath
+                      ? `http://homefinish.runasp.net/${item.imagePath.startsWith('/') ? item.imagePath.substring(1) : item.imagePath}`
+                      : ''}
                     alt={item.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 "
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                      e.target.parentElement.style.backgroundColor = '#e5e7eb';
+                    }}
                   />
                 </div>
 

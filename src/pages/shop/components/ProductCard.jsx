@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import { ShoppingCart, Star } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../../lib/axios";
+import SafeImage from "../../../components/SafeImage";
 
 const ProductCard = ({ product }) => {
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -65,18 +66,12 @@ const ProductCard = ({ product }) => {
     <>
       <Link to={`/product/${productId}`} className="group bg-card rounded-lg overflow-hidden border border-gray-100 transition-all hover:shadow-md block h-full flex flex-col">
         <div className="relative aspect-square bg-muted/30 overflow-hidden">
-          {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={product.name}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              onError={(e) => { e.target.style.display = 'none'; }}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 text-xs">
-              No Image
-            </div>
-          )}
+          <SafeImage
+            src={imageUrl}
+            alt={product.name}
+            type="product"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
           {product.discount > 0 && (
             <span className="absolute top-3 left-3 px-2.5 py-1 bg-[#205457]  text-white text-[11px] font-medium rounded-full">
               {product.discount}% Off

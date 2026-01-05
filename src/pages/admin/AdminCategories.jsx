@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useAppContext } from '../../context/AppContext';
+import SafeImage from '../../components/SafeImage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Layers, Plus, Edit2, Trash2, Search, X, ChevronRight, Image as ImageIcon } from 'lucide-react';
 import api from '../../lib/axios';
 
 const AdminCategories = () => {
+    const { showAlert } = useAppContext();
     const [categories, setCategories] = useState([]);
     const [subCategoriesMap, setSubCategoriesMap] = useState({});
     const [loading, setLoading] = useState(true);
@@ -49,15 +52,17 @@ const AdminCategories = () => {
 
     const getImageUrl = (item) => {
         if (!item) return null;
-        // Check various possible property names
-        const url = item.imageLink || item.imageUrl || item.image || item.url || item.Image;
+        // Check various possible property names from backend DTOs
+        const url = item.imagePath || item.imageLink || item.imageUrl || item.image || item.url || item.Image;
         if (!url) return null;
 
         // Return as is if data URI or absolute URL
         if (url.startsWith('data:') || url.startsWith('http')) return url;
 
         // Use HTTP to avoid SSL mismatch with unconfigured backend or proxy issues
-        return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+        // Ensure only one slash between domain and path
+        const cleanPath = url.startsWith('/') ? url.substring(1) : url;
+        return `http://homefinish.runasp.net/${cleanPath}`;
     };
 
     const handleDelete = async (id, type, parentId = null) => {
@@ -67,7 +72,7 @@ const AdminCategories = () => {
             await api.delete(`${endpoint}/${id}`);
             fetchData();
         } catch (err) {
-            alert("Failed to delete. It might be in use.");
+            showAlert("Failed to delete. It might be in use.", "error", "Error");
         }
     };
 
@@ -112,22 +117,12 @@ const AdminCategories = () => {
                                     {/* Compact Header */}
                                     <div className="flex items-center gap-3 mb-5 border-b border-gray-50 pb-4">
                                         <div className="w-14 h-14 bg-gray-50 rounded-2xl overflow-hidden flex-shrink-0 border border-gray-100 shadow-sm relative">
-                                            {getImageUrl(cat) ? (
-                                                <img
-                                                    src={getImageUrl(cat)}
-                                                    alt={cat.name}
-                                                    className="w-full h-full object-cover"
-                                                    onError={(e) => {
-                                                        // Fallback to placeholder if image fails
-                                                        e.target.style.display = 'none';
-                                                        e.target.nextElementSibling.style.display = 'flex';
-                                                    }}
-                                                />
-                                            ) : null}
-                                            {/* Fallback Icon (initially hidden if image exists, shown on error) */}
-                                            <div className={`w-full h-full flex items-center justify-center bg-gray-50 absolute top-0 left-0 ${getImageUrl(cat) ? 'hidden' : 'flex'}`}>
-                                                <Layers size={24} className="text-gray-300" />
-                                            </div>
+                                            <SafeImage
+                                                src={getImageUrl(cat)}
+                                                alt={cat.name}
+                                                type="category"
+                                                className="w-full h-full object-cover"
+                                            />
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <h2 className="text-lg font-bold text-gray-900 leading-tight truncate" title={cat.name}>{cat.name}</h2>
@@ -168,20 +163,12 @@ const AdminCategories = () => {
                                                 {(subCategoriesMap[catId] || []).map(sub => (
                                                     <div key={sub.id || sub.subCategoryId} className="group flex flex-col items-center bg-gray-50 rounded-xl p-2 hover:bg-white hover:shadow-md border border-transparent hover:border-gray-100 transition-all cursor-pointer relative">
                                                         <div className="w-full aspect-square bg-white rounded-lg overflow-hidden mb-2 relative shadow-sm border border-gray-100">
-                                                            {getImageUrl(sub) ? (
-                                                                <img
-                                                                    src={getImageUrl(sub)}
-                                                                    alt={sub.name}
-                                                                    className="w-full h-full object-cover"
-                                                                    onError={(e) => {
-                                                                        e.target.style.display = 'none';
-                                                                        e.target.nextElementSibling.style.display = 'flex';
-                                                                    }}
-                                                                />
-                                                            ) : null}
-                                                            <div className={`w-full h-full flex items-center justify-center bg-gray-100 absolute top-0 left-0 ${getImageUrl(sub) ? 'hidden' : 'flex'}`}>
-                                                                <ImageIcon size={14} className="text-gray-300" />
-                                                            </div>
+                                                            <SafeImage
+                                                                src={getImageUrl(sub)}
+                                                                alt={sub.name}
+                                                                type="subcategory"
+                                                                className="w-full h-full object-cover"
+                                                            />
 
                                                             {/* Hover Actions */}
                                                             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1 backdrop-blur-[1px] z-10">
@@ -227,13 +214,14 @@ const AdminCategories = () => {
                     initialData={modal.data}
                     parentId={modal.parentId}
                     refresh={handleModalRefresh}
+                    showAlert={showAlert}
                 />
             )}
         </div>
     );
 };
 
-const CategoryModal = ({ isOpen, onClose, type, mode, initialData, parentId, refresh }) => {
+const CategoryModal = ({ isOpen, onClose, type, mode, initialData, parentId, refresh, showAlert }) => {
     const [formData, setFormData] = useState({ name: '', price: '' });
     const [imageFile, setImageFile] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -264,12 +252,23 @@ const CategoryModal = ({ isOpen, onClose, type, mode, initialData, parentId, ref
             data.append('Name', formData.name);
 
             if (imageFile) {
+                // Try both field names to be safe if backend expectation is ambiguous
                 data.append('Image', imageFile);
+                data.append('ImageFile', imageFile);
             }
+
+            const id = initialData?.id || initialData?.subCategoryId || initialData?.categoryId;
 
             if (type === 'subcategory') {
                 data.append('CategoryId', parentId);
                 if (formData.price) data.append('Price', formData.price);
+            }
+
+            if (mode === 'edit') {
+                // Many .NET APIs with [FromForm] still require the ID in the body
+                if (type === 'category') data.append('CategoryId', id);
+                else data.append('SubCategoryId', id);
+                data.append('Id', id);
             }
 
             const endpoint = type === 'category' ? '/Category' : '/SubCategory';
@@ -279,7 +278,7 @@ const CategoryModal = ({ isOpen, onClose, type, mode, initialData, parentId, ref
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
             } else {
-                const id = initialData.id || initialData.subCategoryId || initialData.categoryId;
+                // Some APIs prefer query params for IDs in PUT
                 await api.put(`${endpoint}/${id}`, data, {
                     headers: { 'Content-Type': 'multipart/form-data' }
                 });
@@ -289,10 +288,17 @@ const CategoryModal = ({ isOpen, onClose, type, mode, initialData, parentId, ref
         } catch (err) {
             console.error("Operation failed", err);
             const msg = err.response?.data?.message || err.response?.data?.title || "Unknown error";
-            alert(`Failed to save: ${JSON.stringify(msg)}`);
+            showAlert(`Failed to save: ${JSON.stringify(msg)}`, "error", "Error");
         } finally {
             setLoading(false);
         }
+    };
+
+    const currentImageUrl = initialData ? (initialData.imageLink || initialData.imageUrl || initialData.image || initialData.Image) : null;
+    const getFullImageUrl = (url) => {
+        if (!url) return null;
+        if (url.startsWith('data:') || url.startsWith('http')) return url;
+        return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
     };
 
     return (
@@ -328,24 +334,31 @@ const CategoryModal = ({ isOpen, onClose, type, mode, initialData, parentId, ref
                     )}
 
                     <div>
-                        <label className="text-xs font-bold uppercase text-gray-400 tracking-wider text-center block mb-2">Upload Image</label>
-                        <div className="flex items-center justify-center w-full">
-                            <label className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50 transition-all">
-                                <div className="flex flex-col items-center justify-center pt-2 pb-3">
-                                    {imageFile ? (
-                                        <div className="text-center">
-                                            <p className="text-xs font-bold text-[#205457] max-w-[200px] truncate">{imageFile.name}</p>
-                                            <p className="text-[10px] text-gray-400">Click to change</p>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <ImageIcon className="w-6 h-6 text-gray-400 mb-1" />
-                                            <p className="text-[10px] text-gray-500 font-medium">Click to upload</p>
-                                        </>
-                                    )}
+                        <label className="text-xs font-bold uppercase text-gray-400 tracking-wider text-center block mb-2">Image</label>
+                        <div className="flex items-center gap-3">
+                            {mode === 'edit' && !imageFile && currentImageUrl && (
+                                <div className="w-16 h-16 rounded-xl overflow-hidden border border-gray-100 flex-shrink-0">
+                                    <SafeImage src={getFullImageUrl(currentImageUrl)} className="w-full h-full object-cover" />
                                 </div>
-                                <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
-                            </label>
+                            )}
+                            <div className="flex-1">
+                                <label className="flex flex-col items-center justify-center w-full h-20 border-2 border-dashed border-gray-300 rounded-xl cursor-pointer hover:bg-gray-50 transition-all overflow-hidden">
+                                    <div className="flex flex-col items-center justify-center py-2 px-1">
+                                        {imageFile ? (
+                                            <div className="text-center">
+                                                <p className="text-[10px] font-bold text-[#205457] max-w-[150px] truncate">{imageFile.name}</p>
+                                                <p className="text-[8px] text-gray-400">Click to change</p>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <ImageIcon className="w-5 h-5 text-gray-400 mb-1" />
+                                                <p className="text-[8px] text-gray-500 font-medium text-center">{mode === 'edit' ? 'Replace Image' : 'Click to upload'}</p>
+                                            </>
+                                        )}
+                                    </div>
+                                    <input type="file" className="hidden" accept="image/*" onChange={handleFileChange} />
+                                </label>
+                            </div>
                         </div>
                     </div>
 

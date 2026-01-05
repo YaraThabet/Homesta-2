@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAppContext } from '../context/AppContext';
 import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -21,6 +22,7 @@ const schema = z.object({
 
 const Signup = () => {
   const navigate = useNavigate();
+  const { showAlert } = useAppContext();
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -59,8 +61,14 @@ const Signup = () => {
 
       console.log("Signup Success:", response.data);
 
-      // Show Success Modal
-      setShowSuccessModal(true);
+      // Show Success Alert
+      const role = getValues('role');
+      const msg = role === 'seller'
+        ? "Registration successful! We will send you a confirmation email once the admin revises your application."
+        : "Registration successful! We've sent a confirmation link to your email.";
+
+      showAlert(msg, 'success', 'Welcome to Homesta!');
+      navigate('/login');
 
     } catch (error) {
       console.error("Signup Failed:", error);
@@ -77,38 +85,6 @@ const Signup = () => {
 
   return (
     <div className="min-h-screen flex">
-      {/* Success Modal */}
-      {showSuccessModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center transform transition-all scale-100">
-            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">Registration Successful!</h3>
-            <p className="text-gray-600 mb-6">
-              {getValues('role') === 'seller' ? (
-                <>
-                  We will send you a confirmation email once the admin revise your application, so keep an eye at your email.
-                </>
-              ) : (
-                <>
-                  We've sent a confirmation link to <strong>{getValues('email')}</strong>.
-                  Please check your inbox and confirm your email before logging in.
-                </>
-              )}
-            </p>
-            <button
-              onClick={() => navigate('/login')}
-              className="w-full bg-[#205457] text-white py-3 rounded-lg font-medium hover:bg-[#1a4346] transition-colors"
-            >
-              Go to Login
-            </button>
-          </div>
-        </div>
-      )}
-
       {/* Left Column - Signup Form */}
       <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 lg:px-16 xl:px-24">
         <div className="max-w-md w-full mx-auto">
@@ -268,7 +244,7 @@ const Signup = () => {
                   }`}
               />
               <label htmlFor="terms" className="ml-2 text-sm text-gray-600">
-                Agree with Terms & Condition and Privacy Policy
+                Agree with <Link to="/privacy" className="text-[#205457] font-bold hover:underline">Terms & Condition</Link> and <Link to="/privacy" className="text-[#205457] font-bold hover:underline">Privacy Policy</Link>
               </label>
             </div>
             {errors.terms && (

@@ -7,7 +7,7 @@ import { useAppContext } from "../context/AppContext";
 import api from "../lib/axios";
 
 const ShoppingCart = () => {
-  const { formatPrice, t } = useAppContext();
+  const { formatPrice, t, showAlert } = useAppContext();
   const [cartItems, setCartItems] = useState([]);
   const [cartSummary, setCartSummary] = useState({ subTotal: 0, shipping: 0, tax: 0, total: 0 });
   const [couponCode, setCouponCode] = useState("");
@@ -112,7 +112,7 @@ const ShoppingCart = () => {
       await fetchCart();
     } catch (err) {
       console.error("Remove item failed", err);
-      alert("Could not remove item. Please try again.");
+      showAlert("Could not remove item. Please try again.", "error", "Error");
     } finally {
       setProcessingId(null);
     }
@@ -133,9 +133,11 @@ const ShoppingCart = () => {
   };
 
   const applyCoupon = () => {
-    if (couponCode.trim()) {
+    if (couponCode.toLowerCase() === "save20") {
       setAppliedCoupon(true);
-      // Logic for coupon API call should go here
+      showAlert("Coupon applied successfully! 20% discount added.", "success", "Coupon Applied");
+    } else {
+      showAlert("Invalid coupon code.", "warning", "Oops!");
     }
   };
 

@@ -9,12 +9,15 @@ import {
   LogOut,
   Notebook,
   LockIcon,
-  Star
+  Star,
+  Bookmark
 } from "lucide-react";
+import SafeImage from '../../../components/SafeImage';
 
 const sidebarItems = [
   { icon: User, label: "Personal Data", to: "/account" },
   { icon: Package, label: "My Orders", to: "/account/orders" },
+  { icon: Heart, label: "Wishlist", to: "/wishlist" },
   { icon: Star, label: "My Reviews", to: "/account/reviews" },
   { icon: Notebook, label: "Manage Address", to: "/account/address" },
   { icon: HelpCircle, label: "Help Center", to: "/account/help-center" },
@@ -31,18 +34,13 @@ const AccountSidebar = ({
     <aside className={`bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full ${className}`}>
       {/* User Profile Header */}
       <div className="flex items-center gap-3 mb-5">
-        <div className="h-12 w-12 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center overflow-hidden">
-          {profileImage ? (
-            <img
-              src={profileImage}
-              alt={`${firstName} ${lastName}`}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <span className="text-gray-600 font-medium text-sm">
-              {firstName?.[0]}{lastName?.[0]}
-            </span>
-          )}
+        <div className="h-12 w-12 rounded-full bg-gray-100 border-2 border-gray-200 overflow-hidden">
+          <SafeImage
+            src={profileImage}
+            alt={`${firstName} ${lastName}`}
+            type="profile"
+            className="w-full h-full"
+          />
         </div>
         <div className="min-w-0">
           <h3 className="font-semibold text-gray-900 text-[15px] truncate">{firstName} {lastName}</h3>

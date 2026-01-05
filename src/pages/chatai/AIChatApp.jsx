@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import SafeImage from "../../components/SafeImage";
 import { useNavigate } from "react-router-dom";
 import { Send, Moon, Sun, ChevronLeft, Home, Settings } from "lucide-react";
 import axios from "axios";
@@ -31,9 +32,10 @@ const LandingPage = ({ onStartChat }) => {
           </div>
 
           <div className="absolute right-6 top-24 md:top-20 md:right-20 z-20">
-            <img
+            <SafeImage
               src="/img/chatai2.png"
               alt="AI Assistant"
+              type="profile"
               className="w-56 h-56 md:w-72 md:h-72 object-contain drop-shadow-2xl"
             />
           </div>
@@ -116,16 +118,14 @@ const ChatPage = ({
         {messages.map((m) => (
           <div
             key={m.id}
-            className={`flex ${
-              m.sender === "user" ? "justify-end" : "justify-start"
-            }`}
+            className={`flex ${m.sender === "user" ? "justify-end" : "justify-start"
+              }`}
           >
             <div
-              className={`px-5 py-3 rounded-2xl max-w-md ${
-                m.sender === "user"
+              className={`px-5 py-3 rounded-2xl max-w-md ${m.sender === "user"
                   ? " bg-gradient-to-r from-[#46B6BD] to-[#205457] text-white"
                   : "bg-white text-gray-800 shadow"
-              }`}
+                }`}
             >
               {m.text}
               <div className="text-xs opacity-60 mt-1">{m.time}</div>

@@ -1,6 +1,8 @@
+import { useNavigate } from "react-router-dom";
 import { FaStar } from "react-icons/fa";
 
 const OurProducts = () => {
+  const navigate = useNavigate();
   const products = [
     {
       id: 1,
@@ -75,6 +77,7 @@ const OurProducts = () => {
           ].map((item) => (
             <button
               key={item}
+              onClick={() => navigate('/shop')}
               className="px-6 py-2 rounded-full border border-gray-300 text-sm md:text-base font-medium hover:bg-[#205457] hover:text-white transition"
             >
               {item}

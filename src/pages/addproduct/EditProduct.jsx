@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAppContext } from '../../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     PlusCircle,
@@ -20,6 +21,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../lib/axios';
 
 const EditProduct = () => {
+    const { showAlert } = useAppContext();
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -222,13 +224,12 @@ const EditProduct = () => {
             await api.put(`/Product/Update?id=${id}`, payload);
 
             console.log("✅ Product Updated Successfully");
+            showAlert('Product updated successfully!', 'success', 'Success');
             setShowSuccessPopup(true);
         } catch (err) {
             console.error("❌ Update Failed:", err);
-
             const errorData = err.response?.data;
             let errorMsg = "Failed to update product.";
-
             if (typeof errorData === 'string') {
                 errorMsg = errorData;
             } else if (errorData?.message) {
@@ -236,8 +237,7 @@ const EditProduct = () => {
             } else if (errorData?.errors) {
                 errorMsg = Object.values(errorData.errors).flat().join(", ");
             }
-
-            alert(`Backend Error: ${errorMsg}\n\nCheck the console for details.`);
+            showAlert(`Backend Error: ${errorMsg}`, "error", "Error");
         } finally {
             setIsSaving(false);
         }
@@ -334,7 +334,7 @@ const EditProduct = () => {
                                                 exit={{ opacity: 0, scale: 0.9 }}
                                                 className="relative aspect-[4/5] rounded-[30px] overflow-hidden shadow-xl border-4 border-white group"
                                             >
-                                                <img src={preview} className="w-full h-full object-cover" alt="Preview" />
+                                                <SafeImage src={preview} className="w-full h-full object-cover" alt="Preview" />
                                                 <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-center">
                                                     <button
                                                         type="button"

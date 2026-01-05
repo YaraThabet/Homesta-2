@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useAppContext } from '../../../context/AppContext';
 import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Heart, Minus, Plus, Star, ArrowLeft, Upload, ShoppingCart, Check, X } from 'lucide-react';
 import api from '../../../lib/axios';
+import SafeImage from '../../../components/SafeImage';
 
 const COLOR_MAP = {
   "brown": "#A67B5B",
@@ -76,6 +78,7 @@ const getColorName = (colorVal) => {
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showAlert } = useAppContext();
 
   // Data State
   const [product, setProduct] = useState(null);
@@ -284,7 +287,7 @@ const ProductDetail = () => {
       setNewReview({ rating: 5, comment: '' });
     } catch (err) {
       console.error("Submit review failed", err);
-      alert("Failed to submit review. Please try again.");
+      showAlert("Failed to submit review. Please try again.", "error", "Error");
     } finally {
       setSubmitReviewLoading(false);
     }
@@ -299,7 +302,7 @@ const ProductDetail = () => {
       setReviews(Array.isArray(revRes.data) ? revRes.data : []);
     } catch (err) {
       console.error("Delete review failed", err);
-      alert("Failed to delete review.");
+      showAlert("Failed to delete review.", "error", "Error");
     }
   };
 
@@ -319,7 +322,7 @@ const ProductDetail = () => {
       setEditingReview(null);
     } catch (err) {
       console.error("Update review failed", err);
-      alert("Failed to update review.");
+      showAlert("Failed to update review.", "error", "Error");
     } finally {
       setSubmitReviewLoading(false);
     }
@@ -352,7 +355,7 @@ const ProductDetail = () => {
       setShowSuccessModal(true);
     } catch (err) {
       console.error("Add to cart error", err);
-      alert("Failed to add to cart. " + (err.response?.data?.message || err.message));
+      showAlert("Failed to add to cart. " + (err.response?.data?.message || err.message), "error", "Error");
     } finally {
       setAddingToCart(false);
     }
@@ -380,7 +383,9 @@ const ProductDetail = () => {
           name: product?.name || '',
           price: product?.price || 0,
           dateAdded: new Date().toLocaleDateString(),
-          image: images?.[0] || ''
+          image: images?.[0] || '',
+          color: selectedColor || '',
+          quantity: product?.quantity || 0
         };
         const cleaned = arr.filter((it) => String(it.id) !== String(id));
         cleaned.push(item);
@@ -461,9 +466,10 @@ const ProductDetail = () => {
           {/* Image Gallery */}
           <div>
             <div className="mb-6 bg-white/40 backdrop-blur-md rounded-[30px] p-8 flex items-center justify-center border border-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.04)] group">
-              <img
+              <SafeImage
                 src={images[selectedImageIndex]}
                 alt={product.name}
+                type="product"
                 className="w-full h-[400px] object-contain mix-blend-multiply"
               />
             </div>
@@ -476,9 +482,10 @@ const ProductDetail = () => {
                     className={`w-20 h-20 flex-shrink-0 border-2 rounded-lg overflow-hidden bg-muted/30 ${selectedImageIndex === index ? 'border-[#205457]' : 'border-border'
                       }`}
                   >
-                    <img
+                    <SafeImage
                       src={image}
                       alt={`${product.name} ${index + 1}`}
+                      type="product"
                       className="w-full h-full object-contain p-1 mix-blend-multiply"
                     />
                   </button>

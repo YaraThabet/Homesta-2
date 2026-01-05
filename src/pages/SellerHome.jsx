@@ -22,6 +22,9 @@ const SellerHome = () => {
     const userName = localStorage.getItem('userName') || 'Seller';
     const storeId = localStorage.getItem('storeId');
     const [liveInventory, setLiveInventory] = useState('0');
+    const [revenue, setRevenue] = useState('$0.00');
+    const [ordersCount, setOrdersCount] = useState('0');
+    const [visitors, setVisitors] = useState('0');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -43,9 +46,34 @@ const SellerHome = () => {
                 }
 
                 if (currentId) {
+                    // Fetch Products for Inventory Count
                     const productsRes = await api.get(`/Store/${currentId}/products`);
                     const products = Array.isArray(productsRes.data) ? productsRes.data : [];
                     setLiveInventory(products.length.toString());
+
+                    // Try to fetch Revenue and Orders if endpoints exist
+                    try {
+                        // Assuming /Order/store/{id} returns list of orders
+                        const ordersRes = await api.get(`/Order/store/${currentId}`);
+                        const orders = Array.isArray(ordersRes.data) ? ordersRes.data : [];
+                        setOrdersCount(orders.length.toString());
+
+                        // Sum up revenue
+                        const totalRev = orders.reduce((sum, order) => sum + (Number(order.totalAmount || order.totalPayment || 0)), 0);
+                        setRevenue(`$${totalRev.toLocaleString()}`);
+                    } catch (e) {
+                        console.log("Orders/Revenue endpoints not found or failed, using defaults");
+                    }
+
+                    // Try to fetch store visitors/analytics
+                    try {
+                        const analyticsRes = await api.get(`/Analytics/store/${currentId}`).catch(() => ({ data: {} }));
+                        if (analyticsRes.data.visitors) setVisitors(analyticsRes.data.visitors.toString());
+                        if (analyticsRes.data.revenue) setRevenue(`$${Number(analyticsRes.data.revenue).toLocaleString()}`);
+                        if (analyticsRes.data.orders) setOrdersCount(analyticsRes.data.orders.toString());
+                    } catch (e) {
+                        // Silent fail for analytics
+                    }
                 }
             } catch (err) {
                 console.error("Failed to verify store or fetch stats:", err);
@@ -114,9 +142,9 @@ const SellerHome = () => {
                     variants={fadeInUp}
                 >
                     {[
-                        { label: 'Total Revenue', value: '$0.00', trend: 'Monthly', icon: ShoppingBag, color: '#205457' },
-                        { label: 'Orders Received', value: '0', trend: 'Unfulfilled', icon: Package, color: '#89917D' },
-                        { label: 'Store Visitors', value: '0', trend: 'Live Now', icon: Users, color: '#B19470' },
+                        { label: 'Total Revenue', value: revenue, trend: 'Monthly', icon: ShoppingBag, color: '#205457' },
+                        { label: 'Orders Received', value: ordersCount, trend: 'Unfulfilled', icon: Package, color: '#89917D' },
+                        { label: 'Store Visitors', value: visitors, trend: 'Live Now', icon: Users, color: '#B19470' },
                         { label: 'Live Inventory', value: liveInventory, trend: 'Active Pieces', icon: Package, color: '#205457', to: '/seller-products' },
                     ].map((stat, i) => (
                         <motion.div
