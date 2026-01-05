@@ -9,7 +9,6 @@ import {
   LogOut,
   Notebook,
   LockIcon,
-  LockIcon,
   Star,
   Bookmark,
 } from "lucide-react";
