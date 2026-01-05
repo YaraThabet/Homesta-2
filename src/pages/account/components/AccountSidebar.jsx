@@ -8,12 +8,14 @@ import {
   Settings,
   LogOut,
   Notebook,
-  LockIcon
+  LockIcon,
+  Star
 } from "lucide-react";
 
 const sidebarItems = [
   { icon: User, label: "Personal Data", to: "/account" },
   { icon: Package, label: "My Orders", to: "/account/orders" },
+  { icon: Star, label: "My Reviews", to: "/account/reviews" },
   { icon: Notebook, label: "Manage Address", to: "/account/address" },
   { icon: HelpCircle, label: "Help Center", to: "/account/help-center" },
 ];

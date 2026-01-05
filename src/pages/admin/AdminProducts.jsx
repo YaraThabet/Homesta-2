@@ -21,8 +21,8 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) 
             try {
                 const id = product.productId || product.id;
                 const res = await api.get(`/ProductImages/product/${id}`);
-                if (Array.isArray(res.data) && res.data.length > 0 && res.data[0].imageUrls) {
-                    setImages(res.data[0].imageUrls);
+                if (res.data && Array.isArray(res.data.images)) {
+                    setImages(res.data.images.map(img => img.imageUrl).filter(Boolean));
                     setSelectedImageIndex(0);
                 }
             } catch (err) {
@@ -177,25 +177,25 @@ const ProductCard = ({ product, handleDelete, onViewDetails, categoryMap }) => {
                 const id = product.productId || product.id;
                 if (!id) return;
                 const res = await api.get(`/ProductImages/product/${id}`);
-                if (Array.isArray(res.data) && res.data.length > 0 && res.data[0].imageUrls) {
-                    const validImages = res.data[0].imageUrls.filter(img => typeof img === 'string');
-                    setImages(validImages);
+                if (res.data && Array.isArray(res.data.images)) {
+                    const urls = res.data.images.map(img => img.imageUrl).filter(Boolean);
+                    setImages(urls);
                 }
             } catch (err) { } finally { setLoadingImage(false); }
         };
         fetchImages();
     }, [product]);
 
-    const displayImage = images.length > 0 ? images[0] : null;
+    const displayImage = images.length > 0 ? images[0] : product.imagePath || product.image;
 
     return (
         <motion.div
             layout
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white p-5 rounded-[30px] border border-gray-100 shadow-sm hover:shadow-xl transition-all group hover:-translate-y-1 duration-300 flex flex-col h-full"
+            className="bg-white p-5 rounded-[40px] border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-[#205457]/5 transition-all group hover:-translate-y-1 duration-500 flex flex-col h-full"
         >
-            <div className="relative h-56 bg-gray-100 rounded-[22px] mb-4 overflow-hidden flex-shrink-0">
+            <div className="relative aspect-square bg-gray-50 rounded-[30px] mb-4 overflow-hidden flex-shrink-0">
                 {displayImage ? (
                     <img
                         src={getImageUrl(displayImage)}

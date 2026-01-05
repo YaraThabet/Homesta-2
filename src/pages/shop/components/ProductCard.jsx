@@ -15,11 +15,19 @@ const ProductCard = ({ product }) => {
     const fetchImage = async () => {
       try {
         const res = await api.get(`/ProductImages/product/${productId}`);
-        if (res.data && res.data.length > 0 && res.data[0].imageUrls && res.data[0].imageUrls.length > 0) {
-          const url = res.data[0].imageUrls[0];
-          if (url && typeof url === 'string') {
-            setImageUrl(url.startsWith('http') ? url : `http://homefinish.runasp.net${url}`);
-          }
+        let url = null;
+        if (res.data && Array.isArray(res.data.images) && res.data.images.length > 0) {
+          url = res.data.images[0].imageUrl;
+        } else if (Array.isArray(res.data) && res.data.length > 0 && res.data[0].imageUrls) {
+          url = res.data[0].imageUrls[0];
+        }
+
+        if (!url && (product.imagePath || product.image)) {
+          url = product.imagePath || product.image;
+        }
+
+        if (url && typeof url === 'string') {
+          setImageUrl(url.startsWith('http') ? url : `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`);
         }
       } catch (err) {
         // silent fail

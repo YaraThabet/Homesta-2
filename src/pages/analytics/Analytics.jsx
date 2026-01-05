@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import api from '../../lib/axios';
 import {
   TrendingUp,
   ArrowUpRight,
@@ -10,16 +11,10 @@ import {
   PieChart,
   BarChart3,
   Calendar,
-  ArrowLeft
+  ArrowLeft,
+  Star
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
-const stats = [
-  { id: 1, label: 'Store Earnings', value: '$12,850', trend: '+12.5%', isUp: true, icon: ShoppingBag, color: '#205457' },
-  { id: 2, label: 'Sold Items', value: '482', trend: '+3.2%', isUp: true, icon: Package, color: '#89917D' },
-  { id: 3, label: 'Store Views', value: '1,240', trend: '-2.1%', isUp: false, icon: Users, color: '#B19470' },
-  { id: 4, label: 'Conversion Rate', value: '3.8%', trend: '+0.5%', isUp: true, icon: TrendingUp, color: '#205457' },
-];
 
 const sellingPerformance = [
   { id: 1, title: 'Nordic Oak Dining Table', category: 'Tables', sales: 45, revenue: '$4,500', growth: '+15%', status: 'Best Seller' },
@@ -29,6 +24,34 @@ const sellingPerformance = [
 
 const Analytics = () => {
   const navigate = useNavigate();
+  const [reviews, setReviews] = React.useState([]);
+  const [avgRating, setAvgRating] = React.useState(0);
+  const storeId = localStorage.getItem('storeId');
+
+  React.useEffect(() => {
+    if (!storeId) return;
+    const fetchReviews = async () => {
+      try {
+        const response = await api.get(`/Review/store/${storeId}`);
+        const data = Array.isArray(response.data) ? response.data : [];
+        setReviews(data);
+        if (data.length > 0) {
+          const avg = data.reduce((acc, curr) => acc + curr.rating, 0) / data.length;
+          setAvgRating(avg.toFixed(1));
+        }
+      } catch (err) {
+        console.error("Failed to fetch reviews for analytics:", err);
+      }
+    };
+    fetchReviews();
+  }, [storeId]);
+
+  const stats = [
+    { id: 1, label: 'Store Earnings', value: '$12,850', trend: '+12.5%', isUp: true, icon: ShoppingBag, color: '#205457' },
+    { id: 2, label: 'Sold Items', value: '482', trend: '+3.2%', isUp: true, icon: Package, color: '#89917D' },
+    { id: 3, label: 'Avg Rating', value: avgRating > 0 ? avgRating : 'N/A', trend: reviews.length > 0 ? `${reviews.length} reviews` : 'No reviews', isUp: true, icon: Star, color: '#B19470' },
+    { id: 4, label: 'Conversion Rate', value: '3.8%', trend: '+0.5%', isUp: true, icon: TrendingUp, color: '#205457' },
+  ];
 
   const containerVariants = {
     hidden: { opacity: 0 },

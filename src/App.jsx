@@ -23,6 +23,7 @@ import Collections from "./pages/account/Collections.jsx";
 import HelpCenter from "./pages/account/HelpCenter.jsx";
 import Orders from "./pages/account/Orders.jsx";
 import Payment from "./pages/account/Payment.jsx";
+import MyReviews from "./pages/account/MyReviews.jsx";
 import Dashboard from "./pages/profile/Dashboard.jsx";
 import Analytics from "./pages/analytics/Analytics.jsx";
 import Addproduct from "./pages/addproduct/Addproduct.jsx";
@@ -60,6 +61,7 @@ import AdminProducts from "./pages/admin/AdminProducts.jsx";
 import AdminCategories from "./pages/admin/AdminCategories.jsx";
 import AdminAnalytics from "./pages/admin/AdminAnalytics.jsx";
 import AdminNotifications from "./pages/admin/AdminNotifications.jsx";
+import StoreProducts from "./pages/store/StoreProducts.jsx";
 
 const App = () => {
   const location = useLocation();
@@ -136,6 +138,7 @@ const App = () => {
             <Route path="help-center" element={<HelpCenter />} />
             <Route path="orders" element={<Orders />} />
             <Route path="payment" element={<Payment />} />
+            <Route path="reviews" element={<MyReviews />} />
           </Route>
 
           {/* Dashboard */}
@@ -181,6 +184,7 @@ const App = () => {
           <Route path="/admin/categories" element={<AdminCategories />} />
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
           <Route path="/admin/notifications" element={<AdminNotifications />} />
+          <Route path="/store/:id" element={<StoreProducts />} />
 
           {/* 404 */}
           <Route path="*" element={<Error404 />} />
