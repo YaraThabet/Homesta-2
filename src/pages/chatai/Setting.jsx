@@ -78,7 +78,10 @@ export default function Setting() {
 
         {/* Chats Title */}
         {open && (
-          <p className="px-6 py-4 text-gray-400 text-xs font-bold uppercase tracking-wider">
+          <p
+            onClick={() => navigate('/ai-chat')}
+            className="px-6 py-4 text-gray-400 text-xs font-bold uppercase tracking-wider cursor-pointer hover:text-blue-600"
+          >
             Your Chats
           </p>
         )}
@@ -88,6 +91,7 @@ export default function Setting() {
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
+              onClick={() => navigate('/ai-chat')}
               className="flex items-center justify-between px-3 py-2 rounded-xl hover:bg-white/50 cursor-pointer text-gray-600 hover:text-gray-900 transition-all group"
             >
               <div className="flex items-center gap-3 overflow-hidden">

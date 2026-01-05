@@ -2,86 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import FooterBenefits from "../shop/components/FooterBenefits";
-
-const blogPosts = [
-  {
-    id: 1,
-    title: "Homesta Trends 2025: What's Hot and What's Not",
-    excerpt: "Explore the latest furniture trends shaping modern and elegant living spaces.",
-    date: "15 April 2025",
-    image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=400&h=300&fit=crop"
-  },
-  {
-    id: 2,
-    title: "The Ultimate Guide to Choosing the Perfect Sofa",
-    excerpt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-    date: "14 April 2025",
-    image: "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=400&h=300&fit=crop"
-  },
-  {
-    id: 3,
-    title: "Choosing the Right Dining Table for Your Lifestyle",
-    excerpt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-    date: "12 April 2025",
-    image: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=400&h=300&fit=crop"
-  },
-  {
-    id: 4,
-    title: "Choosing the Right Material for Your Furniture",
-    excerpt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-    date: "11 April 2025",
-    image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=300&fit=crop"
-  },
-  {
-    id: 5,
-    title: "Modern Coffee Tables for Stylish Living Rooms",
-    excerpt: "Discover coffee table designs that combine functionality with contemporary aesthetics.",
-    date: "10 April 2025",
-    image: "https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=400&h=300&fit=crop"
-  },
-  {
-    id: 6,
-    title: "Minimal Sideboards for Elegant Home Storage",
-    excerpt: "Learn how modern sideboards add warmth, organization, and style to your living space.",
-    date: "09 April 2025",
-    image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=300&fit=crop"
-  },
-  {
-    id: 7,
-    title: "Budget-Friendly Furniture Shopping Tips",
-    excerpt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-    date: "08 April 2025",
-    image: "https://images.unsplash.com/photo-1618219908412-a29a1bb7b86e?w=400&h=300&fit=crop"
-  },
-  {
-    id: 8,
-    title: "Organizing Your Home Office with Furniture",
-    excerpt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-    date: "07 April 2025",
-    image: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=400&h=300&fit=crop"
-  },
-  {
-    id: 9,
-    title: "Elevating Your Home Décor with Bold Furniture Choices",
-    excerpt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-    date: "06 April 2025",
-    image: "https://images.unsplash.com/photo-1616137466211-f939a420be84?w=400&h=300&fit=crop"
-  },
-    {
-    id: 10,
-    title: "Elevating Your Home Décor with Bold Furniture Choices",
-    excerpt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-    date: "06 April 2025",
-    image: "https://images.unsplash.com/photo-1616137466211-f939a420be84?w=400&h=300&fit=crop"
-  },
-    {
-    id: 11,
-    title: "Elevating Your Home Décor with Bold Furniture Choices",
-    excerpt: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
-    date: "06 April 2025",
-    image: "https://images.unsplash.com/photo-1616137466211-f939a420be84?w=400&h=300&fit=crop"
-  }
-];
+import { blogPosts } from "../../data/blogsData";
 
 const Blogs = () => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -130,12 +51,9 @@ const currentPosts = blogPosts.slice(indexOfFirstPost, indexOfLastPost);
               <h2 className="text-lg font-semibold text-foreground mb-2 leading-tight group-hover:text-primary transition-colors">
                 {post.title}
               </h2>
-              <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                {post.excerpt}
-              </p>
-              <a href="#" className="text-sm text-foreground underline hover:text-primary transition-colors">
-                Read More
-              </a>
+              <Link to={`/blogs/${post.id}`} className="inline-block text-sm bg-[#205457] text-white px-4 py-1.5 rounded-full hover:bg-[#18433a] transition-colors">
+               Details
+              </Link>
             </article>
           ))}
         </div>

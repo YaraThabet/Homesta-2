@@ -12,8 +12,9 @@ import Home from "./pages/home/Home.jsx";
 import Category from "./pages/Category.jsx";
 import Shop from "./pages/shop/Shop";
 import Blogs from "./pages/blogs/Blogs.jsx";
+import BlogDetail from "./pages/blogs/BlogDetail.jsx";
 import Faqs from "./pages/faqs/Faqs.jsx";
-import ProductDetail from "./pages/ProductDetail.jsx";
+import ProductDetail from "./pages/shop/components/ProductDetail.jsx";
 import Checkout from "./pages/checkout/Checkout.jsx";
 import Wishlist from "./pages/account/Wishlist.jsx";
 import Account from "./pages/account/Account";
@@ -119,6 +120,7 @@ const App = () => {
           <Route path="/category/SubCategory" element={<SubCategory />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/blogs" element={<Blogs />} />
+          <Route path="/blogs/:id" element={<BlogDetail />} />
           <Route path="/faqs" element={<Faqs />} />
           <Route path="/product/:id" element={<ProductDetail />} />
 
