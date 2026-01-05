@@ -21,6 +21,7 @@ import PasswordManager from "./pages/account/PasswordManager.jsx";
 import Collections from "./pages/account/Collections.jsx";
 import HelpCenter from "./pages/account/HelpCenter.jsx";
 import Orders from "./pages/account/Orders.jsx";
+import ManageAddress from "./pages/account/ManageAddress";
 import Payment from "./pages/account/Payment.jsx";
 import Dashboard from "./pages/profile/Dashboard.jsx";
 import Analytics from "./pages/analytics/Analytics.jsx";
@@ -70,7 +71,8 @@ const App = () => {
     location.pathname.startsWith("/seller-products") ||
     location.pathname.startsWith("/store-settings") ||
     location.pathname.startsWith("/seller-reviews") ||
-    (location.pathname.startsWith("/analytics") && !location.pathname.startsWith("/admin"));
+    (location.pathname.startsWith("/analytics") &&
+      !location.pathname.startsWith("/admin"));
 
   const isAdminPage = location.pathname.startsWith("/admin");
 
@@ -86,19 +88,53 @@ const App = () => {
 
   // Identification of valid routes to hide navbar on 404
   const validRoutes = [
-    "/", "/notifications", "/category", "/subcategory/:categoryName", "/shop",
-    "/blogs", "/faqs", "/product/:id", "/checkout", "/wishlist", "/shopping-cart",
-    "/account", "/account/*", "/dashboard", "/analytics", "/addproduct",
-    "/chatai", "/ai-chat", "/summary-order", "/order-success", "/tracking-order",
-    "/about", "/contact", "/track-order", "/customer-support", "/login",
-    "/signup", "/forgot-password", "/reset-password", "/verify-code",
-    "/create-store", "/seller-home", "/seller-products", "/edit-product/:id",
-    "/store-settings", "/seller-reviews",
+    "/",
+    "/notifications",
+    "/category",
+    "/subcategory/:categoryName",
+    "/shop",
+    "/blogs",
+    "/faqs",
+    "/product/:id",
+    "/checkout",
+    "/wishlist",
+    "/shopping-cart",
+    "/account",
+    "/account/*",
+    "/dashboard",
+    "/analytics",
+    "/addproduct",
+    "/chatai",
+    "/ai-chat",
+    "/summary-order",
+    "/order-success",
+    "/tracking-order",
+    "/about",
+    "/contact",
+    "/track-order",
+    "/customer-support",
+    "/login",
+    "/signup",
+    "/forgot-password",
+    "/reset-password",
+    "/verify-code",
+    "/create-store",
+    "/seller-home",
+    "/seller-products",
+    "/edit-product/:id",
+    "/store-settings",
+    "/seller-reviews",
     // Admin Routes
-    "/admin/dashboard", "/admin/stores", "/admin/products", "/admin/categories", "/admin/analytics", "/admin/notifications", "/admin/store/:id"
+    "/admin/dashboard",
+    "/admin/stores",
+    "/admin/products",
+    "/admin/categories",
+    "/admin/analytics",
+    "/admin/notifications",
+    "/admin/store/:id",
   ];
 
-  const isInvalidPage = !validRoutes.some(path =>
+  const isInvalidPage = !validRoutes.some((path) =>
     matchPath({ path, end: true }, location.pathname)
   );
 
@@ -106,9 +142,14 @@ const App = () => {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {!shouldHideNavbar && (
-        isAdminPage ? <AdminNavbar /> : (isSellerPage ? <SellerNavbar /> : <Navbar />)
-      )}
+      {!shouldHideNavbar &&
+        (isAdminPage ? (
+          <AdminNavbar />
+        ) : isSellerPage ? (
+          <SellerNavbar />
+        ) : (
+          <Navbar />
+        ))}
 
       {/* padding-top لتعويض Navbar fixed */}
       <main className="flex-1">
@@ -133,6 +174,8 @@ const App = () => {
             <Route path="collections" element={<Collections />} />
             <Route path="help-center" element={<HelpCenter />} />
             <Route path="orders" element={<Orders />} />
+            <Route path="/account/ManageAddress" element={<ManageAddress />} />
+
             <Route path="payment" element={<Payment />} />
           </Route>
 

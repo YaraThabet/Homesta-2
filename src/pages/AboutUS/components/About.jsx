@@ -23,13 +23,13 @@ const About = () => {
       icon: <Award className="w-8 h-8" />,
       title: "Our Quality Wood",
       description:
-        "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.",
+        "We exclusively use premium hardwoods including oak, walnut, and maple sourced from sustainable forests. Each wood piece is carefully selected, kiln-dried to perfection, and inspected for grain quality and durability.",
     },
     {
       icon: <Home className="w-8 h-8" />,
       title: "Comfort-Driven Design",
       description:
-        "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.",
+        "Great furniture should feel as good as it looks. Our design philosophy centers on ergonomic excellence and everyday comfort. From the perfect seat depth to supportive cushioning, every Homesta piece is engineered for real living.",
     },
   ];
 
@@ -38,7 +38,9 @@ const About = () => {
       {/* Main Content */}
       <header className="bg-[#F6F6F6] py-12 pt-[180px]">
         <div className="container mx-auto px-4 text-center">
-          <h1 className="text-3xl font-semibold text-gray-800 mb-2">About Us</h1>
+          <h1 className="text-3xl font-semibold text-gray-800 mb-2">
+            About Us
+          </h1>
           <nav className="text-sm text-gray-500">
             <Link to="/" className="hover:text-[#205457] transition-colors">
               Home
@@ -51,7 +53,6 @@ const About = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 ">
         {/* Header */}
         <div className="text-center mb-16">
-
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-2">
             <span className="text-gray-900">Crafted Comfort: </span>
             <span style={{ color: "#205457" }}>Quality</span>
@@ -63,10 +64,11 @@ const About = () => {
           </h2>
 
           <p className="text-gray-600 max-w-3xl mx-auto leading-relaxed text-base mb-2">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat.
+            At Homesta, we believe your home deserves furniture that tells a
+            story. For over 25 years, we've been handcrafting premium furniture
+            pieces that blend timeless elegance with modern functionality. Each
+            piece is carefully designed and built to become a cherished part of
+            your home for generations to come.
           </p>
 
           <p className="text-gray-900 font-semibold mt-4 text-lg">
@@ -145,14 +147,17 @@ const About = () => {
 
             <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
               Setting the Standard for{" "}
-              <span style={{ color: "#205457" }}>Quality Homesta</span>
+              <span style={{ color: "#205457" }}>Quality at Homesta</span>
             </h3>
 
             <p className="text-gray-600 mb-10 leading-relaxed text-base">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat.
+              Quality is not just a promise at Homesta—it's our foundation. We
+              source only the finest materials, from sustainably harvested
+              hardwoods to premium fabrics, ensuring every piece meets our
+              rigorous standards. Our skilled craftsmen bring decades of
+              experience to every detail, from the precision of each joint to
+              the smooth finish of every surface. When you choose Homesta,
+              you're choosing furniture built to last a lifetime.
             </p>
 
             <div className="space-y-8">
@@ -224,21 +229,6 @@ const About = () => {
                     <Instagram size={18} />
                   </div>
                 </div>
-
-                {/* Feature */}
-                {/* <div className="flex items-start gap-3 bg-amber-50 p-3 rounded-lg">
-                  <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-amber-600 text-lg">📦</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">
-                      Free Shipping
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      Free shipping for order above $150
-                    </p>
-                  </div>
-                </div> */}
               </div>
             </div>
 
@@ -256,7 +246,7 @@ const About = () => {
                   Robert Fox
                 </h4>
                 <p className="text-teal-700 font-medium mb-4 text-center">
-                  Carpenter
+                  Master Carpenter
                 </p>
 
                 {/* Social Icons */}
@@ -274,21 +264,6 @@ const About = () => {
                     <Instagram size={18} />
                   </div>
                 </div>
-
-                {/* Feature */}
-                {/* <div className="flex items-start gap-3 bg-amber-50 p-3 rounded-lg">
-                  <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-amber-600 text-lg">💳</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">
-                      Flexible Payment
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      Flexible payment options available
-                    </p>
-                  </div>
-                </div> */}
               </div>
             </div>
 
@@ -306,7 +281,7 @@ const About = () => {
                   Theresa Webb
                 </h4>
                 <p className="text-teal-700 font-medium mb-4 text-center">
-                  Carpenter
+                  Head Designer
                 </p>
 
                 {/* Social Icons */}
@@ -324,21 +299,6 @@ const About = () => {
                     <Instagram size={18} />
                   </div>
                 </div>
-
-                {/* Feature */}
-                {/* <div className="flex items-start gap-3 bg-amber-50 p-3 rounded-lg">
-                  <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-                    <span className="text-amber-600 text-lg">🤝</span>
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-gray-900">
-                      24/7 Support
-                    </p>
-                    <p className="text-xs text-gray-600">
-                      Get support online 24 hours a day
-                    </p>
-                  </div>
-                </div> */}
               </div>
             </div>
           </div>

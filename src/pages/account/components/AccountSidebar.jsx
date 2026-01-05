@@ -1,4 +1,4 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink } from "react-router-dom";
 import {
   User,
   CreditCard,
@@ -8,13 +8,13 @@ import {
   Settings,
   LogOut,
   Notebook,
-  LockIcon
+  LockIcon,
 } from "lucide-react";
 
 const sidebarItems = [
   { icon: User, label: "Personal Data", to: "/account" },
   { icon: Package, label: "My Orders", to: "/account/orders" },
-  { icon: Notebook, label: "Manage Address", to: "/account/address" },
+  { icon: Notebook, label: "Manage Address", to: "/account/ManageAddress" },
   { icon: HelpCircle, label: "Help Center", to: "/account/help-center" },
 ];
 
@@ -23,10 +23,12 @@ const AccountSidebar = ({
   onNavigate,
   profileImage,
   firstName = "Maram",
-  lastName = "Elamly"
+  lastName = "Elamly",
 }) => {
   return (
-    <aside className={`bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full ${className}`}>
+    <aside
+      className={`bg-white rounded-2xl shadow-sm border border-gray-200 p-6 flex flex-col h-full ${className}`}
+    >
       {/* User Profile Header */}
       <div className="flex items-center gap-3 mb-5">
         <div className="h-12 w-12 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center overflow-hidden">
@@ -38,12 +40,15 @@ const AccountSidebar = ({
             />
           ) : (
             <span className="text-gray-600 font-medium text-sm">
-              {firstName?.[0]}{lastName?.[0]}
+              {firstName?.[0]}
+              {lastName?.[0]}
             </span>
           )}
         </div>
         <div className="min-w-0">
-          <h3 className="font-semibold text-gray-900 text-[15px] truncate">{firstName} {lastName}</h3>
+          <h3 className="font-semibold text-gray-900 text-[15px] truncate">
+            {firstName} {lastName}
+          </h3>
           <p className="text-sm text-gray-500 truncate">Customer Operations</p>
         </div>
       </div>
@@ -60,10 +65,13 @@ const AccountSidebar = ({
               to={item.to}
               onClick={onNavigate}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 ${isActive
-                  ? "text-white shadow-sm"
-                  : "text-gray-700 hover:bg-gray-100"
-                } ${isActive ? 'bg-gradient-to-r from-[#46B6BD] to-[#205457]' : ''}`
+                `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 ${
+                  isActive
+                    ? "text-white shadow-sm"
+                    : "text-gray-700 hover:bg-gray-100"
+                } ${
+                  isActive ? "bg-gradient-to-r from-[#46B6BD] to-[#205457]" : ""
+                }`
               }
             >
               <Icon className="h-4 w-4 flex-shrink-0" />
@@ -72,10 +80,6 @@ const AccountSidebar = ({
           );
         })}
       </nav>
-
-
-
-
     </aside>
   );
 };
