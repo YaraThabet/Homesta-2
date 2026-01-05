@@ -99,9 +99,12 @@ const translations = {
     }
 };
 
+import GlobalAlert from '../components/GlobalAlert';
+
 export const AppProvider = ({ children }) => {
     const [language, setLanguage] = useState(localStorage.getItem('language') || 'en');
     const [currency, setCurrency] = useState(localStorage.getItem('currency') || 'usd');
+    const [alert, setAlert] = useState({ isOpen: false, type: 'info', title: '', message: '' });
 
     useEffect(() => {
         localStorage.setItem('language', language);
@@ -134,6 +137,14 @@ export const AppProvider = ({ children }) => {
         return `$${numPrice.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
     };
 
+    const showAlert = (message, type = 'info', title = '') => {
+        setAlert({ isOpen: true, message, type, title });
+    };
+
+    const closeAlert = () => {
+        setAlert(prev => ({ ...prev, isOpen: false }));
+    };
+
     const value = {
         language,
         setLanguage,
@@ -141,7 +152,16 @@ export const AppProvider = ({ children }) => {
         setCurrency,
         formatPrice,
         t,
+        showAlert
     };
 
-    return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+    return (
+        <AppContext.Provider value={value}>
+            {children}
+            <GlobalAlert
+                {...alert}
+                onClose={closeAlert}
+            />
+        </AppContext.Provider>
+    );
 };

@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useAppContext } from '../../context/AppContext';
+import SafeImage from '../../components/SafeImage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Package, Search, Plus, Filter, MoreVertical, Edit2, Trash2, Eye, Star, DollarSign, Tag, Image as ImageIcon, X } from 'lucide-react';
 import api from '../../lib/axios';
@@ -21,8 +23,8 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) 
             try {
                 const id = product.productId || product.id;
                 const res = await api.get(`/ProductImages/product/${id}`);
-                if (Array.isArray(res.data) && res.data.length > 0 && res.data[0].imageUrls) {
-                    setImages(res.data[0].imageUrls);
+                if (res.data && Array.isArray(res.data.images)) {
+                    setImages(res.data.images.map(img => img.imageUrl).filter(Boolean));
                     setSelectedImageIndex(0);
                 }
             } catch (err) {
@@ -56,28 +58,20 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) 
                     {/* Left: Images Gallery */}
                     <div className="space-y-4">
                         <div className="aspect-square bg-gray-100 rounded-3xl overflow-hidden relative shadow-inner border border-gray-100">
-                            {images.length > 0 ? (
-                                <motion.img
-                                    key={selectedImageIndex} // Key change triggers animation
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    transition={{ duration: 0.3 }}
-                                    src={getImageUrl(images[selectedImageIndex])}
-                                    alt="Main"
+                            <motion.div
+                                key={selectedImageIndex} // Key change triggers animation
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.3 }}
+                                className="w-full h-full"
+                            >
+                                <SafeImage
+                                    src={images.length > 0 ? getImageUrl(images[selectedImageIndex]) : null}
+                                    alt={product.name || "Product Image"}
+                                    type="product"
                                     className="w-full h-full object-cover"
-                                    onError={(e) => {
-                                        e.target.style.display = 'none';
-                                        e.target.nextElementSibling.style.display = 'flex';
-                                    }}
                                 />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                    {loadingImages ? <div className="animate-pulse w-full h-full bg-gray-200" /> : <Package size={64} />}
-                                </div>
-                            )}
-                            <div className="hidden absolute inset-0 w-full h-full items-center justify-center bg-gray-100 text-gray-300">
-                                <ImageIcon size={48} />
-                            </div>
+                            </motion.div>
                         </div>
                         {/* Thumbnails */}
                         {images.length > 1 && (
@@ -91,11 +85,11 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) 
                                             : 'border-gray-100 hover:border-gray-300'
                                             }`}
                                     >
-                                        <img
+                                        <SafeImage
                                             src={getImageUrl(img)}
                                             className="w-full h-full object-cover"
                                             alt={`Thumb ${idx}`}
-                                            onError={(e) => e.target.style.display = 'none'}
+                                            type="product"
                                         />
                                     </button>
                                 ))}
@@ -177,43 +171,31 @@ const ProductCard = ({ product, handleDelete, onViewDetails, categoryMap }) => {
                 const id = product.productId || product.id;
                 if (!id) return;
                 const res = await api.get(`/ProductImages/product/${id}`);
-                if (Array.isArray(res.data) && res.data.length > 0 && res.data[0].imageUrls) {
-                    const validImages = res.data[0].imageUrls.filter(img => typeof img === 'string');
-                    setImages(validImages);
+                if (res.data && Array.isArray(res.data.images)) {
+                    const urls = res.data.images.map(img => img.imageUrl).filter(Boolean);
+                    setImages(urls);
                 }
             } catch (err) { } finally { setLoadingImage(false); }
         };
         fetchImages();
     }, [product]);
 
-    const displayImage = images.length > 0 ? images[0] : null;
+    const displayImage = images.length > 0 ? images[0] : product.imagePath || product.image;
 
     return (
         <motion.div
             layout
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white p-5 rounded-[30px] border border-gray-100 shadow-sm hover:shadow-xl transition-all group hover:-translate-y-1 duration-300 flex flex-col h-full"
+            className="bg-white p-5 rounded-[40px] border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-[#205457]/5 transition-all group hover:-translate-y-1 duration-500 flex flex-col h-full"
         >
-            <div className="relative h-56 bg-gray-100 rounded-[22px] mb-4 overflow-hidden flex-shrink-0">
-                {displayImage ? (
-                    <img
-                        src={getImageUrl(displayImage)}
-                        alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => {
-                            e.target.style.display = 'none';
-                            e.target.nextElementSibling.style.display = 'flex';
-                        }}
-                    />
-                ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-300">
-                        {loadingImage ? <div className="animate-pulse w-full h-full bg-gray-200" /> : <Package size={40} />}
-                    </div>
-                )}
-                <div className="hidden absolute inset-0 w-full h-full items-center justify-center bg-gray-100 text-gray-300">
-                    <Package size={40} />
-                </div>
+            <div className="relative aspect-square bg-gray-50 rounded-[30px] mb-4 overflow-hidden flex-shrink-0">
+                <SafeImage
+                    src={getImageUrl(displayImage)}
+                    alt={product.name}
+                    type="product"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
                 <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-[#205457] shadow-sm">
                     {categoryMap[product.categoryId] || 'Uncategorized'}
                 </div>
@@ -269,6 +251,7 @@ const ProductCard = ({ product, handleDelete, onViewDetails, categoryMap }) => {
 
 // --- MAIN PAGE COMPONENT ---
 const AdminProducts = () => {
+    const { showAlert, formatPrice } = useAppContext();
     const [products, setProducts] = useState([]);
     const [categoryMap, setCategoryMap] = useState({});
     const [subCategoryMap, setSubCategoryMap] = useState({}); // ID -> Name
@@ -332,8 +315,10 @@ const AdminProducts = () => {
         try {
             await api.delete(`/Product/${id}`);
             setProducts(products.filter(p => (p.productId || p.id) !== id));
+            showAlert("Product deleted successfully!", "success");
         } catch (err) {
-            alert("Failed to delete product");
+            console.error("Delete failed", err);
+            showAlert("Failed to delete product.", "error", "Error");
         }
     };
 

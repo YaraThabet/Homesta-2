@@ -9,11 +9,17 @@ import {
   LogOut,
   Notebook,
   LockIcon,
+  LockIcon,
+  Star,
+  Bookmark,
 } from "lucide-react";
+import SafeImage from "../../../components/SafeImage";
 
 const sidebarItems = [
   { icon: User, label: "Personal Data", to: "/account" },
   { icon: Package, label: "My Orders", to: "/account/orders" },
+  { icon: Heart, label: "Wishlist", to: "/wishlist" },
+  { icon: Star, label: "My Reviews", to: "/account/reviews" },
   { icon: Notebook, label: "Manage Address", to: "/account/ManageAddress" },
   { icon: HelpCircle, label: "Help Center", to: "/account/help-center" },
 ];

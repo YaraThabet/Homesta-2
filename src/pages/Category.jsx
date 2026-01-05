@@ -65,7 +65,10 @@ const Category = () => {
                  hover:scale-[1.03] hover:shadow-xl
                  active:scale-[0.97]"
                 style={{
-                  backgroundImage: `url(http://homefinish.runasp.net/${category.imagePath})`,
+                  backgroundImage: category.imagePath
+                    ? `url(http://homefinish.runasp.net/${category.imagePath.startsWith('/') ? category.imagePath.substring(1) : category.imagePath})`
+                    : 'none',
+                  backgroundColor: '#e5e7eb', // Fallback color
                   backgroundSize: "cover",
                   backgroundPosition: "center",
                 }}

@@ -7,7 +7,7 @@ import { useAppContext } from "../context/AppContext";
 import api from "../lib/axios";
 
 const ShoppingCart = () => {
-  const { formatPrice, t } = useAppContext();
+  const { formatPrice, t, showAlert } = useAppContext();
   const [cartItems, setCartItems] = useState([]);
   const [cartSummary, setCartSummary] = useState({ subTotal: 0, shipping: 0, tax: 0, total: 0 });
   const [couponCode, setCouponCode] = useState("");
@@ -44,14 +44,20 @@ const ShoppingCart = () => {
         mappedItems.forEach(async (item) => {
           try {
             const imgRes = await api.get(`/ProductImages/product/${item.productId}`);
-            if (imgRes.data && imgRes.data.length > 0 && imgRes.data[0].imageUrls) {
-              const url = imgRes.data[0].imageUrls[0];
-              if (url && typeof url === 'string') {
-                const fullUrl = url.startsWith('http') ? url : `http://homefinish.runasp.net${url}`;
-                setCartItems(prev => prev.map(p => p.id === item.id ? { ...p, image: fullUrl } : p));
-              }
+            let url = null;
+            if (imgRes.data && Array.isArray(imgRes.data.images) && imgRes.data.images.length > 0) {
+              url = imgRes.data.images[0].imageUrl;
+            } else if (imgRes.data && Array.isArray(imgRes.data.imageUrls) && imgRes.data.imageUrls.length > 0) {
+              url = imgRes.data.imageUrls[0];
             }
-          } catch (e) { console.log('Failed to load image for cart item', item.id); }
+
+            if (url && typeof url === 'string') {
+              const fullUrl = url.startsWith('http') ? url : `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+              setCartItems(prev => prev.map(p => p.id === item.id ? { ...p, image: fullUrl } : p));
+            }
+          } catch (e) {
+            console.log('Failed to load image for cart item', item.id);
+          }
         });
 
       } else {
@@ -106,7 +112,7 @@ const ShoppingCart = () => {
       await fetchCart();
     } catch (err) {
       console.error("Remove item failed", err);
-      alert("Could not remove item. Please try again.");
+      showAlert("Could not remove item. Please try again.", "error", "Error");
     } finally {
       setProcessingId(null);
     }
@@ -127,9 +133,11 @@ const ShoppingCart = () => {
   };
 
   const applyCoupon = () => {
-    if (couponCode.trim()) {
+    if (couponCode.toLowerCase() === "save20") {
       setAppliedCoupon(true);
-      // Logic for coupon API call should go here
+      showAlert("Coupon applied successfully! 20% discount added.", "success", "Coupon Applied");
+    } else {
+      showAlert("Invalid coupon code.", "warning", "Oops!");
     }
   };
 

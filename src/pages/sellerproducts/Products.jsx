@@ -13,11 +13,84 @@ import {
     Check,
     X,
     LayoutGrid,
-    List
+    List,
+    Eye,
+    Star,
+    DollarSign,
+    Image as ImageIcon
 } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../lib/axios';
+import PageLoader from '../../components/PageLoader';
 
+const COLOR_MAP = {
+    "brown": "#A67B5B",
+    "grey": "#9E9E9E",
+    "gray": "#9E9E9E",
+    "green": "#5B8C5A",
+    "red": "#D64545",
+    "orange": "#E8915B",
+    "blue": "#5B9BD5",
+    "white": "#F5F5F5",
+    "black": "#2D2D2D",
+    "yellow": "#F59E0B",
+    "purple": "#8B5CF6",
+    "pink": "#EC4899",
+    "beige": "#F5F5DC",
+    "gold": "#FFD700",
+    "silver": "#C0C0C0",
+    "navy": "#000080",
+    "teal": "#008080",
+    "maroon": "#800000",
+    "olive": "#808000"
+};
+
+const hexToRgb = (hex) => {
+    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+};
+
+const getDistance = (rgb1, rgb2) => {
+    return Math.sqrt(
+        Math.pow(rgb1.r - rgb2.r, 2) +
+        Math.pow(rgb1.g - rgb2.g, 2) +
+        Math.pow(rgb1.b - rgb2.b, 2)
+    );
+};
+
+const getColorName = (colorVal) => {
+    if (!colorVal) return "";
+    const val = colorVal.trim().toLowerCase();
+    if (!val.startsWith('#')) return colorVal;
+
+    // Try exact
+    const exactFound = Object.entries(COLOR_MAP).find(([name, hex]) => hex.toLowerCase() === val);
+    if (exactFound) return exactFound[0];
+
+    // Try nearest
+    const targetRgb = hexToRgb(val);
+    if (!targetRgb) return colorVal;
+
+    let minDistance = Infinity;
+    let nearestName = colorVal;
+
+    Object.entries(COLOR_MAP).forEach(([name, hex]) => {
+        const mapRgb = hexToRgb(hex);
+        if (mapRgb) {
+            const distance = getDistance(targetRgb, mapRgb);
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestName = name;
+            }
+        }
+    });
+
+    return nearestName;
+};
 const Products = () => {
     const navigate = useNavigate();
     const [products, setProducts] = useState([]);
@@ -25,6 +98,7 @@ const Products = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [viewMode, setViewMode] = useState('grid');
     const [deleteId, setDeleteId] = useState(null);
+    const [selectedProduct, setSelectedProduct] = useState(null);
     const [isDeleting, setIsDeleting] = useState(false);
     const [error, setError] = useState(null);
 
@@ -93,7 +167,7 @@ const Products = () => {
 
                     // 3. Fetch Products
                     const productsRes = await api.get(`/Store/${sid}/products`);
-                    const productsList = Array.isArray(productsRes.data) ? productsRes.data : [];
+                    const productsList = productsRes.data?.products || (Array.isArray(productsRes.data) ? productsRes.data : []);
                     setProducts(productsList);
                 } else {
                     setError("No store found for your account. Please create a store first.");
@@ -324,6 +398,7 @@ const Products = () => {
                                 subCategoryMap={subCategoryMap}
                                 onEdit={() => navigate(`/edit-product/${product.productId || product.id}`)}
                                 onDelete={() => setDeleteId(product.productId || product.id)}
+                                onViewDetails={setSelectedProduct}
                             />
                         ))}
                     </div>
@@ -348,6 +423,7 @@ const Products = () => {
                                         subCategoryMap={subCategoryMap}
                                         onEdit={() => navigate(`/edit-product/${product.productId || product.id}`)}
                                         onDelete={() => setDeleteId(product.productId || product.id)}
+                                        onViewDetails={setSelectedProduct}
                                     />
                                 ))}
                             </tbody>
@@ -355,6 +431,18 @@ const Products = () => {
                     </div>
                 )}
             </motion.div>
+
+            {/* PRODUCT DETAILS MODAL */}
+            <AnimatePresence>
+                {selectedProduct && (
+                    <ProductDetailsModal
+                        product={selectedProduct}
+                        categoryMap={categoryMap}
+                        subCategoryMap={subCategoryMap}
+                        onClose={() => setSelectedProduct(null)}
+                    />
+                )}
+            </AnimatePresence>
 
             {/* Delete Confirmation Modal */}
             <AnimatePresence>
@@ -403,78 +491,324 @@ const Products = () => {
     );
 };
 
+// --- MODAL COMPONENT ---
+const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) => {
+    const [images, setImages] = useState([]);
+    const [reviews, setReviews] = useState([]);
+    const [loadingImages, setLoadingImages] = useState(true);
+    const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+    const getImageUrl = (url) => {
+        if (!url || typeof url !== 'string') return null;
+        if (url.startsWith('http')) return url;
+        return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+    };
+
+    useEffect(() => {
+        const fetchDetails = async () => {
+            try {
+                const id = product.productId || product.id;
+                const [imgRes, revRes] = await Promise.all([
+                    api.get(`/ProductImages/product/${id}`),
+                    api.get(`/Review/product/${id}`).catch(() => ({ data: [] }))
+                ]);
+
+                if (imgRes.data && Array.isArray(imgRes.data.images)) {
+                    const urls = imgRes.data.images.map(img => img.imageUrl).filter(Boolean);
+                    setImages(urls);
+                } else if (product.imagePath || product.image) {
+                    setImages([product.imagePath || product.image]);
+                }
+
+                setReviews(Array.isArray(revRes.data) ? revRes.data : []);
+            } catch (err) {
+                console.error("Failed to fetch details", err);
+            } finally {
+                setLoadingImages(false);
+            }
+        };
+        fetchDetails();
+    }, [product]);
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+            <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="bg-white w-full max-w-5xl rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+            >
+                <div className="flex justify-between items-center p-8 border-b border-gray-100 bg-gray-50/50">
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-900">Product Analysis</h2>
+                        <p className="text-gray-500 text-sm">Reviewing your showroom piece: #{product.productId || product.id}</p>
+                    </div>
+                    <button onClick={onClose} className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors shadow-sm text-gray-400 hover:text-gray-600">
+                        <X size={24} />
+                    </button>
+                </div>
+
+                <div className="overflow-y-auto p-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+                        {/* Left: Images */}
+                        <div className="space-y-4">
+                            <div className="aspect-square bg-gray-50 rounded-3xl overflow-hidden relative shadow-inner border border-gray-100 flex items-center justify-center">
+                                {images.length > 0 ? (
+                                    <img
+                                        src={getImageUrl(images[selectedImageIndex])}
+                                        alt="Main"
+                                        className="w-full h-full object-contain p-4"
+                                    />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                        <Package size={64} />
+                                    </div>
+                                )}
+                            </div>
+                            {images.length > 1 && (
+                                <div className="grid grid-cols-5 gap-2">
+                                    {images.map((img, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setSelectedImageIndex(idx)}
+                                            className={`aspect-square bg-gray-50 rounded-xl overflow-hidden border transition-all ${selectedImageIndex === idx
+                                                ? 'border-[#205457] ring-2 ring-[#205457]/20'
+                                                : 'border-gray-100 hover:border-gray-300'
+                                                }`}
+                                        >
+                                            <img src={getImageUrl(img)} className="w-full h-full object-contain p-1" alt={`Thumb ${idx}`} />
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Right: Detailed Info */}
+                        <div className="space-y-8">
+                            <div>
+                                <h3 className="text-4xl font-black text-gray-900 leading-tight mb-4">{product.name}</h3>
+                                <div className="flex flex-wrap gap-2 mb-6">
+                                    <span className="px-4 py-1.5 bg-[#205457]/10 text-[#205457] rounded-xl text-xs font-black uppercase tracking-widest border border-[#205457]/10">
+                                        {categoryMap[product.categoryId] || 'Unknown Category'}
+                                    </span>
+                                    {product.subCategoryId && (
+                                        <span className="px-4 py-1.5 bg-gray-50 text-gray-400 rounded-xl text-xs font-bold uppercase tracking-wider border border-gray-100">
+                                            {subCategoryMap[product.subCategoryId] || 'Standard Edition'}
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="text-gray-500 leading-relaxed text-sm bg-gray-50/50 p-6 rounded-3xl border border-gray-100/50 font-light italic">
+                                    "{product.description || "No description provided for this piece."}"
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="p-5 bg-white rounded-3xl border border-gray-100 shadow-sm">
+                                    <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">Market Price</span>
+                                    <div className="text-3xl font-black text-[#205457] tabular-nums">${product.price}</div>
+                                </div>
+                                <div className="p-5 bg-white rounded-3xl border border-gray-100 shadow-sm">
+                                    <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">Stock Available</span>
+                                    <div className="text-3xl font-black text-gray-900 tabular-nums">{product.quantity || 0}</div>
+                                </div>
+                                <div className="p-5 bg-white rounded-3xl border border-gray-100 shadow-sm">
+                                    <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">Rating</span>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <Star size={24} className="fill-[#F59E0B] text-[#F59E0B]" />
+                                        <span className="text-2xl font-black text-gray-900">{product.rating || 0}</span>
+                                    </div>
+                                </div>
+                                <div className="p-5 bg-white rounded-3xl border border-gray-100 shadow-sm">
+                                    <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">Active Discount</span>
+                                    <div className="text-3xl font-black text-red-500 tabular-nums">{product.discount || 0}%</div>
+                                </div>
+                            </div>
+
+                            {product.colors && (
+                                <div>
+                                    <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-3 block">Color Variations</span>
+                                    <div className="flex flex-wrap gap-2">
+                                        {(Array.isArray(product.colors) ? product.colors : product.colors.split(',')).map((c, i) => (
+                                            <span key={i} className="px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-[10px] font-black text-gray-700 uppercase tracking-widest">{getColorName(c.trim())}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Bottom: Reviews Summary */}
+                    <div className="mt-8 pt-8 border-t border-gray-100">
+                        <div className="flex items-center gap-3 mb-8">
+                            <div className="w-10 h-10 rounded-xl bg-[#B19470]/10 flex items-center justify-center text-[#B19470]">
+                                <Eye size={20} />
+                            </div>
+                            <h4 className="text-xl font-bold text-gray-900">Customer Feedback ({reviews.length})</h4>
+                        </div>
+
+                        {reviews.length > 0 ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {reviews.map((rev, idx) => (
+                                    <div key={rev.reviewId || idx} className="p-6 bg-gray-50/50 rounded-3xl border border-gray-100/50">
+                                        <div className="flex justify-between items-center mb-3">
+                                            <span className="font-bold text-gray-900 text-sm">{rev.userName || 'Customer'}</span>
+                                            <div className="flex gap-0.5">
+                                                {[1, 2, 3, 4, 5].map(s => <Star key={s} size={10} className={s <= rev.rating ? "fill-[#F59E0B] text-[#F59E0B]" : "text-gray-200"} />)}
+                                            </div>
+                                        </div>
+                                        <p className="text-gray-500 text-xs leading-relaxed line-clamp-2">"{rev.comment}"</p>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="text-center py-10 bg-gray-50/30 rounded-3xl border-2 border-dashed border-gray-100">
+                                <p className="text-gray-400 font-medium italic text-sm">No customer reviews yet for this piece.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </motion.div>
+        </div>
+    );
+};
+
 const backendBase = 'http://homefinish.runasp.net';
 
-const ProductCard = ({ product, onEdit, onDelete, categoryMap }) => {
-    // Basic image fallback logic for this simpler view
-    // Note: AdminProducts has robust multi-image fetching, but here we stick to simple logic for now
-    // or we could upgrade it. User asked for FILTERS here essentially.
-    const imageUrl = product.image
-        ? (product.image.startsWith('http') ? product.image : `${backendBase}${product.image}`)
-        : product.images && product.images.length > 0 && product.images[0].url
-            ? product.images[0].url
-            : 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80';
+const ProductCard = ({ product, onEdit, onDelete, onViewDetails, categoryMap }) => {
+    const [images, setImages] = useState([]);
+    const [loadingImage, setLoadingImage] = useState(true);
+
+    useEffect(() => {
+        const fetchImages = async () => {
+            try {
+                const id = product.productId || product.id;
+                if (!id) return;
+                const res = await api.get(`/ProductImages/product/${id}`);
+                if (res.data && Array.isArray(res.data.images)) {
+                    setImages(res.data.images.map(img => img.imageUrl).filter(Boolean));
+                }
+            } catch (err) {
+                // Silent fail
+            } finally {
+                setLoadingImage(false);
+            }
+        };
+        fetchImages();
+    }, [product]);
+
+    const getImageUrl = (url) => {
+        if (!url || typeof url !== 'string') return null;
+        if (url.startsWith('http')) return url;
+        return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+    };
+
+    const displayImage = images.length > 0 ? images[0] : product.imagePath || product.image;
 
     return (
         <motion.div
             layout
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="group bg-white rounded-[40px] overflow-hidden shadow-[0_15px_50px_rgba(0,0,0,0.02)] border border-gray-100 hover:shadow-2xl hover:shadow-[#205457]/5 transition-all duration-500 flex flex-col h-full"
+            className="group bg-white rounded-[45px] overflow-hidden shadow-[0_15px_50px_rgba(0,0,0,0.02)] border border-gray-100 hover:shadow-2xl hover:shadow-[#205457]/5 transition-all duration-700 flex flex-col h-full"
         >
-            <div className="relative aspect-[4/5] overflow-hidden bg-gray-50">
-                <img
-                    src={imageUrl}
-                    alt={product.name}
-                    className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                    onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80'; }}
-                />
+            <div className="relative aspect-square overflow-hidden bg-gray-50">
+                {displayImage ? (
+                    <img
+                        src={getImageUrl(displayImage)}
+                        alt={product.name}
+                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+                        onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80'; }}
+                    />
+                ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-200">
+                        {loadingImage ? (
+                            <div className="w-8 h-8 border-2 border-[#205457]/10 border-t-[#205457] rounded-full animate-spin" />
+                        ) : (
+                            <Package size={48} strokeWidth={1} />
+                        )}
+                    </div>
+                )}
+
                 <div className="absolute top-6 left-6 flex flex-col gap-2">
                     {product.quantity <= 5 && (
-                        <span className="px-4 py-2 bg-red-500 text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg">
+                        <span className={`px-4 py-2 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-lg ${product.quantity === 0 ? 'bg-red-500' : 'bg-amber-500'
+                            }`}>
                             {product.quantity === 0 ? "Out of Stock" : `Low Stock: ${product.quantity}`}
+                        </span>
+                    )}
+                    {product.discount > 0 && (
+                        <span className="px-4 py-2 bg-[#205457] text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-lg">
+                            -{product.discount}% OFF
                         </span>
                     )}
                 </div>
 
                 <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center gap-3">
                     <button
-                        onClick={onEdit}
+                        onClick={() => onViewDetails(product)}
                         className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-[#205457] hover:bg-[#205457] hover:text-white transition-all transform -translate-y-4 group-hover:translate-y-0 duration-500"
+                        title="View Details"
+                    >
+                        <Eye size={20} />
+                    </button>
+                    <button
+                        onClick={onEdit}
+                        className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-[#205457] hover:bg-[#205457] hover:text-white transition-all transform -translate-y-4 group-hover:translate-y-0 duration-500 delay-75"
+                        title="Edit Product"
                     >
                         <Edit3 size={20} />
                     </button>
                     <button
                         onClick={onDelete}
-                        className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all transform translate-y-4 group-hover:translate-y-0 duration-500 delay-75"
+                        className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all transform translate-y-4 group-hover:translate-y-0 duration-500 delay-100"
+                        title="Delete Product"
                     >
                         <Trash2 size={20} />
                     </button>
                 </div>
+
+                {images.length > 1 && (
+                    <div className="absolute bottom-6 right-6 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl text-[10px] font-black text-[#205457] flex items-center gap-2 shadow-sm">
+                        <ImageIcon size={12} />
+                        {images.length}
+                    </div>
+                )}
             </div>
 
-            <div className="p-8">
+            <div className="p-8 flex-1 flex flex-col">
                 <div className="flex justify-between items-start mb-4">
-                    <div>
-                        <h4 className="font-bold text-gray-900 text-lg leading-tight mb-2 truncate max-w-[180px]">{product.name}</h4>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-[#B19470] bg-[#B19470]/10 px-3 py-1 rounded-lg">
-                            {categoryMap[product.categoryId] || product.categoryName || 'Furniture'}
-                        </span>
+                    <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-[#B19470] bg-[#B19470]/10 px-3 py-1 rounded-lg">
+                                {categoryMap[product.categoryId] || product.categoryName || 'Furniture'}
+                            </span>
+                            <div className="flex items-center gap-1">
+                                <Star size={12} className="fill-amber-400 text-amber-400" />
+                                <span className="text-xs font-bold text-gray-900">{product.rating || '0.0'}</span>
+                            </div>
+                        </div>
+                        <h4 className="font-bold text-gray-900 text-xl leading-tight truncate" title={product.name}>{product.name}</h4>
                     </div>
-                    <p className="text-xl font-black text-[#205457] tabular-nums">${product.price}</p>
                 </div>
 
-                <p className="text-gray-400 text-sm font-light line-clamp-2 leading-relaxed h-[40px]">
-                    {product.description || "No description available for this piece."}
-                </p>
+                <div className="mt-6 pt-6 border-t border-gray-50 flex items-center justify-between">
+                    <div>
+                        <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">Price</span>
+                        <p className="text-2xl font-black text-[#205457] tabular-nums">${product.price}</p>
+                    </div>
+                    <div className="text-right">
+                        <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">Stock</span>
+                        <p className="text-lg font-bold text-gray-900 tabular-nums">{product.quantity}</p>
+                    </div>
+                </div>
             </div>
         </motion.div>
     );
 };
 
-const ProductRow = ({ product, onEdit, onDelete, subCategoryMap }) => {
-    const imageUrl = product.image
-        ? (product.image.startsWith('http') ? product.image : `${backendBase}${product.image}`)
+const ProductRow = ({ product, onEdit, onDelete, onViewDetails, subCategoryMap }) => {
+    const imageUrl = (product.imagePath || product.image)
+        ? ((product.imagePath || product.image).startsWith('http') ? (product.imagePath || product.image) : `${backendBase}${product.imagePath || product.image}`)
         : 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80';
 
     return (
@@ -522,6 +856,13 @@ const ProductRow = ({ product, onEdit, onDelete, subCategoryMap }) => {
             </td>
             <td className="px-8 py-6 text-right">
                 <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                        onClick={() => onViewDetails(product)}
+                        className="p-3 bg-white rounded-xl shadow-sm border border-gray-100 text-[#205457] hover:bg-[#205457] hover:text-white transition-all"
+                        title="View Details"
+                    >
+                        <Eye size={18} />
+                    </button>
                     <button
                         onClick={onEdit}
                         className="p-3 bg-white rounded-xl shadow-sm border border-gray-100 text-[#205457] hover:bg-[#205457] hover:text-white transition-all"

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAppContext } from '../../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
 	PlusCircle,
@@ -19,6 +20,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../../lib/axios';
 
 const AddProduct = () => {
+	const { showAlert } = useAppContext();
 	const navigate = useNavigate();
 	const [name, setName] = useState('');
 	const [category, setCategory] = useState('');
@@ -102,7 +104,7 @@ const AddProduct = () => {
 	const handleImageChange = (e) => {
 		const files = Array.from(e.target.files);
 		if (files.length + images.length > 5) {
-			alert("Maximum 5 images allowed");
+			showAlert("Maximum 5 images allowed", "warning", "Image Limit");
 			return;
 		}
 
@@ -193,7 +195,7 @@ const AddProduct = () => {
 				description: description,
 				colors: colors,
 				price: parseFloat(price),
-				rating: parseFloat(rating) || 0,
+				rating: Math.round(parseFloat(rating)) || 0,
 				quantity: parseInt(stock),
 				discount: parseFloat(discount) || 0,
 				deliveryTime: parseInt(deliveryTime) || 0,
@@ -236,7 +238,7 @@ const AddProduct = () => {
 			}
 
 			resetForm();
-			setShowSuccessPopup(true);
+			showAlert('Product created successfully!', 'success', 'Success');
 		} catch (err) {
 			console.error("❌ Product Creation Failed:", err);
 			const errorData = err.response?.data;
@@ -245,6 +247,7 @@ const AddProduct = () => {
 			if (err.response?.status === 401) {
 				errorMsg = "Your session has expired. Please log in again.";
 				setErrorType('session-expired');
+				showAlert(errorMsg, 'error', 'Session Expired');
 			} else if (errorData) {
 				if (typeof errorData === 'string') errorMsg = errorData;
 				else if (errorData.message) errorMsg = errorData.message;
@@ -580,10 +583,10 @@ const AddProduct = () => {
 													type="number"
 													min="0"
 													max="5"
-													step="0.1"
+													step="1"
 													value={rating}
 													onChange={(e) => {
-														const v = parseFloat(e.target.value);
+														const v = parseInt(e.target.value);
 														if (v >= 0 && v <= 5) setRating(e.target.value);
 													}}
 													className="w-16 bg-gray-50 rounded-xl px-2 py-1 text-center font-bold text-gray-900 border-none outline-none"

@@ -32,11 +32,21 @@ const Footer = () => {
           </p>
 
           <div className="flex gap-4">
-            <FaFacebook size={24} />
-            <AiFillTwitterCircle size={24} />
-            <FaPinterest size={24} />
-            <AiFillInstagram size={24} />
-            <FaYoutube size={24} />
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-white/70 transition-colors">
+              <FaFacebook size={24} />
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="hover:text-white/70 transition-colors">
+              <AiFillTwitterCircle size={24} />
+            </a>
+            <a href="https://pinterest.com" target="_blank" rel="noopener noreferrer" className="hover:text-white/70 transition-colors">
+              <FaPinterest size={24} />
+            </a>
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="hover:text-white/70 transition-colors">
+              <AiFillInstagram size={24} />
+            </a>
+            <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="hover:text-white/70 transition-colors">
+              <FaYoutube size={24} />
+            </a>
           </div>
         </div>
 
@@ -97,15 +107,24 @@ const Footer = () => {
             <p className="font-outfit font-medium text-[20px]">
               Our Information
             </p>
-            <a href="#" className="font-outfit text-[18px] hover:underline">
+            <button
+              onClick={() => handleNavigation("/privacy")}
+              className="font-outfit text-[18px] hover:underline text-left"
+            >
               Privacy
-            </a>
-            <a href="#" className="font-outfit text-[18px] hover:underline">
+            </button>
+            <button
+              onClick={() => handleNavigation("/privacy")}
+              className="font-outfit text-[18px] hover:underline text-left"
+            >
               User Terms & Condition
-            </a>
-            <a href="#" className="font-outfit text-[18px] hover:underline">
+            </button>
+            <button
+              onClick={() => handleNavigation("/privacy")}
+              className="font-outfit text-[18px] hover:underline text-left"
+            >
               Return Policy
-            </a>
+            </button>
           </div>
 
           <div className="flex flex-col gap-4">
@@ -120,8 +139,8 @@ const Footer = () => {
       </div>
 
       <div className="w-full bg-[#B19470] py-6 text-center">
-        <p className="font-outfit text-[16px] text-[#43766C]">
-          Copyright © 2025 Homesta. All Rights Reserved.
+        <p className="font-outfit text-[16px] text-white">
+          Copyright © {new Date().getFullYear()} Homesta. All Rights Reserved.
         </p>
       </div>
     </footer>

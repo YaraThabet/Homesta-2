@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useAppContext } from '../../../context/AppContext';
 import { createPortal } from 'react-dom';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Heart, Minus, Plus, Star, ArrowLeft, Upload, ShoppingCart, Check, X } from 'lucide-react';
 import api from '../../../lib/axios';
+import SafeImage from '../../../components/SafeImage';
 
 const COLOR_MAP = {
   "brown": "#A67B5B",
@@ -19,12 +21,64 @@ const COLOR_MAP = {
   "pink": "#EC4899",
   "beige": "#F5F5DC",
   "gold": "#FFD700",
-  "silver": "#C0C0C0"
+  "silver": "#C0C0C0",
+  "navy": "#000080",
+  "teal": "#008080",
+  "maroon": "#800000",
+  "olive": "#808000"
+};
+
+const hexToRgb = (hex) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : null;
+};
+
+const getDistance = (rgb1, rgb2) => {
+  return Math.sqrt(
+    Math.pow(rgb1.r - rgb2.r, 2) +
+    Math.pow(rgb1.g - rgb2.g, 2) +
+    Math.pow(rgb1.b - rgb2.b, 2)
+  );
+};
+
+const getColorName = (colorVal) => {
+  if (!colorVal) return "";
+  const val = colorVal.trim().toLowerCase();
+  if (!val.startsWith('#')) return colorVal;
+
+  // Try exact match
+  const exactFound = Object.entries(COLOR_MAP).find(([name, hex]) => hex.toLowerCase() === val);
+  if (exactFound) return exactFound[0];
+
+  // Try nearest color
+  const targetRgb = hexToRgb(val);
+  if (!targetRgb) return colorVal;
+
+  let minDistance = Infinity;
+  let nearestName = colorVal;
+
+  Object.entries(COLOR_MAP).forEach(([name, hex]) => {
+    const mapRgb = hexToRgb(hex);
+    if (mapRgb) {
+      const distance = getDistance(targetRgb, mapRgb);
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestName = name;
+      }
+    }
+  });
+
+  return nearestName;
 };
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showAlert } = useAppContext();
 
   // Data State
   const [product, setProduct] = useState(null);
@@ -48,7 +102,9 @@ const ProductDetail = () => {
   // We can eventually replace this with a fetch for product specific reviews
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
+  const [editingReview, setEditingReview] = useState(null); // { reviewId, rating, comment }
   const [submitReviewLoading, setSubmitReviewLoading] = useState(false);
+  const currentUserId = localStorage.getItem('userId');
 
   // Base URL for images
   const IMG_BASE_URL = "http://homefinish.runasp.net/";
@@ -88,31 +144,33 @@ const ProductDetail = () => {
         }
         if (availColors.length > 0) setSelectedColor(availColors[0]);
 
-        // 2. Fetch Images
+        // 2. Fetch Images - Updated to match new API structure
         const imgRes = await api.get(`/ProductImages/product/${id}`);
-        let rawImages = [];
-        // API returns [{ productId: x, imageUrls: [...] }]
-        if (Array.isArray(imgRes.data) && imgRes.data.length > 0 && imgRes.data[0].imageUrls) {
-          rawImages = imgRes.data[0].imageUrls;
-        } else if (Array.isArray(imgRes.data)) {
-          // Fallback if it returns direct array of objects (rare but possible based on other endpoints)
-          rawImages = imgRes.data.map(img => img.imagePath).filter(Boolean);
+        let galleryImages = [];
+
+        // API returns: { productId: id, images: [{ productImageId: x, imageUrl: "..." }] }
+        if (imgRes.data && Array.isArray(imgRes.data.images)) {
+          galleryImages = imgRes.data.images.map(img => img.imageUrl).filter(Boolean);
+        } else if (Array.isArray(imgRes.data) && imgRes.data.length > 0 && imgRes.data[0].imageUrls) {
+          // Backward compatibility for old format
+          galleryImages = imgRes.data[0].imageUrls;
         }
 
-        // Map to full URLs
-        let imageUrls = rawImages
+        // Add main imagePath as fallback if gallery is empty
+        if (galleryImages.length === 0 && prodData.imagePath) {
+          galleryImages = [prodData.imagePath];
+        } else if (galleryImages.length === 0 && prodData.image) {
+          galleryImages = [prodData.image];
+        }
+
+        // Map to full URLs and set images
+        const finalImages = galleryImages
           .filter(img => typeof img === 'string' && img.trim() !== '')
           .map(path =>
-            path.startsWith('http') ? path : `${IMG_BASE_URL}${path}`
+            path.startsWith('http') ? path : `${IMG_BASE_URL}${path.startsWith('/') ? path.substring(1) : path}`
           );
 
-        // If no gallery images, try product main image
-        if (imageUrls.length === 0 && prodData.imagePath) {
-          imageUrls = [prodData.imagePath.startsWith('http') ? prodData.imagePath : `${IMG_BASE_URL}${prodData.imagePath}`];
-        } else if (imageUrls.length === 0) {
-          imageUrls = ["https://via.placeholder.com/600x600?text=No+Image"];
-        }
-        setImages(imageUrls);
+        setImages(finalImages.length > 0 ? finalImages : ["https://via.placeholder.com/600x600?text=No+Image"]);;
 
         // 3. Fetch Related Products (Same Category)
         if (prodData.categoryId) {
@@ -141,10 +199,27 @@ const ProductDetail = () => {
           setRelatedProducts(relatedWithImages);
         }
 
-        // 4. Fetch Reviews
+        // 4. Fetch Product Reviews
         try {
           const revRes = await api.get(`/Review/product/${id}`);
-          setReviews(Array.isArray(revRes.data) ? revRes.data : []);
+          const fetchedReviews = Array.isArray(revRes.data) ? revRes.data : [];
+          setReviews(fetchedReviews);
+
+          // 4b. If logged in, fetch user's own reviews to identify ownership
+          const token = localStorage.getItem('token');
+          const uid = localStorage.getItem('userId');
+          if (token && uid) {
+            try {
+              const userRevRes = await api.get(`/Review/user/${uid}`);
+              if (Array.isArray(userRevRes.data)) {
+                // Store IDs of reviews that belong to this user
+                const ids = userRevRes.data.map(r => r.reviewId || r.id || r.ReviewId);
+                setUserReviewIds(ids);
+              }
+            } catch (ue) {
+              console.log("User reviews fetch failed (optional)", ue);
+            }
+          }
         } catch (rErr) {
           console.log("Reviews fetch failed (optional)", rErr);
         }
@@ -159,6 +234,15 @@ const ProductDetail = () => {
 
     if (id) fetchProductData();
   }, [id]);
+
+  const [userReviewIds, setUserReviewIds] = useState([]);
+
+  useEffect(() => {
+    if (reviews.length > 0) {
+      console.log("📝 Sample Review Data:", reviews[0]);
+      console.log("👤 Current User ID:", currentUserId);
+    }
+  }, [reviews, currentUserId]);
 
   const handleSubmitReview = async (e) => {
     e.preventDefault();
@@ -190,10 +274,55 @@ const ProductDetail = () => {
       // Refresh reviews
       const revRes = await api.get(`/Review/product/${id}`);
       setReviews(Array.isArray(revRes.data) ? revRes.data : []);
+
+      // Also refresh user review IDs to enable edit/delete for new review
+      if (token && userId) {
+        const userRevRes = await api.get(`/Review/user/${userId}`);
+        if (Array.isArray(userRevRes.data)) {
+          const ids = userRevRes.data.map(r => r.reviewId || r.id || r.ReviewId);
+          setUserReviewIds(ids);
+        }
+      }
+
       setNewReview({ rating: 5, comment: '' });
     } catch (err) {
       console.error("Submit review failed", err);
-      alert("Failed to submit review. Please try again.");
+      showAlert("Failed to submit review. Please try again.", "error", "Error");
+    } finally {
+      setSubmitReviewLoading(false);
+    }
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    if (!window.confirm("Are you sure you want to delete this review?")) return;
+    try {
+      await api.delete(`/Review/${reviewId}`);
+      // Refresh reviews
+      const revRes = await api.get(`/Review/product/${id}`);
+      setReviews(Array.isArray(revRes.data) ? revRes.data : []);
+    } catch (err) {
+      console.error("Delete review failed", err);
+      showAlert("Failed to delete review.", "error", "Error");
+    }
+  };
+
+  const handleUpdateReview = async (e) => {
+    e.preventDefault();
+    try {
+      setSubmitReviewLoading(true);
+      const payload = {
+        comment: editingReview.comment,
+        rating: parseInt(editingReview.rating)
+      };
+      await api.put(`/Review/${editingReview.reviewId}`, payload);
+
+      // Refresh reviews
+      const revRes = await api.get(`/Review/product/${id}`);
+      setReviews(Array.isArray(revRes.data) ? revRes.data : []);
+      setEditingReview(null);
+    } catch (err) {
+      console.error("Update review failed", err);
+      showAlert("Failed to update review.", "error", "Error");
     } finally {
       setSubmitReviewLoading(false);
     }
@@ -226,7 +355,7 @@ const ProductDetail = () => {
       setShowSuccessModal(true);
     } catch (err) {
       console.error("Add to cart error", err);
-      alert("Failed to add to cart. " + (err.response?.data?.message || err.message));
+      showAlert("Failed to add to cart. " + (err.response?.data?.message || err.message), "error", "Error");
     } finally {
       setAddingToCart(false);
     }
@@ -254,7 +383,9 @@ const ProductDetail = () => {
           name: product?.name || '',
           price: product?.price || 0,
           dateAdded: new Date().toLocaleDateString(),
-          image: images?.[0] || ''
+          image: images?.[0] || '',
+          color: selectedColor || '',
+          quantity: product?.quantity || 0
         };
         const cleaned = arr.filter((it) => String(it.id) !== String(id));
         cleaned.push(item);
@@ -335,9 +466,10 @@ const ProductDetail = () => {
           {/* Image Gallery */}
           <div>
             <div className="mb-6 bg-white/40 backdrop-blur-md rounded-[30px] p-8 flex items-center justify-center border border-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.04)] group">
-              <img
+              <SafeImage
                 src={images[selectedImageIndex]}
                 alt={product.name}
+                type="product"
                 className="w-full h-[400px] object-contain mix-blend-multiply"
               />
             </div>
@@ -350,9 +482,10 @@ const ProductDetail = () => {
                     className={`w-20 h-20 flex-shrink-0 border-2 rounded-lg overflow-hidden bg-muted/30 ${selectedImageIndex === index ? 'border-[#205457]' : 'border-border'
                       }`}
                   >
-                    <img
+                    <SafeImage
                       src={image}
                       alt={`${product.name} ${index + 1}`}
+                      type="product"
                       className="w-full h-full object-contain p-1 mix-blend-multiply"
                     />
                   </button>
@@ -405,7 +538,7 @@ const ProductDetail = () => {
               <div className="mb-6">
                 <p className="text-sm text-foreground mb-3">
                   <span className="font-medium">Selected Color: </span>
-                  <span className="text-[#205457] font-bold uppercase tracking-wide">{selectedColor || "None"}</span>
+                  <span className="text-[#205457] font-bold uppercase tracking-wide">{getColorName(selectedColor) || "None"}</span>
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {availableColors.map((colorVal, index) => {
@@ -515,17 +648,93 @@ const ProductDetail = () => {
                 {reviews.length > 0 ? (
                   <div className="space-y-6 mb-10">
                     {reviews.map((review, idx) => (
-                      <div key={review.reviewId || idx} className="border-b border-gray-100 pb-6 last:border-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="font-bold text-gray-900">{review.userName || "Customer"}</span>
-                          {review.createdDate && <span className="text-gray-400 text-sm">• {new Date(review.createdDate).toLocaleDateString()}</span>}
-                        </div>
-                        <div className="flex text-yellow-400 mb-2">
-                          {[...Array(5)].map((_, i) => (
-                            <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-current' : 'text-gray-200'}`} />
-                          ))}
-                        </div>
-                        <p className="text-gray-600">{review.comment}</p>
+                      <div key={review.reviewId || idx} className="border-b border-gray-100 pb-6 last:border-0 relative">
+                        {editingReview?.reviewId === review.reviewId ? (
+                          <form onSubmit={handleUpdateReview} className="space-y-4 pt-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-bold text-gray-700">Rating:</span>
+                              <div className="flex gap-1">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <button key={star} type="button" onClick={() => setEditingReview({ ...editingReview, rating: star })}>
+                                    <Star className={`w-4 h-4 ${star <= editingReview.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} />
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                            <textarea
+                              className="w-full p-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#205457]/20 text-sm"
+                              rows="2"
+                              value={editingReview.comment}
+                              onChange={e => setEditingReview({ ...editingReview, comment: e.target.value })}
+                              required
+                            ></textarea>
+                            <div className="flex gap-2">
+                              <button
+                                type="submit"
+                                disabled={submitReviewLoading}
+                                className="bg-[#205457] text-white px-4 py-1.5 rounded-lg font-medium text-xs hover:bg-[#1a4345] disabled:opacity-50"
+                              >
+                                {submitReviewLoading ? 'Saving...' : 'Save'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setEditingReview(null)}
+                                className="bg-gray-100 text-gray-600 px-4 py-1.5 rounded-lg font-medium text-xs hover:bg-gray-200"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </form>
+                        ) : (
+                          <>
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-gray-900">{review.userName || "Customer"}</span>
+                                {(review.reviewDate || review.createdDate) && (
+                                  <span className="text-gray-400 text-sm">
+                                    • {new Date(review.reviewDate || review.createdDate).toLocaleDateString()}
+                                  </span>
+                                )}
+                              </div>
+                              {(() => {
+                                const rId = review.reviewId || review.id || review.ReviewId;
+                                const revUserId = review.userId || review.UserId || review.uid;
+                                const isOwner = (currentUserId && revUserId && String(currentUserId) === String(revUserId)) ||
+                                  (userReviewIds.includes(rId));
+
+                                if (isOwner) {
+                                  return (
+                                    <div className="flex gap-3">
+                                      <button
+                                        onClick={() => {
+                                          setEditingReview({ reviewId: rId, rating: review.rating, comment: review.comment });
+                                        }}
+                                        className="text-xs font-bold text-[#205457] hover:underline"
+                                      >
+                                        Edit
+                                      </button>
+                                      <button
+                                        onClick={() => {
+                                          handleDeleteReview(rId);
+                                        }}
+                                        className="text-xs font-bold text-red-500 hover:underline"
+                                      >
+                                        Delete
+                                      </button>
+                                    </div>
+                                  );
+                                }
+                                return null;
+                              })()}
+                            </div>
+                            <div className="flex text-yellow-400 mb-2">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} className={`w-3 h-3 ${i < review.rating ? 'fill-current' : 'text-gray-200'}`} />
+                              ))}
+                            </div>
+                            <p className="text-gray-600">{review.comment}</p>
+                          </>
+                        )}
                       </div>
                     ))}
                   </div>

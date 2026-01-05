@@ -12,8 +12,10 @@ import {
   CreditCard,
   Headphones,
 } from "lucide-react";
+import { useAppContext } from "../../../context/AppContext";
 
 const ContactUs = () => {
+  const { showAlert } = useAppContext();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -32,7 +34,7 @@ const ContactUs = () => {
     e.preventDefault();
     // validate required fields
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
-      alert('Please fill name, email and message.');
+      showAlert('Please fill in your name, email, and message.', 'warning', 'Required Fields');
       return;
     }
 

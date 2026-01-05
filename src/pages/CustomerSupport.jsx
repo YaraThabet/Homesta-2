@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { useAppContext } from "../context/AppContext";
 import { Phone, Mail, MapPin, Clock, Plus, Minus } from "lucide-react";
 
 const CustomerSupport = () => {
+  const { showAlert } = useAppContext();
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -21,7 +23,7 @@ const CustomerSupport = () => {
 
   const handleSubmit = () => {
     console.log("Form submitted:", formData);
-    alert("Message sent successfully!");
+    showAlert("Message sent successfully!", "success", "Success");
     setFormData({
       fullName: "",
       email: "",

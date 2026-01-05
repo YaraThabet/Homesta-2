@@ -12,6 +12,7 @@ import Home from "./pages/home/Home.jsx";
 import Category from "./pages/Category.jsx";
 import Shop from "./pages/shop/Shop";
 import Blogs from "./pages/blogs/Blogs.jsx";
+import BlogDetail from "./pages/blogs/BlogDetail.jsx";
 import Faqs from "./pages/faqs/Faqs.jsx";
 import ProductDetail from "./pages/shop/components/ProductDetail.jsx";
 import Checkout from "./pages/checkout/Checkout.jsx";
@@ -23,6 +24,7 @@ import HelpCenter from "./pages/account/HelpCenter.jsx";
 import Orders from "./pages/account/Orders.jsx";
 import ManageAddress from "./pages/account/ManageAddress";
 import Payment from "./pages/account/Payment.jsx";
+import MyReviews from "./pages/account/MyReviews.jsx";
 import Dashboard from "./pages/profile/Dashboard.jsx";
 import Analytics from "./pages/analytics/Analytics.jsx";
 import Addproduct from "./pages/addproduct/Addproduct.jsx";
@@ -44,6 +46,7 @@ import VerifyCode from "./pages/VerifyCode.jsx";
 import ForgetPassword from "./pages/ForgetPassword.jsx";
 import AddPassword from "./pages/AddPassword.jsx";
 import Error404 from "./pages/Error404";
+import Privacy from "./pages/Privacy.jsx";
 
 // Seller Pages
 import CreateStore from "./pages/CreateStore.jsx";
@@ -60,6 +63,7 @@ import AdminProducts from "./pages/admin/AdminProducts.jsx";
 import AdminCategories from "./pages/admin/AdminCategories.jsx";
 import AdminAnalytics from "./pages/admin/AdminAnalytics.jsx";
 import AdminNotifications from "./pages/admin/AdminNotifications.jsx";
+import StoreProducts from "./pages/store/StoreProducts.jsx";
 
 const App = () => {
   const location = useLocation();
@@ -94,6 +98,7 @@ const App = () => {
     "/subcategory/:categoryName",
     "/shop",
     "/blogs",
+    "/blogs/:id",
     "/faqs",
     "/product/:id",
     "/checkout",
@@ -124,6 +129,7 @@ const App = () => {
     "/edit-product/:id",
     "/store-settings",
     "/seller-reviews",
+    "/privacy",
     // Admin Routes
     "/admin/dashboard",
     "/admin/stores",
@@ -160,6 +166,7 @@ const App = () => {
           <Route path="/category/SubCategory" element={<SubCategory />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/blogs" element={<Blogs />} />
+          <Route path="/blogs/:id" element={<BlogDetail />} />
           <Route path="/faqs" element={<Faqs />} />
           <Route path="/product/:id" element={<ProductDetail />} />
 
@@ -177,6 +184,7 @@ const App = () => {
             <Route path="/account/ManageAddress" element={<ManageAddress />} />
 
             <Route path="payment" element={<Payment />} />
+            <Route path="reviews" element={<MyReviews />} />
           </Route>
 
           {/* Dashboard */}
@@ -198,6 +206,7 @@ const App = () => {
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/track-order" element={<TrackOrder />} />
           <Route path="/customer-support" element={<CustomerSupport />} />
+          <Route path="/privacy" element={<Privacy />} />
 
           {/* Auth */}
           <Route path="/login" element={<Login />} />
@@ -222,6 +231,7 @@ const App = () => {
           <Route path="/admin/categories" element={<AdminCategories />} />
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
           <Route path="/admin/notifications" element={<AdminNotifications />} />
+          <Route path="/store/:id" element={<StoreProducts />} />
 
           {/* 404 */}
           <Route path="*" element={<Error404 />} />
@@ -229,7 +239,7 @@ const App = () => {
       </main>
 
       {!shouldHideNavbar && !isSellerPage && <AIChatFloatButton />}
-      {!shouldHideNavbar && !isSellerPage && <Footer />}
+      {!shouldHideNavbar && !isSellerPage && !isAdminPage && <Footer />}
     </div>
   );
 };

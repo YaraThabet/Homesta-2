@@ -1,16 +1,18 @@
 import React, { useState } from "react";
+import { useAppContext } from "../context/AppContext";
 import { Package, CreditCard, Headphones } from "lucide-react";
 import { Link } from "react-router-dom";
 const TrackOrder = () => {
+  const { showAlert } = useAppContext();
   const [orderId, setOrderId] = useState("");
   const [email, setEmail] = useState("");
 
   const handleSubmit = () => {
     if (orderId && email) {
       console.log("Tracking order:", orderId, email);
-      alert(`Tracking Order ID: ${orderId} with Email: ${email}`);
+      showAlert(`Tracking Order ID: ${orderId} with Email: ${email}`, "info", "Order Tracking");
     } else {
-      alert("Please fill in both fields");
+      showAlert("Please fill in both fields", "warning", "Missing Information");
     }
   };
 

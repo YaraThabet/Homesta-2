@@ -3,6 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Camera, Edit, Globe, User } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useAppContext } from "../../../context/AppContext";
+
+import SafeImage from "../../../components/SafeImage";
 
 // Country data with flags and dial codes
 const countryData = {
@@ -11,18 +14,6 @@ const countryData = {
   CA: { flag: "🇨🇦", code: "1", name: "Canada" },
   AU: { flag: "🇦🇺", code: "61", name: "Australia" },
   EG: { flag: "🇪🇬", code: "20", name: "Egypt" },
-};
-
-// Simple toast notification function
-const showToast = (message) => {
-  const toast = document.createElement("div");
-  toast.className =
-    "fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md shadow-lg";
-  toast.textContent = message;
-  document.body.appendChild(toast);
-  setTimeout(() => {
-    document.body.removeChild(toast);
-  }, 3000);
 };
 
 const profileSchema = z.object({
@@ -84,8 +75,10 @@ const ProfileForm = ({
   profileData,
   onProfileUpdate,
 }) => {
+  const { showAlert } = useAppContext();
   const [isEditing, setIsEditing] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState("EG");
+  const [imageFile, setImageFile] = useState(null); // Store the actual file
 
   const {
     register,
@@ -93,6 +86,7 @@ const ProfileForm = ({
     formState: { errors },
     reset,
     watch,
+    setValue,
   } = useForm({
     resolver: zodResolver(profileSchema),
     defaultValues: {
@@ -118,18 +112,28 @@ const ProfileForm = ({
     if (file) {
       // Check file type
       if (!file.type.match("image.*")) {
-        alert("Please select an image file (JPEG, PNG, etc.)");
+        showAlert(
+          "Please select an image file (JPEG, PNG, etc.)",
+          "warning",
+          "Invalid File"
+        );
         return;
       }
 
       // Check file size (5MB max)
       if (file.size > 5 * 1024 * 1024) {
-        alert("Image size should be less than 5MB");
+        showAlert(
+          "Image size should be less than 5MB",
+          "warning",
+          "File Too Large"
+        );
         return;
       }
 
       const imageUrl = URL.createObjectURL(file);
-      onProfileImageChange && onProfileImageChange(imageUrl);
+      setImageFile(file); // Store the file for later upload
+      // Pass both the preview URL and the actual file
+      onProfileImageChange && onProfileImageChange(imageUrl, file);
     }
   };
 
@@ -137,9 +141,10 @@ const ProfileForm = ({
     const formData = {
       ...data,
       profileImage: profileImage,
+      imageFile: imageFile, // Include the image file
     };
     onProfileUpdate(formData);
-    showToast("Profile updated successfully!");
+    // Don't show alert here - it's handled in the parent component
     setIsEditing(false);
   };
 
@@ -162,15 +167,12 @@ const ProfileForm = ({
       <div className="flex flex-col sm:flex-row items-start gap-5">
         <div className="relative group">
           <div className="h-[100px] w-[100px] rounded-full border-4 border-white bg-gray-100 shadow-md overflow-hidden flex items-center justify-center">
-            {profileImage ? (
-              <img
-                src={profileImage}
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <User className="h-12 w-12 text-gray-400" />
-            )}
+            <SafeImage
+              src={profileImage}
+              alt="Profile"
+              type="profile"
+              className="w-full h-full object-cover"
+            />
           </div>
           {isEditing && (
             <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
@@ -270,7 +272,7 @@ const ProfileForm = ({
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Enter first name"
+                  placeholder="e.g., John"
                   className={`w-full h-12 px-4 rounded-xl border ${
                     errors.firstName ? "border-red-500" : "border-gray-300"
                   } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
@@ -291,7 +293,7 @@ const ProfileForm = ({
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Enter last name"
+                  placeholder="e.g., Doe"
                   className={`w-full h-12 px-4 rounded-xl border ${
                     errors.lastName ? "border-red-500" : "border-gray-300"
                   } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
@@ -308,22 +310,18 @@ const ProfileForm = ({
 
           {/* Row 2: Email, Mobile Number */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-900">Email</label>
+            <div className="space-y-2 text-muted-foreground opacity-70">
+              <label className="text-sm font-medium text-gray-900">
+                Email (Uneditable)
+              </label>
               <div className="relative">
                 <input
                   type="email"
-                  placeholder="Enter email"
-                  className={`w-full h-12 px-4 rounded-xl border ${
-                    errors.email ? "border-red-500" : "border-gray-300"
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                  readOnly
+                  placeholder="example@email.com"
+                  className="w-full h-12 px-4 rounded-xl border border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed outline-none"
                   {...register("email")}
                 />
-                {errors.email && (
-                  <p className="mt-1 text-xs text-red-500">
-                    {errors.email.message}
-                  </p>
-                )}
               </div>
             </div>
 
@@ -343,7 +341,7 @@ const ProfileForm = ({
                   </div>
                   <input
                     type="tel"
-                    placeholder="0806 123 7890"
+                    placeholder="xxxx-xxx-xxxx"
                     className={`flex-1 h-12 px-4 rounded-r-xl border-l-0 ${
                       errors.mobileNumber ? "border-red-500" : "border-gray-300"
                     } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
@@ -436,7 +434,7 @@ const ProfileForm = ({
             <div className="relative">
               <input
                 type="text"
-                placeholder="Enter your address"
+                placeholder="e.g., 123 Main Street, Apt 4B"
                 className={`w-full h-12 px-4 rounded-xl border ${
                   errors.address ? "border-red-500" : "border-gray-300"
                 } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
@@ -459,7 +457,7 @@ const ProfileForm = ({
               <div className="relative">
                 <input
                   type="text"
-                  placeholder="Enter ZIP code"
+                  placeholder="e.g., 12345 or 12345-6789"
                   className={`w-full h-12 px-4 rounded-xl border ${
                     errors.zipCode ? "border-red-500" : "border-gray-300"
                   } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
