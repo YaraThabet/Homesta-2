@@ -88,7 +88,8 @@ const App = () => {
     location.pathname.startsWith("/signup") ||
     location.pathname.startsWith("/verify-code") ||
     location.pathname.startsWith("/forgot-password") ||
-    location.pathname.startsWith("/reset-password");
+    location.pathname.startsWith("/reset-password") ||
+    location.pathname.startsWith("/blogs/");
 
   // Identification of valid routes to hide navbar on 404
   const validRoutes = [
