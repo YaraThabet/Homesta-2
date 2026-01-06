@@ -53,12 +53,12 @@ const Category = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
           {categories
-            .filter((category) => ![1, 2, 3, 4].includes(category.categoryId))
+            .filter((category) => ![1,4,12,16].includes(category.categoryId))
             .map((category) => (
               <button
                 type="button"
                 key={category.categoryId}
-                onClick={() => navigate("/category/SubCategory")}
+                onClick={() => navigate(`/category/${category.categoryId}`)}
                 className=" relative h-[238px] rounded-[18px] overflow-hidden
                  focus:outline-none focus:ring-4 focus:ring-[#43766C]/40
                  transform transition-all duration-300
