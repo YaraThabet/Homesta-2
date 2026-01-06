@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import PageLoader from "../components/PageLoader";
 import api from "../lib/axios";
+import { useParams } from "react-router-dom";
 
 const SubCategory = () => {
+  const { categoryId } = useParams();
   const [subCategories, setSubCategories] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -10,7 +12,7 @@ const SubCategory = () => {
   useEffect(() => {
     const fetchSubCategories = async () => {
       try {
-        const response = await api.get("/SubCategory");
+        const response = await api.get(`/SubCategory/by-category/${categoryId}`);
 
         // api.get returns the response object, data is in response.data
         const data = response.data;

@@ -95,7 +95,7 @@ const App = () => {
     "/",
     "/notifications",
     "/category",
-    "/subcategory/:categoryName",
+    "/category/:categoryId",
     "/shop",
     "/blogs",
     "/blogs/:id",
@@ -163,7 +163,7 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/category" element={<Category />} />
-          <Route path="/category/SubCategory" element={<SubCategory />} />
+          <Route path="/category/:categoryId" element={<SubCategory />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/blogs" element={<Blogs />} />
           <Route path="/blogs/:id" element={<BlogDetail />} />
