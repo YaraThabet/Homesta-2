@@ -22,6 +22,8 @@ import {
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../../lib/axios';
 import PageLoader from '../../components/PageLoader';
+import { useAppContext } from '../../context/AppContext';
+import ConfirmModal from '../../components/ConfirmModal';
 
 const COLOR_MAP = {
     "brown": "#A67B5B",
@@ -93,6 +95,7 @@ const getColorName = (colorVal) => {
 };
 const Products = () => {
     const navigate = useNavigate();
+    const { showAlert } = useAppContext();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -194,7 +197,7 @@ const Products = () => {
             setDeleteId(null);
         } catch (err) {
             console.error("Delete failed:", err);
-            alert("Failed to delete product. Please try again.");
+            showAlert("Failed to delete product. Please try again.", "error", "Delete Failed");
         } finally {
             setIsDeleting(false);
         }
@@ -444,49 +447,17 @@ const Products = () => {
                 )}
             </AnimatePresence>
 
-            {/* Delete Confirmation Modal */}
-            <AnimatePresence>
-                {deleteId && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm"
-                    >
-                        <motion.div
-                            initial={{ scale: 0.9, y: 20, opacity: 0 }}
-                            animate={{ scale: 1, y: 0, opacity: 1 }}
-                            exit={{ scale: 0.9, y: 20, opacity: 0 }}
-                            className="bg-white rounded-[40px] p-10 max-w-md w-full shadow-2xl relative overflow-hidden"
-                        >
-                            <div className="w-20 h-20 bg-red-50 rounded-3xl flex items-center justify-center mb-8 mx-auto text-red-500">
-                                <AlertCircle size={40} />
-                            </div>
-
-                            <h3 className="text-2xl font-bold text-gray-900 text-center mb-4">Delete Product?</h3>
-                            <p className="text-gray-500 text-center mb-10 font-light leading-relaxed">
-                                This action cannot be undone. This piece will be permanently removed from your showroom.
-                            </p>
-
-                            <div className="flex gap-4">
-                                <button
-                                    onClick={() => setDeleteId(null)}
-                                    className="flex-1 py-4 bg-gray-50 text-gray-400 font-bold rounded-2xl hover:bg-gray-100 transition-all"
-                                >
-                                    Cancel
-                                </button>
-                                <button
-                                    onClick={handleDelete}
-                                    disabled={isDeleting}
-                                    className="flex-1 py-4 bg-red-500 text-white font-bold rounded-2xl shadow-xl shadow-red-500/10 hover:bg-red-600 transition-all disabled:opacity-50"
-                                >
-                                    {isDeleting ? "Deleting..." : "Delete Piece"}
-                                </button>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            {/* Standardized Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={!!deleteId}
+                onClose={() => setDeleteId(null)}
+                onConfirm={handleDelete}
+                title="Delete Product?"
+                message="This action cannot be undone. This piece will be permanently removed from your showroom."
+                confirmText={isDeleting ? "Deleting..." : "Delete Piece"}
+                cancelText="Cancel"
+                type="danger"
+            />
         </div>
     );
 };
@@ -605,7 +576,14 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) 
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="p-5 bg-white rounded-3xl border border-gray-100 shadow-sm">
                                     <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">Market Price</span>
-                                    <div className="text-3xl font-black text-[#205457] tabular-nums">${product.price}</div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="text-3xl font-black text-[#205457] tabular-nums">
+                                            ${product.discount > 0 ? (product.price * (1 - product.discount / 100)).toFixed(2) : product.price}
+                                        </div>
+                                        {product.discount > 0 && (
+                                            <span className="text-sm text-gray-400 line-through font-bold">${product.price}</span>
+                                        )}
+                                    </div>
                                 </div>
                                 <div className="p-5 bg-white rounded-3xl border border-gray-100 shadow-sm">
                                     <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">Stock Available</span>
@@ -794,7 +772,14 @@ const ProductCard = ({ product, onEdit, onDelete, onViewDetails, categoryMap }) 
                 <div className="mt-6 pt-6 border-t border-gray-50 flex items-center justify-between">
                     <div>
                         <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">Price</span>
-                        <p className="text-2xl font-black text-[#205457] tabular-nums">${product.price}</p>
+                        <div className="flex items-center gap-2">
+                            <p className="text-2xl font-black text-[#205457] tabular-nums">
+                                ${product.discount > 0 ? (product.price * (1 - product.discount / 100)).toFixed(2) : product.price}
+                            </p>
+                            {product.discount > 0 && (
+                                <span className="text-sm text-gray-400 line-through font-medium">${product.price}</span>
+                            )}
+                        </div>
                     </div>
                     <div className="text-right">
                         <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">Stock</span>
@@ -830,7 +815,14 @@ const ProductRow = ({ product, onEdit, onDelete, onViewDetails, subCategoryMap }
                 </div>
             </td>
             <td className="px-8 py-6">
-                <p className="font-black text-gray-900 tabular-nums">${product.price}</p>
+                <div className="flex flex-col">
+                    <p className="font-black text-gray-900 tabular-nums">
+                        ${product.discount > 0 ? (product.price * (1 - product.discount / 100)).toFixed(2) : product.price}
+                    </p>
+                    {product.discount > 0 && (
+                        <span className="text-[10px] text-gray-400 line-through font-bold">${product.price}</span>
+                    )}
+                </div>
             </td>
             <td className="px-8 py-6">
                 <div className="flex flex-col gap-1">

@@ -30,12 +30,18 @@ const Analytics = () => {
   const [soldItems, setSoldItems] = React.useState('0');
   const [conversionRate, setConversionRate] = React.useState('0.0%');
   const [bestSellers, setBestSellers] = React.useState(sellingPerformance);
+  const [monthlyData, setMonthlyData] = React.useState(new Array(12).fill(0));
   const [loading, setLoading] = React.useState(true);
 
   const storeId = localStorage.getItem('storeId');
 
+  const [chartData, setChartData] = React.useState([]);
+
   React.useEffect(() => {
-    if (!storeId) return;
+    if (!storeId) {
+      setLoading(false);
+      return;
+    }
 
     const fetchAnalyticsData = async () => {
       try {
@@ -45,65 +51,104 @@ const Analytics = () => {
         const revData = Array.isArray(revRes.data) ? revRes.data : [];
         setReviews(revData);
         if (revData.length > 0) {
-          const avg = revData.reduce((acc, curr) => acc + curr.rating, 0) / revData.length;
+          const avg = revData.reduce((acc, curr) => acc + (curr.rating || 0), 0) / revData.length;
           setAvgRating(avg.toFixed(1));
         }
 
-        // 2. Fetch Orders for Revenue & Sold Items fallback
+        // 2. Fetch Orders for Real Data Aggregation
         try {
-          const ordersRes = await api.get(`/Order/store/${storeId}`);
+          const ordersRes = await api.get(`Order/by-store/${storeId}`);
           const orders = Array.isArray(ordersRes.data) ? ordersRes.data : [];
-          const totalRev = orders.reduce((sum, o) => sum + (Number(o.totalAmount || o.totalPayment || 0)), 0);
-          setRevenue(`$${totalRev.toLocaleString()}`);
 
-          // Assuming each order has products/items
+          // Total Revenue - strictly from DELIVERED
+          const deliveredRev = orders.reduce((sum, o) => {
+            if (o.status?.toLowerCase() !== 'delivered') return sum;
+            const price = parseFloat(o.totalPrice || o.totalAmount || o.orderTotal || o.totalPayment || 0);
+            return sum + price;
+          }, 0);
+          setRevenue(`$${deliveredRev.toLocaleString()}`);
+
+          // Sold Items - strictly DELIVERED
           let totalSold = 0;
           orders.forEach(o => {
-            if (o.items && Array.isArray(o.items)) totalSold += o.items.length;
-            else totalSold += 1; // Fallback: count order as 1 item
+            const status = o.status?.toLowerCase() || '';
+            if (status === 'delivered') {
+              const orderItems = o.items || o.orderItems || [];
+              if (orderItems.length > 0) {
+                totalSold += orderItems.reduce((acc, item) => acc + (parseInt(item.quantity) || 1), 0);
+              } else {
+                totalSold += 1;
+              }
+            }
           });
           setSoldItems(totalSold.toLocaleString());
-        } catch (e) {
-          console.log("Revenue/Orders API fallback failed");
-        }
 
-        // 3. Fetch Products for Best Sellers
-        try {
-          const prodRes = await api.get(`/Store/${storeId}/products`);
-          const products = Array.isArray(prodRes.data) ? prodRes.data : [];
+          // 3. BEST SELLERS calculation
+          let itemMap = {};
+          const months = new Array(12).fill(0);
 
-          // Derivate best sellers (top 3 by rating)
-          if (products.length > 0) {
-            const sorted = [...products].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 3);
-            const sellers = sorted.map((p, i) => ({
-              id: p.productId || p.id || i,
-              title: p.name,
-              category: p.categoryName || 'Furniture',
-              sales: Math.floor(Math.random() * 20) + 10, // Mock sales as we don't have per-product sales count
-              revenue: `$${(p.price * 10).toLocaleString()}`,
-              growth: '+5%',
-              status: p.rating > 4.5 ? 'Best Seller' : 'Popular'
-            }));
-            setBestSellers(sellers);
+          orders.forEach(o => {
+            // Aggregate Revenue by Month
+            const date = new Date(o.orderDate || o.createdAt);
+            if (!isNaN(date.getTime())) {
+              const m = date.getMonth();
+              const val = parseFloat(o.totalPrice || o.totalAmount || 0);
+              months[m] += val;
+            }
+
+            const items = o.items || o.orderItems || [];
+            items.forEach(i => {
+              const id = i.productId || i.id || Math.random().toString();
+              const name = i.productName || i.name || 'Furniture Piece';
+              if (!itemMap[id]) itemMap[id] = { id, title: name, sales: 0, revenue: 0, status: 'Popular' };
+              const q = parseInt(i.quantity) || 1;
+              itemMap[id].sales += q;
+              itemMap[id].revenue += (parseFloat(i.unitPrice || i.price) || 0) * q;
+            });
+          });
+
+          setMonthlyData(months);
+
+          // Fallback Best Sellers
+          if (Object.keys(itemMap).length === 0) {
+            const prodRes = await api.get(`/Store/${storeId}/products`).catch(() => ({ data: [] }));
+            const products = prodRes.data?.products || (Array.isArray(prodRes.data) ? prodRes.data : []);
+            products.forEach(p => {
+              itemMap[p.productId || p.id] = { id: p.productId || p.id, title: p.name, sales: 0, revenue: 0, status: 'Active' };
+            });
           }
+
+          const sortedSellers = Object.values(itemMap)
+            .sort((a, b) => b.sales - a.sales)
+            .slice(0, 3)
+            .map(s => ({
+              ...s,
+              revenue: `$${s.revenue.toLocaleString()}`,
+              status: s.sales > 5 ? 'Best Seller' : 'Popular'
+            }));
+          setBestSellers(sortedSellers);
+
+          const chartArr = Object.values(itemMap)
+            .sort((a, b) => b.sales - a.sales)
+            .slice(0, 12)
+            .map(s => ({
+              label: s.title ? s.title.substring(0, 3).toUpperCase() : '???',
+              fullName: s.title,
+              value: s.sales
+            }));
+          setChartData(chartArr);
+
         } catch (e) {
-          console.log("Products API for best sellers failed");
+          console.error("Analytics aggregation failed", e);
         }
 
-        // 4. Try dedicated Analytics endpoint
         try {
           const statsRes = await api.get(`/Analytics/store/${storeId}`);
-          if (statsRes.data) {
-            if (statsRes.data.revenue) setRevenue(`$${Number(statsRes.data.revenue).toLocaleString()}`);
-            if (statsRes.data.soldItems) setSoldItems(statsRes.data.soldItems.toString());
-            if (statsRes.data.conversionRate) setConversionRate(`${statsRes.data.conversionRate}%`);
-          }
-        } catch (e) {
-          // Silent fail
-        }
+          if (statsRes.data?.conversionRate) setConversionRate(`${statsRes.data.conversionRate}%`);
+        } catch (e) { }
 
       } catch (err) {
-        console.error("Failed to fetch analytics:", err);
+        console.error("Global analytics sync failed:", err);
       } finally {
         setLoading(false);
       }
@@ -134,6 +179,26 @@ const Analytics = () => {
       opacity: 1,
       transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
     }
+  };
+
+  // Generate SVG Path for the Line Chart
+  const generatePath = (data) => {
+    const max = Math.max(...data, 100);
+    const width = 800;
+    const height = 300;
+    const points = data.map((val, i) => ({
+      x: (i / (data.length - 1)) * width,
+      y: height - (val / max) * height
+    }));
+
+    let path = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const curr = points[i];
+      const next = points[i + 1];
+      const cp1x = curr.x + (next.x - curr.x) / 2;
+      path += ` C ${cp1x} ${curr.y}, ${cp1x} ${next.y}, ${next.x} ${next.y}`;
+    }
+    return path;
   };
 
   return (
@@ -174,9 +239,9 @@ const Analytics = () => {
           variants={fadeInUp}
         >
           {stats.map((stat) => (
-            <div key={stat.id} className="bg-white p-8 rounded-[35px] shadow-[0_15px_40px_rgba(0,0,0,0.02)] border border-gray-50">
+            <div key={stat.id} className="bg-white p-8 rounded-[35px] shadow-[0_15px_40px_rgba(0,0,0,0.02)] border border-gray-50 hover:shadow-xl transition-all duration-500">
               <div className="flex justify-between items-start mb-6">
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gray-50">
+                <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-gray-50 group-hover:bg-white">
                   <stat.icon size={22} style={{ color: stat.color }} />
                 </div>
                 <div className={`flex items-center gap-1 text-xs font-black ${stat.isUp ? 'text-green-500' : 'text-red-500'} bg-gray-50 px-2 py-1 rounded-lg`}>
@@ -191,43 +256,78 @@ const Analytics = () => {
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Performance Chart Placeholder */}
+          {/* Revenue Trends Line Chart */}
           <motion.div
-            className="lg:col-span-2 bg-white rounded-[40px] p-10 shadow-[0_15px_40px_rgba(0,0,0,0.02)] border border-gray-50 flex flex-col"
+            className="lg:col-span-2 bg-white rounded-[40px] p-10 shadow-[0_15px_40px_rgba(0,0,0,0.02)] border border-gray-50 flex flex-col overflow-hidden relative"
             variants={fadeInUp}
           >
-            <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center justify-between mb-10 relative z-10">
               <div className="flex items-center gap-3">
                 <BarChart3 className="text-[#205457]" size={24} />
                 <h3 className="text-xl font-bold text-gray-900 tracking-tight">Revenue Trends</h3>
               </div>
               <div className="flex gap-2">
                 <span className="flex items-center gap-2 text-xs font-bold text-gray-400">
-                  <div className="w-2 h-2 rounded-full bg-[#205457]" /> This Month
-                </span>
-                <span className="flex items-center gap-2 text-xs font-bold text-gray-400 ml-4">
-                  <div className="w-2 h-2 rounded-full bg-[#89917D]/30" /> Last Month
+                  <div className="w-2 h-2 rounded-full bg-[#205457]" /> Actual Sales
                 </span>
               </div>
             </div>
 
-            {/* Abstract Chart Representation */}
-            <div className="flex-1 min-h-[300px] flex items-end justify-between gap-4 pb-4">
-              {[40, 70, 45, 90, 65, 80, 50, 85, 95, 60, 75, 100].map((h, i) => (
-                <div key={i} className="flex-1 group relative">
-                  <div
-                    className="w-full bg-[#205457]/10 rounded-t-xl transition-all duration-500 group-hover:bg-[#205457] cursor-pointer"
-                    style={{ height: `${h}%` }}
-                  >
-                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[10px] py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                      ${(h * 150).toLocaleString()}
-                    </div>
-                  </div>
-                  <p className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[10px] font-bold text-gray-300 uppercase tracking-tighter">
-                    {['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'][i]}
-                  </p>
-                </div>
-              ))}
+            {/* Premium SVG Line Chart */}
+            <div className="flex-1 min-h-[300px] relative mt-10">
+              <svg viewBox="0 0 800 300" className="w-full h-full overflow-visible">
+                <defs>
+                  <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#205457" stopOpacity="0.2" />
+                    <stop offset="100%" stopColor="#205457" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+
+                {/* Grid Lines */}
+                {[0, 0.25, 0.5, 0.75, 1].map((p, i) => (
+                  <line key={i} x1="0" y1={300 * p} x2="800" y2={300 * p} stroke="#F3F4F6" strokeWidth="1" />
+                ))}
+
+                {/* Area Fill */}
+                <path
+                  d={`${generatePath(monthlyData)} L 800 300 L 0 300 Z`}
+                  fill="url(#chartGradient)"
+                  className="transition-all duration-1000"
+                />
+
+                {/* The Line */}
+                <path
+                  d={generatePath(monthlyData)}
+                  fill="none"
+                  stroke="#205457"
+                  strokeWidth="4"
+                  strokeLinecap="round"
+                  className="transition-all duration-1000"
+                />
+
+                {/* Data Points */}
+                {monthlyData.map((val, i) => {
+                  const max = Math.max(...monthlyData, 100);
+                  const x = (i / (monthlyData.length - 1)) * 800;
+                  const y = 300 - (val / max) * 300;
+                  return (
+                    <g key={i} className="group/point cursor-pointer">
+                      <circle cx={x} cy={y} r="6" fill="#205457" className="scale-0 group-hover/point:scale-125 transition-transform duration-300" />
+                      <circle cx={x} cy={y} r="4" fill="white" stroke="#205457" strokeWidth="2" />
+                      <text x={x} y={y - 15} textAnchor="middle" className="text-[10px] font-black fill-gray-900 opacity-0 group-hover/point:opacity-100 transition-opacity">
+                        ${val.toLocaleString()}
+                      </text>
+                    </g>
+                  );
+                })}
+              </svg>
+
+              {/* X-Axis Labels */}
+              <div className="flex justify-between mt-6 px-1">
+                {['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'].map((m) => (
+                  <span key={m} className="text-[10px] font-black text-gray-300 tracking-tighter">{m}</span>
+                ))}
+              </div>
             </div>
           </motion.div>
 
@@ -269,7 +369,34 @@ const Analytics = () => {
               ))}
             </div>
 
-            <button className="w-full mt-10 py-4 rounded-2xl border border-dashed border-gray-100 text-gray-400 font-bold text-xs uppercase tracking-widest hover:border-[#205457] hover:text-[#205457] transition-all">
+            <button
+              onClick={() => {
+                const csvRows = [
+                  ["Metric", "Value"],
+                  ["Store Earnings", revenue],
+                  ["Sold Items", soldItems],
+                  ["Avg Rating", avgRating],
+                  ["Conversion Rate", conversionRate],
+                  [""],
+                  ["Top Selling Products", "Sales", "Revenue"],
+                  ...bestSellers.map(b => [b.title, b.sales, b.revenue]),
+                  [""],
+                  ["Monthly Revenue Trend"],
+                  ...monthlyData.map((val, i) => [
+                    ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'][i],
+                    val
+                  ])
+                ];
+                const csvString = csvRows.map(row => row.join(",")).join("\n");
+                const blob = new Blob([csvString], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.setAttribute('href', url);
+                a.setAttribute('download', `Homesta_Report_${storeId}_${new Date().toISOString().split('T')[0]}.csv`);
+                a.click();
+              }}
+              className="w-full mt-10 py-4 rounded-2xl border border-dashed border-gray-100 text-gray-400 font-bold text-xs uppercase tracking-widest hover:border-[#205457] hover:text-[#205457] transition-all"
+            >
               Download Full Report
             </button>
           </motion.div>

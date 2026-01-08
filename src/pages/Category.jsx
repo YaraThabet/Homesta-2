@@ -13,7 +13,7 @@ const Category = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await api.get("/Category");
+        const response = await api.get("Category");
 
         // api.get returns the response object, data is in response.data
         const data = response.data;
@@ -53,7 +53,7 @@ const Category = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
           {categories
-            .filter((category) => ![1,4,12,16].includes(category.categoryId))
+            .filter((category) => ![1, 4, 12, 16].includes(category.categoryId))
             .map((category) => (
               <button
                 type="button"

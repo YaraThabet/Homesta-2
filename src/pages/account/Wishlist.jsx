@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import FooterBenefits from "../shop/components/FooterBenefits";
 import SafeImage from "../../components/SafeImage";
+import ConfirmModal from "../../components/ConfirmModal";
 import { useAppContext } from "../../context/AppContext";
 import api from "../../lib/axios";
 
@@ -62,6 +63,7 @@ const Wishlist = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [categoryName, setCategoryName] = useState("");
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const { showAlert, formatPrice } = useAppContext();
   const navigate = useNavigate();
   const location = useLocation();
@@ -136,11 +138,10 @@ const Wishlist = () => {
   };
 
   const clearWishlist = () => {
-    if (window.confirm("Are you sure you want to clear your entire wishlist?")) {
-      setItems([]);
-      localStorage.removeItem('wishlist');
-      showAlert("Wishlist cleared", 'success', 'Cleared');
-    }
+    setItems([]);
+    localStorage.removeItem('wishlist');
+    showAlert("Wishlist cleared", 'success', 'Cleared');
+    setShowClearConfirm(false);
   };
 
   const copyLink = () => {
@@ -155,12 +156,22 @@ const Wishlist = () => {
         showAlert("Please login to add items to cart", 'warning', 'Login Required');
         return;
       }
-      await api.post('/Cart/add', {
+      await api.post('Cart/add', {
         productId: parseInt(item.id),
-        quantity: 1
+        quantity: 1,
+        colorName: item.color || null
       });
       showAlert(`${item.name} added to cart!`, 'success', 'Added to Cart');
+
+      // Remove from wishlist
+      setItems(prevItems => {
+        const newItems = prevItems.filter(i => i.id !== item.id);
+        localStorage.setItem('wishlist', JSON.stringify(newItems));
+        window.dispatchEvent(new Event('storage'));
+        return newItems;
+      });
     } catch (err) {
+      console.error(err);
       showAlert("Failed to add to cart", 'error', 'Error');
     }
   };
@@ -254,7 +265,7 @@ const Wishlist = () => {
                   <Share2 className="w-5 h-5" />
                 </button>
                 <button
-                  onClick={clearWishlist}
+                  onClick={() => setShowClearConfirm(true)}
                   className="flex items-center gap-2 text-sm font-bold text-red-400 hover:text-red-600 hover:bg-red-50 px-4 py-2.5 rounded-2xl transition-all"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -403,6 +414,17 @@ const Wishlist = () => {
       <div className="mt-20">
         <FooterBenefits />
       </div>
+
+      <ConfirmModal
+        isOpen={showClearConfirm}
+        onClose={() => setShowClearConfirm(false)}
+        onConfirm={clearWishlist}
+        title="Clear Wishlist?"
+        message="Are you sure you want to remove all items from your wishlist? This action cannot be undone."
+        confirmText="Clear All"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 };

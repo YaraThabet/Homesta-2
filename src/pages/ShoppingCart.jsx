@@ -4,6 +4,7 @@ import { X, Minus, Plus, ShoppingBag, ArrowRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import CheckoutStepper from "./summaryOrder/components/CheckoutStepper";
 import { useAppContext } from "../context/AppContext";
+import ConfirmModal from "../components/ConfirmModal";
 import api from "../lib/axios";
 
 const ShoppingCart = () => {
@@ -14,19 +15,20 @@ const ShoppingCart = () => {
   const [appliedCoupon, setAppliedCoupon] = useState(false);
   const [loading, setLoading] = useState(true);
   const [processingId, setProcessingId] = useState(null); // To track which item is being updated
+  const [showClearCartConfirm, setShowClearCartConfirm] = useState(false);
   const navigate = useNavigate();
 
   const fetchCart = async () => {
     try {
       setLoading(true);
-      const res = await api.get('/Cart');
+      const res = await api.get('Cart');
       if (res.data && res.data.cartItems) {
         // Map API items to UI items
         const mappedItems = res.data.cartItems.map(item => ({
           id: item.cartItemId,
           productId: item.productId,
           name: item.productName || "Product",
-          color: item.productColors ? item.productColors[0] : null,
+          color: item.colorName || (item.productColors ? item.productColors[0] : null),
           price: (item.finalPrice !== undefined && item.finalPrice !== null) ? item.finalPrice : (item.unitPrice || 0),
           quantity: item.quantity || 1,
           image: null,
@@ -78,27 +80,22 @@ const ShoppingCart = () => {
   const updateQuantity = async (item, delta) => {
     if (processingId) return;
 
-    // Optimistic Update
-    const oldQty = item.quantity;
-    const newQty = oldQty + delta;
+    const newQty = item.quantity + delta;
     if (newQty < 1) return;
 
     setProcessingId(item.id);
 
     try {
-      // Try to add/subtract via Add endpoint (assuming it aggregates)
-      // If API behaves differently, strict quantity setting endpoint is needed.
-      // For now, we assume adding negative quantity decreases.
-      await api.post('/Cart/add', {
-        productId: item.productId,
-        quantity: delta
+      await api.put('Cart/update', {
+        cartItemId: item.id,
+        quantity: newQty
       });
 
       // Refetch to be safe and get correct totals
       await fetchCart();
     } catch (err) {
       console.error("Update quantity failed", err);
-      // Revert UI if needed (handled by fetchCart usually)
+      showAlert("Could not update quantity. Please try again.", "error", "Error");
     } finally {
       setProcessingId(null);
     }
@@ -107,8 +104,7 @@ const ShoppingCart = () => {
   const removeItem = async (id) => {
     setProcessingId(id);
     try {
-      // Attempt standard REST pattern for deletion
-      await api.delete(`/Cart/items/${id}`);
+      await api.delete(`Cart/remove/${id}`);
       await fetchCart();
     } catch (err) {
       console.error("Remove item failed", err);
@@ -119,16 +115,16 @@ const ShoppingCart = () => {
   };
 
   const clearCart = async () => {
-    if (!window.confirm(t('confirmClearCart') || "Are you sure you want to clear your cart?")) return;
     try {
       setLoading(true);
-      await api.delete('/Cart/clear');
+      await api.delete('Cart/clear');
       setCartItems([]);
       setCartSummary({ subTotal: 0, shipping: 0, tax: 0, total: 0 });
     } catch (err) {
       console.error("Failed to clear cart", err);
     } finally {
       setLoading(false);
+      setShowClearCartConfirm(false);
     }
   };
 
@@ -259,8 +255,15 @@ const ShoppingCart = () => {
                         </div>
 
                         {/* Price (Desktop) */}
-                        <div className="hidden md:block w-32 text-center font-bold text-gray-900 text-lg">
-                          {formatPrice(item.price)}
+                        <div className="hidden md:block w-32 text-center">
+                          <div className="font-bold text-gray-900 text-lg">
+                            {formatPrice(item.price)}
+                          </div>
+                          {item.originalPrice > item.price && (
+                            <div className="text-xs text-gray-400 line-through">
+                              {formatPrice(item.originalPrice)}
+                            </div>
+                          )}
                         </div>
 
                         {/* Quantity Control */}
@@ -339,7 +342,7 @@ const ShoppingCart = () => {
                     <div className="flex-1"></div>
 
                     <button
-                      onClick={clearCart}
+                      onClick={() => setShowClearCartConfirm(true)}
                       className="text-gray-500 hover:text-red-500 text-sm font-medium underline transition-colors"
                     >
                       {t('clearCart')}
@@ -408,6 +411,18 @@ const ShoppingCart = () => {
 
         </div>
       </div>
+
+      {/* Clear Cart Confirmation Modal */}
+      <ConfirmModal
+        isOpen={showClearCartConfirm}
+        onClose={() => setShowClearCartConfirm(false)}
+        onConfirm={clearCart}
+        title="Clear Shopping Cart?"
+        message="Are you sure you want to remove all items from your cart? This action cannot be undone."
+        confirmText="Clear Cart"
+        cancelText="Keep Items"
+        type="danger"
+      />
     </div>
   );
 };

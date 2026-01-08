@@ -1,9 +1,38 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaStar } from "react-icons/fa";
+import { FaStar, FaShoppingCart } from "react-icons/fa";
+import api from "../../../lib/axios";
 
 const OurProducts = () => {
   const navigate = useNavigate();
+  const [addingId, setAddingId] = useState(null);
+
+  const handleAddToCart = async (e, product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      setAddingId(product.id);
+      await api.post('Cart/add', {
+        productId: product.id,
+        quantity: 1,
+        colorName: null
+      });
+      // Simple feedback: could use a toast here if available globally
+    } catch (err) {
+      console.error("Failed to add to cart", err);
+    } finally {
+      setAddingId(null);
+    }
+  };
+
   const products = [
+    // ... (rest of the products array remains same)
     {
       id: 1,
       name: "Wooden Sofa Chair",
@@ -104,10 +133,20 @@ const OurProducts = () => {
                   alt={product.name}
                   className="max-h-[220px] object-contain"
                 />
+
+                {/* Quick Add To Cart Button */}
+                <button
+                  onClick={(e) => handleAddToCart(e, product)}
+                  disabled={addingId === product.id}
+                  className="absolute bottom-4 right-4 w-12 h-12 bg-white text-[#205457] rounded-full shadow-lg flex items-center justify-center hover:bg-[#205457] hover:text-white transition-all transform hover:scale-110 active:scale-95"
+                  title="Quick Add"
+                >
+                  <FaShoppingCart className={addingId === product.id ? 'animate-bounce' : ''} />
+                </button>
               </div>
 
               {/* Info */}
-              <div className="mt-4 text-left">
+              <div className="mt-4 text-left cursor-pointer" onClick={() => navigate(`/product/${product.id}`)}>
                 <div className="flex justify-between items-center mb-1">
                   <p className="text-gray-600 text-sm">{product.category}</p>
                   <div className="flex items-center gap-1">

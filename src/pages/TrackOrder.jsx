@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import { useAppContext } from "../context/AppContext";
 import { Package, CreditCard, Headphones } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 const TrackOrder = () => {
   const { showAlert } = useAppContext();
+  const navigate = useNavigate();
   const [orderId, setOrderId] = useState("");
   const [email, setEmail] = useState("");
 
   const handleSubmit = () => {
     if (orderId && email) {
-      console.log("Tracking order:", orderId, email);
-      showAlert(`Tracking Order ID: ${orderId} with Email: ${email}`, "info", "Order Tracking");
+      navigate(`/tracking-order/${orderId}`);
     } else {
       showAlert("Please fill in both fields", "warning", "Missing Information");
     }
@@ -85,11 +86,7 @@ const TrackOrder = () => {
               onClick={handleSubmit}
               className="w-full md:w-auto px-10 py-3 bg-teal-800 text-white font-semibold rounded-lg hover:bg-teal-900 transition-colors shadow-md hover:shadow-lg"
             >
-
-              <Link to="/tracking-order">
-                Track Order
-              </Link>
-
+              Track Order
             </button>
           </div>
         </div>

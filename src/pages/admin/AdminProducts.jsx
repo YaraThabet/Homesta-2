@@ -3,6 +3,7 @@ import { useAppContext } from '../../context/AppContext';
 import SafeImage from '../../components/SafeImage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Package, Search, Plus, Filter, MoreVertical, Edit2, Trash2, Eye, Star, DollarSign, Tag, Image as ImageIcon, X } from 'lucide-react';
+import ConfirmModal from '../../components/ConfirmModal';
 import api from '../../lib/axios';
 
 // Helper to format image URL
@@ -253,6 +254,7 @@ const ProductCard = ({ product, handleDelete, onViewDetails, categoryMap }) => {
 const AdminProducts = () => {
     const { showAlert, formatPrice } = useAppContext();
     const [products, setProducts] = useState([]);
+    const [stores, setStores] = useState([]);
     const [categoryMap, setCategoryMap] = useState({});
     const [subCategoryMap, setSubCategoryMap] = useState({}); // ID -> Name
     const [allSubCategories, setAllSubCategories] = useState([]); // List of objects
@@ -260,21 +262,27 @@ const AdminProducts = () => {
     const [searchQuery, setSearchQuery] = useState('');
 
     // Filters
+    const [selectedStore, setSelectedStore] = useState('All'); // Stores Name
     const [selectedCategory, setSelectedCategory] = useState('All'); // Stores Name
     const [selectedSubCategory, setSelectedSubCategory] = useState('All'); // Stores Name
+    const [minPrice, setMinPrice] = useState('');
+    const [maxPrice, setMaxPrice] = useState('');
 
     const [selectedProduct, setSelectedProduct] = useState(null);
+    const [deleteConfirm, setDeleteConfirm] = useState({ show: false, id: null });
 
     useEffect(() => {
         const fetchAllData = async () => {
             try {
                 setLoading(true);
-                const [prodRes, catRes] = await Promise.all([
-                    api.get('/Product/GetAllProducts'),
-                    api.get('/Category')
+                const [prodRes, catRes, storeRes] = await Promise.all([
+                    api.get('Product/GetAllProducts'),
+                    api.get('Category'),
+                    api.get('Store')
                 ]);
 
                 setProducts(Array.isArray(prodRes.data) ? prodRes.data : []);
+                setStores(Array.isArray(storeRes.data) ? storeRes.data : []);
 
                 const cats = Array.isArray(catRes.data) ? catRes.data : [];
                 const cMap = {};
@@ -310,15 +318,21 @@ const AdminProducts = () => {
         fetchAllData();
     }, []);
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this product?")) return;
+    const handleDelete = (id) => {
+        setDeleteConfirm({ show: true, id });
+    };
+
+    const confirmDelete = async () => {
+        const id = deleteConfirm.id;
         try {
-            await api.delete(`/Product/${id}`);
+            await api.delete(`/Product/Delete/${id}`);
             setProducts(products.filter(p => (p.productId || p.id) !== id));
             showAlert("Product deleted successfully!", "success");
         } catch (err) {
             console.error("Delete failed", err);
             showAlert("Failed to delete product.", "error", "Error");
+        } finally {
+            setDeleteConfirm({ show: false, id: null });
         }
     };
 
@@ -338,6 +352,9 @@ const AdminProducts = () => {
     const filteredProducts = products.filter(product => {
         const matchesSearch = product.name?.toLowerCase().includes(searchQuery.toLowerCase());
 
+        // Store Filter
+        const matchesStore = selectedStore === 'All' || product.storeId?.toString() === Object.keys(stores).find(key => stores[key].name === selectedStore) || stores.find(s => s.name === selectedStore)?.id?.toString() === product.storeId?.toString() || stores.find(s => s.name === selectedStore)?.storeId?.toString() === product.storeId?.toString();
+
         // Category Filter
         const catName = categoryMap[product.categoryId] || 'Uncategorized';
         const matchesCategory = selectedCategory === 'All' || catName === selectedCategory;
@@ -349,7 +366,11 @@ const AdminProducts = () => {
             matchesSubCategory = subName === selectedSubCategory;
         }
 
-        return matchesSearch && matchesCategory && matchesSubCategory;
+        const price = product.price || 0;
+        const matchesMinPrice = minPrice === '' || price >= parseFloat(minPrice);
+        const matchesMaxPrice = maxPrice === '' || price <= parseFloat(maxPrice);
+
+        return matchesSearch && matchesCategory && matchesSubCategory && matchesStore && matchesMinPrice && matchesMaxPrice;
     });
 
     return (
@@ -375,6 +396,32 @@ const AdminProducts = () => {
                             className="w-full pl-12 pr-4 py-4 bg-white rounded-2xl border border-gray-100 focus:ring-2 focus:ring-[#205457]/20 outline-none shadow-sm text-gray-700 font-medium placeholder-gray-300"
                         />
                     </div>
+
+                    {/* Store List */}
+                    <div className="flex gap-2 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm overflow-x-auto max-w-full md:max-w-md no-scrollbar">
+                        <button
+                            onClick={() => setSelectedStore('All')}
+                            className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all flex-shrink-0 ${selectedStore === 'All'
+                                ? 'bg-[#205457] text-white shadow-lg shadow-[#205457]/20'
+                                : 'text-gray-400 hover:bg-gray-50'
+                                }`}
+                        >
+                            All Stores
+                        </button>
+                        {stores.map(s => (
+                            <button
+                                key={s.storeId || s.id}
+                                onClick={() => setSelectedStore(s.name)}
+                                className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all flex-shrink-0 ${selectedStore === s.name
+                                    ? 'bg-[#205457] text-white shadow-lg shadow-[#205457]/20'
+                                    : 'text-gray-400 hover:bg-gray-50'
+                                    }`}
+                            >
+                                {s.name}
+                            </button>
+                        ))}
+                    </div>
+
                     {/* Category List */}
                     <div className="flex gap-2 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm overflow-x-auto max-w-full md:max-w-md no-scrollbar">
                         {categoryNames.map(cat => (
@@ -389,6 +436,28 @@ const AdminProducts = () => {
                                 {cat}
                             </button>
                         ))}
+                    </div>
+
+                    {/* Price Range */}
+                    <div className="flex items-center gap-3 bg-white p-2 px-4 rounded-2xl border border-gray-100 shadow-sm">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-gray-300">Budget</span>
+                        <div className="flex items-center bg-gray-50 rounded-xl px-2 py-1">
+                            <input
+                                type="number"
+                                placeholder="Min"
+                                value={minPrice}
+                                onChange={(e) => setMinPrice(e.target.value)}
+                                className="w-16 bg-transparent text-xs font-bold text-center border-none outline-none focus:ring-0 px-1"
+                            />
+                            <span className="text-gray-200 mx-1">-</span>
+                            <input
+                                type="number"
+                                placeholder="Max"
+                                value={maxPrice}
+                                onChange={(e) => setMaxPrice(e.target.value)}
+                                className="w-16 bg-transparent text-xs font-bold text-center border-none outline-none focus:ring-0 px-1"
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -450,6 +519,18 @@ const AdminProducts = () => {
                     />
                 )}
             </AnimatePresence>
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={deleteConfirm.show}
+                onClose={() => setDeleteConfirm({ show: false, id: null })}
+                onConfirm={confirmDelete}
+                title="Delete Product?"
+                message="Are you sure you want to delete this product? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                type="danger"
+            />
         </div>
     );
 };

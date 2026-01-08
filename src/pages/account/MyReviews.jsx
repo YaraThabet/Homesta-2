@@ -3,6 +3,7 @@ import { useAppContext } from '../../context/AppContext';
 import SafeImage from '../../components/SafeImage';
 import { Star, Trash2, Edit3, MessageSquare, Package, ArrowRight, X, Check, Calendar, Store, Quote } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ConfirmModal from '../../components/ConfirmModal';
 import api from '../../lib/axios';
 
 const MyReviews = () => {
@@ -10,6 +11,7 @@ const MyReviews = () => {
     const [reviews, setReviews] = useState([]);
     const [loading, setLoading] = useState(true);
     const [editingReview, setEditingReview] = useState(null);
+    const [deleteConfirm, setDeleteConfirm] = useState({ show: false, id: null });
     const [saving, setSaving] = useState(false);
     const userId = localStorage.getItem('userId');
 
@@ -29,8 +31,12 @@ const MyReviews = () => {
         if (userId) fetchReviews();
     }, [userId]);
 
-    const handleDelete = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this review?")) return;
+    const handleDelete = (id) => {
+        setDeleteConfirm({ show: true, id });
+    };
+
+    const confirmDelete = async () => {
+        const id = deleteConfirm.id;
         try {
             await api.delete(`/Review/${id}`);
             setReviews(prev => prev.filter(r => (r.reviewId || r.id) !== id));
@@ -38,6 +44,8 @@ const MyReviews = () => {
         } catch (err) {
             console.error("Delete failed", err);
             showAlert("Failed to delete review.", "error", "Error");
+        } finally {
+            setDeleteConfirm({ show: false, id: null });
         }
     };
 
@@ -337,6 +345,18 @@ const MyReviews = () => {
                     </div>
                 )}
             </AnimatePresence>
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={deleteConfirm.show}
+                onClose={() => setDeleteConfirm({ show: false, id: null })}
+                onConfirm={confirmDelete}
+                title="Delete Review?"
+                message="Are you sure you want to delete this review? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                type="danger"
+            />
         </div>
     );
 };

@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import ShopHeader from "./components/ShopHeader";
 import FilterSidebar from "./components/FilterSidebar";
@@ -12,6 +13,8 @@ import api from "../../lib/axios";
 const ITEMS_PER_PAGE = 12;
 
 const Shop = () => {
+  const [searchParams] = useSearchParams();
+
   // Data State
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -35,8 +38,8 @@ const Shop = () => {
       try {
         setLoading(true);
         const [prodRes, catRes] = await Promise.all([
-          api.get('/Product/GetAllProducts'),
-          api.get('/Category')
+          api.get('Product/GetAllProducts'),
+          api.get('Category')
         ]);
 
         const fetchedProducts = Array.isArray(prodRes.data) ? prodRes.data : [];
@@ -66,6 +69,12 @@ const Shop = () => {
         });
         setSubCategories(allSubs);
 
+        // Check for subcategory filter from URL
+        const subCatIdFromUrl = searchParams.get('subCategoryId');
+        if (subCatIdFromUrl) {
+          setSelectedSubCategories([parseInt(subCatIdFromUrl)]);
+        }
+
       } catch (error) {
         console.error("Failed to fetch shop data", error);
       } finally {
@@ -73,7 +82,7 @@ const Shop = () => {
       }
     };
     fetchData();
-  }, []);
+  }, [searchParams]);
 
   // --- 2. Derive Dynamic Filter Options ---
   const { availableColors, maxProductPrice } = useMemo(() => {
@@ -359,17 +368,22 @@ const Shop = () => {
                 <ProductGrid products={paginatedProducts} />
               </div>
             )}
-
-            {/* Pagination */}
-            {!loading && totalPages > 1 && (
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-              />
-            )}
           </div>
         </div>
+
+        {/* Pagination - Moved to absolute bottom of page content */}
+        {!loading && totalPages > 1 && (
+          <div className="mt-12 flex justify-center">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => {
+                setCurrentPage(page);
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+            />
+          </div>
+        )}
       </main>
 
       <FooterBenefits />

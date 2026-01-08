@@ -14,7 +14,7 @@ const Deals = () => {
       oldPrice: "150$",
       discount: "20% Off",
       rating: 4.9,
-      image: "/public/img/chair1.jpg",
+      image: "/img/chair1.jpg",
       description:
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt",
     },

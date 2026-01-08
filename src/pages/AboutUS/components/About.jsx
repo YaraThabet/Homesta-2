@@ -81,7 +81,7 @@ const About = () => {
           {/* Left large image */}
           <div className="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
             <img
-              src="/img/about-1.jpg"
+              src="/img/about-1.png"
               alt="Workshop craftsman"
               className="w-full h-[400px] md:h-[500px] object-cover"
               style={{ objectPosition: "center 30%" }}
@@ -92,7 +92,7 @@ const About = () => {
           <div className="grid grid-rows-2 gap-4">
             <div className="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
               <img
-                src="/img/about-2.jpg"
+                src="/img/about-2.png"
                 alt="Craftsman at work"
                 className="w-full h-[195px] md:h-[243px] object-cover"
                 style={{ objectPosition: "center 20%" }}
@@ -101,7 +101,7 @@ const About = () => {
 
             <div className="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
               <img
-                src="/img/about-3.jpg"
+                src="/img/about-3.png"
                 alt="Design process"
                 className="w-full h-[195px] md:h-[243px] object-cover"
                 style={{ objectPosition: "center 30%" }}
@@ -132,7 +132,7 @@ const About = () => {
           {/* Quality image */}
           <div className="rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
             <img
-              src="/img/about-4.jpg"
+              src="/img/about-1.png"
               alt="Quality team member"
               className="w-full h-[400px] md:h-[550px] object-cover"
               style={{ objectPosition: "center 25%" }}
@@ -201,7 +201,7 @@ const About = () => {
             <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
               <div className="relative h-80 overflow-hidden">
                 <img
-                  src="/img/team1.png"
+                  src="/img/person2.avif"
                   alt="Jenny Alexander"
                   className="w-full h-full object-cover"
                 />
@@ -271,14 +271,14 @@ const About = () => {
             <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow">
               <div className="relative h-80 overflow-hidden">
                 <img
-                  src="/img/team3.png"
+                  src="/img/person 3.avif"
                   alt="Theresa Webb"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="p-6">
                 <h4 className="text-xl font-bold text-gray-900 mb-1 text-center">
-                  Theresa Webb
+                  Jhon Webb
                 </h4>
                 <p className="text-teal-700 font-medium mb-4 text-center">
                   Head Designer

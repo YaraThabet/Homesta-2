@@ -26,6 +26,8 @@ const OrderSuccess = () => {
 
     return () => clearInterval(interval);
   }, []);
+  const orderId = localStorage.getItem('currentOrderId') || 'N/A';
+
   return (
     <div className="min-h-screen bg-background pt-[120px]">
       <div className="max-w-lg mx-auto px-4 py-16">
@@ -60,7 +62,7 @@ const OrderSuccess = () => {
         <div className="bg-card border border-border rounded-lg p-6 mb-8">
           <div className="flex justify-between items-center py-3 border-b border-border">
             <span className="text-muted-foreground">Order Number</span>
-            <span className="font-semibold text-foreground">#46406</span>
+            <span className="font-semibold text-foreground">{orderId}</span>
           </div>
           <div className="flex justify-between items-center py-3">
             <span className="text-muted-foreground">Estimated Delivery</span>
@@ -86,7 +88,7 @@ const OrderSuccess = () => {
           <button
             className="w-full bg-transparent border-2 border-[#205457] text-[#205457] py-4 rounded-xl font-bold hover:bg-[#205457] hover:text-white transition-all duration-300"
           >
-            <Link to="/track-order">
+            <Link to={`/tracking-order/${orderId}`}>
               Track Order
             </Link>
 

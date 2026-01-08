@@ -130,7 +130,7 @@ const Footer = () => {
           <div className="flex flex-col gap-4">
             <p className="font-outfit font-medium text-[20px]">Contact Info</p>
             <p className="font-outfit text-[18px]">+123-456-789</p>
-            <p className="font-outfit text-[18px]">maramahmed@gmail.com</p>
+            <p className="font-outfit text-[18px]">HomestaTeam@gmail.com</p>
             <p className="font-outfit text-[18px]">
               8502 Person Rd, Inglewood, Maine 98380
             </p>

@@ -1,28 +1,66 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { CreditCard } from "lucide-react";
 import CheckoutStepper from "../summaryOrder/components/CheckoutStepper";
 import { useAppContext } from "../../context/AppContext";
+import api from "../../lib/axios";
 
 const Payment = () => {
-  const { formatPrice, t } = useAppContext();
-  const [paymentMethod, setPaymentMethod] = useState("paypal");
-  const [cardData, setCardData] = useState({
-    cardHolderName: "",
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "",
-    saveCard: true
+  const { formatPrice, t, showAlert } = useAppContext();
+  const navigate = useNavigate();
+  const [paymentMethod, setPaymentMethod] = useState(() => {
+    return localStorage.getItem('checkoutPaymentMethod') || "paypal";
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [cartData, setCartData] = useState({ items: 0, subTotal: 0, total: 0 });
+
+  const [cardData, setCardData] = useState(() => {
+    const saved = localStorage.getItem('checkoutCardData');
+    return saved ? JSON.parse(saved) : {
+      cardHolderName: "",
+      cardNumber: "",
+      expiryDate: "",
+      cvv: "",
+      saveCard: true
+    };
   });
 
-  const orderSummary = {
-    items: 9,
-    subTotal: 740.00,
-    shipping: 0.00,
-    taxes: 0.00,
-    couponDiscount: -100.00,
-    total: 640.00
-  };
+  useEffect(() => {
+    localStorage.setItem('checkoutPaymentMethod', paymentMethod);
+  }, [paymentMethod]);
+
+  useEffect(() => {
+    localStorage.setItem('checkoutCardData', JSON.stringify(cardData));
+  }, [cardData]);
+
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get('Cart');
+        const items = res.data.cartItems || [];
+
+        // Calculate original subtotal to show discount breakdown
+        const originalSubtotal = items.reduce((acc, item) => acc + ((item.unitPrice || 0) * (item.quantity || 0)), 0);
+        const currentSubtotal = res.data.subTotal || 0;
+        const discount = originalSubtotal - currentSubtotal;
+
+        setCartData({
+          items: res.data.totalItems || 0,
+          subTotal: currentSubtotal,
+          originalSubtotal: originalSubtotal,
+          discount: discount > 0 ? discount : 0,
+          total: res.data.totalPrice || 0
+        });
+      } catch (err) {
+        console.error("Failed to fetch cart:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCart();
+  }, []);
 
   const handleCardChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -32,11 +70,37 @@ const Payment = () => {
     }));
   };
 
-  const navigate = useNavigate();
+  const handleConfirmPayment = async () => {
+    try {
+      setSubmitting(true);
+      const orderId = localStorage.getItem('currentOrderId');
+      const userId = localStorage.getItem('userId');
 
-  const handleConfirmPayment = () => {
-    console.log("Payment confirmed:", { paymentMethod, cardData });
-    navigate("/summary-order");
+      if (!orderId || orderId === "[object Object]") {
+        showAlert("No valid order found. Please go back to Shipping and try again.", "error", "Error");
+        return;
+      }
+
+      // Map frontend payment method names to backend expected ones
+      let apiPaymentType = "PayPal";
+      if (paymentMethod === "cod") apiPaymentType = "CashOnDelivery";
+      if (paymentMethod === "card") apiPaymentType = "CreditCard";
+      if (paymentMethod === "googlepay") apiPaymentType = "GooglePay";
+
+      // Use a standard POST request with IDs in the body for maximum compatibility
+      await api.post('Order/payment', {
+        orderId: parseInt(orderId),
+        userId: userId,
+        paymentMethod: apiPaymentType
+      });
+
+      navigate("/summary-order");
+    } catch (err) {
+      console.error("Failed to save payment info:", err.response?.data || err.message);
+      showAlert("Could not save payment information. Please try again.", "error", "Error");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -233,41 +297,54 @@ const Payment = () => {
             <div className="bg-background border border-border rounded-xl p-6">
               <h2 className="text-xl font-semibold text-foreground mb-6">{t('orderSummary')}</h2>
 
-              <div className="space-y-4 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t('items')}</span>
-                  <span className="text-foreground">{orderSummary.items}</span>
+              <div className="space-y-4 text-sm mt-6">
+                <div className="flex justify-between text-muted-foreground font-medium">
+                  <span>{t('items')}</span>
+                  <span className="text-foreground">{cartData.items}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t('subtotal')}</span>
-                  <span className="text-foreground">{formatPrice(orderSummary.subTotal)}</span>
+                <div className="flex justify-between text-muted-foreground font-medium">
+                  <span>{t('subtotal')}</span>
+                  <span className={`text-foreground font-bold ${cartData.discount > 0 ? 'line-through opacity-50' : ''}`}>
+                    {formatPrice(cartData.originalSubtotal || cartData.subTotal)}
+                  </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t('shipping')}</span>
-                  <span className="text-foreground">{formatPrice(orderSummary.shipping)}</span>
+                {cartData.discount > 0 && (
+                  <div className="flex justify-between text-green-600 font-medium">
+                    <span>{t('discount') || 'Discount'}</span>
+                    <span className="font-bold">-{formatPrice(cartData.discount)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-muted-foreground font-medium">
+                  <span>{t('shipping')}</span>
+                  <span className="text-foreground font-bold">{cartData.subTotal > 500 ? 'Free' : formatPrice(0)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t('tax')}</span>
-                  <span className="text-foreground">{formatPrice(orderSummary.taxes)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">{t('couponDiscount')}</span>
-                  <span className="text-foreground">-{formatPrice(Math.abs(orderSummary.couponDiscount))}</span>
+                <div className="flex justify-between text-muted-foreground font-medium">
+                  <span>{t('tax')}</span>
+                  <span className="text-foreground font-bold">{formatPrice(0)}</span>
                 </div>
 
-                <div className="border-t border-border pt-4 mt-4">
-                  <div className="flex justify-between font-semibold">
-                    <span className="text-foreground">{t('total')}</span>
-                    <span className="text-foreground">{formatPrice(orderSummary.total)}</span>
+                <div className="border-t-2 border-dashed border-border pt-6 mt-6">
+                  <div className="flex justify-between items-end">
+                    <span className="text-muted-foreground font-bold mb-1">{t('total')}</span>
+                    <span className="text-3xl font-black text-[#205457] tracking-tight">{formatPrice(cartData.total)}</span>
                   </div>
+                  <p className="text-xs text-gray-400 text-right mt-1 italic">Including Valid Tax</p>
                 </div>
               </div>
 
               <button
                 onClick={handleConfirmPayment}
-                className="w-full bg-[#205457] text-white py-4 rounded-xl mt-6 font-medium hover:bg-[#205457]/90 transition-colors"
+                disabled={submitting || loading}
+                className="w-full bg-[#205457] text-white py-4 rounded-xl mt-6 font-medium hover:bg-[#205457]/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                {t('confirmPayment')}
+                {submitting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    {t('processing') || 'Processing...'}
+                  </>
+                ) : (
+                  t('confirmPayment')
+                )}
               </button>
             </div>
           </div>
