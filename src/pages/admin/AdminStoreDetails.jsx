@@ -373,6 +373,89 @@ const StoreProductCard = ({ product, onDeleteClick, onViewClick }) => {
     );
 };
 
+const StoreOrdersList = ({ storeId }) => {
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                setLoading(true);
+                // 1. Fetch all orders
+                const res = await api.get('Order/all');
+                const rawOrders = Array.isArray(res.data) ? res.data : [];
+
+                // 2. Filter orders where at least one item belongs to this store
+                const storeOrders = rawOrders.filter(order =>
+                    (order.items || []).some(item => (item.storeId?.toString() === storeId?.toString()))
+                ).map(order => {
+                    // Filter items to only show this store's items in the total calculation
+                    const storeItems = (order.items || []).filter(item => item.storeId?.toString() === storeId?.toString());
+                    const itemsTotal = storeItems.reduce((sum, item) => {
+                        return sum + ((item.price || 0) * (item.quantity || 0));
+                    }, 0);
+
+                    return {
+                        ...order,
+                        items: storeItems, // Optional: Only show relevant items
+                        displayTotal: itemsTotal > 0 ? itemsTotal : (order.totalPrice || 0)
+                    };
+                });
+
+                setOrders(storeOrders);
+            } catch (err) {
+                console.error("Failed to fetch store orders:", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        if (storeId) fetchOrders();
+    }, [storeId]);
+
+    if (loading) return <div className="py-10 text-center text-gray-400">Loading store orders...</div>;
+    if (orders.length === 0) return (
+        <div className="bg-white rounded-[30px] border border-dashed border-gray-200 py-20 text-center">
+            <ShoppingBag size={40} className="mx-auto text-gray-200 mb-4" />
+            <h3 className="text-gray-900 font-bold">No Orders Yet</h3>
+            <p className="text-gray-400 text-sm">This store hasn't received any orders yet.</p>
+        </div>
+    );
+
+    return (
+        <div className="space-y-4">
+            {orders.map((order, idx) => (
+                <div key={idx} className="bg-white p-6 rounded-[30px] border border-gray-100 flex flex-col md:flex-row items-center gap-6 shadow-sm hover:shadow-md transition-all">
+                    <div className="flex items-center gap-4 min-w-[150px]">
+                        <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400">
+                            <Package size={20} />
+                        </div>
+                        <div>
+                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Order ID</p>
+                            <p className="font-bold text-gray-900 leading-none pb-1">#{order.orderId || order.id}</p>
+                        </div>
+                    </div>
+                    <div className="flex-1">
+                        <div className="flex -space-x-3">
+                            {(order.items || []).slice(0, 5).map((item, i) => (
+                                <div key={i} title={item.productName} className="w-8 h-8 rounded-full border-2 border-white bg-gray-100 overflow-hidden shadow-sm">
+                                    <img src={item.image || `http://homefinish.runasp.net${item.imagePath}`} className="w-full h-full object-cover" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="text-right px-4">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Amount</p>
+                        <p className="text-lg font-black text-[#205457]">${(order.displayTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                    </div>
+                    <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${order.status === 'Delivered' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'}`}>
+                        {order.status || 'Accepted'}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
 const AdminStoreDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -436,7 +519,7 @@ const AdminStoreDetails = () => {
     const handleDeleteProduct = async () => {
         if (!deleteModal.productId) return;
         try {
-            await api.delete(`/Product/Delete?productId=${deleteModal.productId}`);
+            await api.delete(`/Product/Delete/${deleteModal.productId}`);
             setProducts(prev => prev.filter(p => (p.productId || p.id) !== deleteModal.productId));
             setDeleteModal({ show: false, productId: null });
         } catch (err) {
@@ -575,18 +658,9 @@ const AdminStoreDetails = () => {
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -10 }}
-                            className="bg-white rounded-[30px] border border-gray-100 p-8 min-h-[400px] flex items-center justify-center"
+                            className="space-y-6"
                         >
-                            <div className="text-center">
-                                <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
-                                    <Package size={24} />
-                                </div>
-                                <h3 className="text-gray-900 font-bold mb-2">Orders History</h3>
-                                <p className="text-gray-400 max-w-md mx-auto">
-                                    View all orders placed for this store's items. Track status, fulfillment, and customer details.
-                                    <br /><span className="text-xs text-[#205457] mt-2 block">(Integration Coming Soon)</span>
-                                </p>
-                            </div>
+                            <StoreOrdersList storeId={id} />
                         </motion.div>
                     )}
 

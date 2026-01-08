@@ -5,6 +5,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Heart, Minus, Plus, Star, ArrowLeft, Upload, ShoppingCart, Check, X } from 'lucide-react';
 import api from '../../../lib/axios';
 import SafeImage from '../../../components/SafeImage';
+import ConfirmModal from '../../../components/ConfirmModal';
 
 const COLOR_MAP = {
   "brown": "#A67B5B",
@@ -103,6 +104,7 @@ const ProductDetail = () => {
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
   const [editingReview, setEditingReview] = useState(null); // { reviewId, rating, comment }
+  const [deleteConfirm, setDeleteConfirm] = useState({ show: false, id: null });
   const [submitReviewLoading, setSubmitReviewLoading] = useState(false);
   const currentUserId = localStorage.getItem('userId');
 
@@ -177,7 +179,7 @@ const ProductDetail = () => {
           // We fetch a subset of products. 
           // Optimization: If API has /Product/ByCategory/{id}, use it.
           // Else, fetch all (cached usually) and filter.
-          const allRes = await api.get('/Product/GetAllProducts');
+          const allRes = await api.get('Product/GetAllProducts');
           const all = Array.isArray(allRes.data) ? allRes.data : [];
           const related = all
             .filter(p => p.categoryId === prodData.categoryId && (p.productId || p.id) != id)
@@ -269,7 +271,7 @@ const ProductDetail = () => {
         productId: parseInt(product.productId || id),
         storeId: parseInt(product.storeId || 0)
       };
-      await api.post('/Review', payload);
+      await api.post('Review', payload);
 
       // Refresh reviews
       const revRes = await api.get(`/Review/product/${id}`);
@@ -293,8 +295,12 @@ const ProductDetail = () => {
     }
   };
 
-  const handleDeleteReview = async (reviewId) => {
-    if (!window.confirm("Are you sure you want to delete this review?")) return;
+  const handleDeleteReview = (reviewId) => {
+    setDeleteConfirm({ show: true, id: reviewId });
+  };
+
+  const confirmDeleteReview = async () => {
+    const reviewId = deleteConfirm.id;
     try {
       await api.delete(`/Review/${reviewId}`);
       // Refresh reviews
@@ -303,6 +309,8 @@ const ProductDetail = () => {
     } catch (err) {
       console.error("Delete review failed", err);
       showAlert("Failed to delete review.", "error", "Error");
+    } finally {
+      setDeleteConfirm({ show: false, id: null });
     }
   };
 
@@ -349,9 +357,11 @@ const ProductDetail = () => {
       setAddingToCart(true);
       const payload = {
         productId: parseInt(id),
-        quantity: quantity
+        quantity: quantity,
+        colorName: selectedColor
       };
-      await api.post('/Cart/add', payload);
+      console.log("🛒 Adding to cart with payload:", payload);
+      await api.post('Cart/add', payload);
       setShowSuccessModal(true);
     } catch (err) {
       console.error("Add to cart error", err);
@@ -508,7 +518,21 @@ const ProductDetail = () => {
               </button>
             </div>
 
-            <p className="text-2xl font-bold text-[#205457] mb-4">${product.price?.toFixed(2)}</p>
+            <div className="flex items-center gap-3 mb-4">
+              <p className="text-2xl font-bold text-[#205457]">
+                ${(product.finalPrice || (product.discount ? product.price * (1 - product.discount / 100) : product.price))?.toFixed(2)}
+              </p>
+              {(product.discount > 0 || (product.finalPrice && product.finalPrice < product.price)) && (
+                <p className="text-lg text-muted-foreground line-through">
+                  ${product.price?.toFixed(2)}
+                </p>
+              )}
+              {product.discount > 0 && (
+                <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded">
+                  -{product.discount}%
+                </span>
+              )}
+            </div>
 
             {/* Rating (Dynamic) */}
             <div className="flex items-center gap-2 mb-6">
@@ -613,7 +637,8 @@ const ProductDetail = () => {
 
         {/* Tabs Section (Description, Reviews) */}
         <div className="mb-16">
-          <div className="flex gap-8 border-b border-gray-200 mb-8 overflow-x-auto">
+          {/* Centered Tabs */}
+          <div className="flex gap-8 border-b border-gray-200 mb-8 overflow-x-auto justify-center">
             <button
               onClick={() => setActiveTab('description')}
               className={`pb-4 text-base font-medium transition-colors whitespace-nowrap ${activeTab === 'description'
@@ -637,14 +662,91 @@ const ProductDetail = () => {
           {/* Tab Content */}
           <div className="animate-fade-in-up">
             {activeTab === 'description' && (
-              <div className="prose max-w-none text-gray-600">
-                <p>{product.description || "No detailed description."}</p>
+              <div className="py-8 animate-fade-in-up w-full">
+                <div className="prose prose-lg max-w-none">
+                  {/* Description Paragraph(s) */}
+                  <div
+                    className="text-gray-600 leading-loose text-lg font-light mb-10"
+                    dangerouslySetInnerHTML={{ __html: product.description || "No detailed description available." }}
+                  />
+
+                  {/* Features / Bullet Points */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-[#205457]"></div>
+                      <span className="text-gray-700 font-medium">Premium Materials</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-[#205457]"></div>
+                      <span className="text-gray-700 font-medium">Modern Design</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-[#205457]"></div>
+                      <span className="text-gray-700 font-medium">Durable Construction</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-2 h-2 rounded-full bg-[#205457]"></div>
+                      <span className="text-gray-700 font-medium">Easy Maintenance</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
+
             {activeTab === 'review' && (
               <div id="reviews">
+                {/* Review Statistics */}
+                {reviews.length > 0 && (
+                  <div className="bg-gray-50 rounded-2xl p-8 mb-10 border border-gray-100">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      {/* Left: Average Rating */}
+                      <div className="flex flex-col items-center justify-center text-center border-r border-gray-200">
+                        <div className="text-5xl font-bold text-gray-900 mb-2">
+                          {(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)}
+                        </div>
+                        <div className="flex items-center gap-1 mb-2">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-5 h-5 ${star <= Math.round(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length)
+                                ? 'fill-yellow-400 text-yellow-400'
+                                : 'text-gray-300'
+                                }`}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-sm text-gray-500">Based on {reviews.length} review{reviews.length !== 1 ? 's' : ''}</p>
+                      </div>
+
+                      {/* Right: Rating Breakdown */}
+                      <div className="space-y-2">
+                        {[5, 4, 3, 2, 1].map((rating) => {
+                          const count = reviews.filter(r => r.rating === rating).length;
+                          const percentage = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+                          return (
+                            <div key={rating} className="flex items-center gap-3">
+                              <div className="flex items-center gap-1 w-16">
+                                <span className="text-sm font-medium text-gray-700">{rating}</span>
+                                <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
+                              </div>
+                              <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div
+                                  className="h-full bg-yellow-400 transition-all duration-500"
+                                  style={{ width: `${percentage}%` }}
+                                />
+                              </div>
+                              <span className="text-sm text-gray-500 w-12 text-right">{count}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Reviews List */}
+
                 {reviews.length > 0 ? (
                   <div className="space-y-6 mb-10">
                     {reviews.map((review, idx) => (
@@ -880,6 +982,18 @@ const ProductDetail = () => {
         </div>,
         document.body
       )}
+
+      {/* Delete Review Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteConfirm.show}
+        onClose={() => setDeleteConfirm({ show: false, id: null })}
+        onConfirm={confirmDeleteReview}
+        title="Delete Review?"
+        message="Are you sure you want to delete this review? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 };

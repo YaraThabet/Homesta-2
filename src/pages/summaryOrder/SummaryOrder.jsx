@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import CheckoutHeader from './components/CheckoutHeader';
+import React, { useState, useEffect } from 'react';
 import CheckoutStepper from './components/CheckoutStepper';
 import OrderItem from './components/OrderItem';
 import OrderSummaryCard from './components/OrderSummaryCard';
-import FeatureBar from './components/FeatureBar';
-import { products } from '../../data/products';
 import { Link, useNavigate } from 'react-router-dom';
 import FooterBenefits from '../shop/components/FooterBenefits';
 import { useAppContext } from '../../context/AppContext';
+import api from '../../lib/axios';
+import PageLoader from '../../components/PageLoader';
+
 function LocationIcon() {
   return (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -17,127 +17,191 @@ function LocationIcon() {
   );
 }
 
-const initialItems = [
-  { id: products[12].id, image: products[12].image, name: products[12].name, color: products[12].color, price: products[12].price },
-  { id: products[6].id, image: products[6].image, name: products[6].name, color: products[6].color, price: products[6].price },
-  { id: products[0].id, image: products[0].image, name: products[0].name, color: products[0].color, price: products[0].price },
-  { id: products[10].id, image: products[10].image, name: products[10].name, color: products[10].color, price: products[10].price },
-];
-
 export default function Index() {
-  const { t, formatPrice } = useAppContext();
+  const { t, showAlert } = useAppContext();
   const navigate = useNavigate();
-  const [items, setItems] = useState(initialItems);
 
-  const handleRemove = (id) => {
-    setItems(items.filter((item) => item.id !== id));
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [orderData, setOrderData] = useState(null);
+
+  const fetchOrderDetails = async () => {
+    try {
+      setLoading(true);
+      const orderId = localStorage.getItem('currentOrderId');
+      if (!orderId) return;
+
+      // 1. Fetch both Order and Cart. 
+      // We fetch Cart because it usually holds the "live" discounted finalPrice
+      const [orderRes, cartRes] = await Promise.all([
+        api.get(`Order/OrderDetails?orderId=${orderId}`),
+        api.get('Cart').catch(() => ({ data: { cartItems: [] } }))
+      ]);
+
+      const order = orderRes.data;
+      const cartItems = cartRes.data?.cartItems || [];
+      setOrderData(order);
+
+      if (order.items) {
+        // 2. Enrich order items with Cart pricing if Order pricing is missing/wrong
+        const enriched = order.items.map(item => {
+          const cartItem = cartItems.find(ci => ci.productId === item.productId || ci.productID === item.productId);
+
+          return {
+            ...item,
+            // Prefer order's finalPrice, but if missing or same as unitPrice, check cart
+            effectivePrice: item.finalPrice || cartItem?.finalPrice || (item.subTotal && item.quantity > 0 ? item.subTotal / item.quantity : item.unitPrice)
+          };
+        });
+
+        // 3. Fetch images
+        for (let i = 0; i < enriched.length; i++) {
+          const item = enriched[i];
+          if (!item.image && item.productId) {
+            try {
+              const imgRes = await api.get(`/ProductImages/product/${item.productId}`);
+              if (imgRes.data?.images?.length) {
+                enriched[i].image = imgRes.data.images[0].imageUrl;
+              }
+            } catch { }
+          }
+        }
+
+        setItems(enriched);
+      }
+    } catch (err) {
+      console.error("Fetch Error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const subtotal = items.reduce((sum, item) => sum + item.price, 0);
-  const shipping = 49.0;
-  const tax = subtotal * 0.08;
-  const total = subtotal + shipping + tax;
+  useEffect(() => {
+    fetchOrderDetails();
+  }, []);
 
-  const handlePlaceOrder = () => {
-    // Navigate to success page
-    navigate('/order-success');
-    window.scrollTo(0, 0);
+  const handleRemove = async (orderItemId) => {
+    try {
+      await api.delete(`Order/item/${orderItemId}`);
+      await fetchOrderDetails();
+      showAlert('Item removed', 'success', 'Success');
+    } catch {
+      showAlert('Failed to remove item', 'error', 'Error');
+    }
   };
+
+  const handleQuantityChange = async (orderItemId, quantity) => {
+    try {
+      await api.put('Order/item/update', { orderItemId, quantity });
+      await fetchOrderDetails();
+    } catch {
+      showAlert('Failed to update quantity', 'error', 'Error');
+    }
+  };
+
+  // =========================
+  // MANUAL PRICE CALCULATION
+  // =========================
+
+  const itemsSubtotal = items.reduce((sum, item) => {
+    const price = item.effectivePrice ?? item.finalPrice ?? item.unitPrice ?? 0;
+    return sum + price * item.quantity;
+  }, 0);
+
+  const originalSubtotal = items.reduce((sum, item) => {
+    return sum + (item.unitPrice || 0) * (item.quantity || 0);
+  }, 0);
+
+  const shipping = orderData?.shipping || 0;
+  const tax = orderData?.tax || 0;
+
+  const total = itemsSubtotal + shipping + tax;
+  const discount = Math.max(0, originalSubtotal - itemsSubtotal);
+
+  const getImageUrl = (url) => {
+    if (!url) return null;
+    if (url.startsWith('http')) return url;
+    return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
+  if (loading) return <PageLoader />;
 
   return (
     <div className="min-h-screen bg-background pt-[120px]">
-      {/* Header */}
       <header className="bg-[#F6F6F6] py-14 text-center">
-        <h1 className="text-2xl font-semibold text-foreground mb-2 tracking-tight">{t('payment')}</h1>
-        <nav className="text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-foreground cursor-pointer">{t('home') || 'Home'}</Link>
-          <span className="mx-1.5 text-muted-foreground/50">/</span>
-          <Link to="/shopping-cart" className="hover:text-foreground cursor-pointer">{t('cart')}</Link>
-          <span className="mx-1.5 text-muted-foreground/50">/</span>
-          <Link to="/checkout" className="hover:text-foreground cursor-pointer">{t('shipping')}</Link>
-          <span className="mx-1.5 text-muted-foreground/50">/</span>
-          <Link to="/payment" className="hover:text-foreground cursor-pointer">{t('payment')}</Link>
-          <span className="mx-1.5 text-muted-foreground/50">/</span>
-          <span className="text-foreground font-medium">{t('checkout')}</span>
-        </nav>
+        <h1 className="text-2xl font-semibold">{t('orderSummary') || 'Order Summary'}</h1>
       </header>
+
       <CheckoutStepper currentStep={4} />
 
       <div className="container max-w-6xl mx-auto px-4 pb-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column */}
+
+          {/* LEFT */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Order Summary Section */}
             <div>
-              <h2 className="text-xl font-semibold text-foreground mb-4">{t('orderSummary')}</h2>
-
-              {/* Shipping Address */}
-              <div className="bg-card border border-border rounded-lg p-6 mb-4">
-                <h3 className="font-medium text-foreground mb-3">{t('shippingAddress')}</h3>
-                <div className="flex items-start gap-2 text-muted-foreground">
-                  <LocationIcon />
-                  <div>
-                    <p className="text-foreground font-medium">Nasr</p>
-                    <p className="text-sm">Giza, Egypt</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Payment Method */}
-              <div className="bg-card border border-border rounded-lg p-6">
-                <h3 className="font-medium text-foreground mb-3">{t('paymentMethod')}</h3>
-                <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground text-sm">Credit Card (Mastercard)</span>
-                  <span className="text-muted-foreground text-sm">•••• 789-</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Order Items */}
-            <div>
-              <h2 className="text-xl font-semibold text-foreground mb-4">
+              <h2 className="text-xl font-semibold mb-4">
                 {t('orderItems')} ({items.length})
               </h2>
-              <div className="bg-card border border-border rounded-lg p-6 max-h-[600px] overflow-y-auto">
-                {items.map((item) => (
-                  <OrderItem
-                    key={item.id}
-                    image={item.image}
-                    name={item.name}
-                    color={item.color}
-                    price={item.price}
-                    onRemove={() => handleRemove(item.id)}
-                  />
-                ))}
+
+              <div className="bg-card border rounded-lg p-6">
+                {items.map((item) => {
+                  const price = item.effectivePrice ?? item.finalPrice ?? item.unitPrice ?? 0;
+                  const originalPrice =
+                    (item.unitPrice && item.unitPrice > price)
+                      ? item.unitPrice
+                      : 0;
+
+                  return (
+                    <OrderItem
+                      key={item.orderItemId}
+                      image={getImageUrl(item.image)}
+                      name={item.productName}
+                      color={item.productColor}
+                      price={price}
+                      originalPrice={originalPrice}
+                      initialQuantity={item.quantity}
+                      onRemove={() => handleRemove(item.orderItemId)}
+                      onQuantityChange={(qty) =>
+                        handleQuantityChange(item.orderItemId, qty)
+                      }
+                    />
+                  );
+                })}
               </div>
             </div>
           </div>
 
-          {/* Right Column - Order Summary Card */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-6">
-              <OrderSummaryCard
-                subtotal={subtotal}
-                shipping={shipping}
-                tax={tax}
-                total={total}
-                onPlaceOrder={handlePlaceOrder}
-              />
-
-              <div className="flex gap-3 mt-4">
-                <Link to="/" className="bg-[#5B8A8A] text-white flex-1 text-sm py-2.5 rounded-lg font-medium hover:bg-[#4a7575] transition-colors text-center">
-                  {t('chatWithSeller')}
-                </Link>
-                <Link to="/" className="border border-border text-foreground flex-1 text-sm py-2.5 rounded-lg font-medium hover:bg-muted transition-colors text-center">
-                  {t('backToHome')}
-                </Link>
-              </div>
-            </div>
+          {/* RIGHT */}
+          <div>
+            <OrderSummaryCard
+              subtotal={originalSubtotal}
+              discount={discount}
+              shipping={shipping}
+              tax={tax}
+              total={total}
+              onPlaceOrder={async () => {
+                try {
+                  setSubmitting(true);
+                  await api.post('Order/Create/Place', {
+                    userId: localStorage.getItem('userId'),
+                    orderId: Number(localStorage.getItem('currentOrderId'))
+                  });
+                  navigate('/order-success');
+                } catch {
+                  showAlert('Failed to place order', 'error', 'Error');
+                } finally {
+                  setSubmitting(false);
+                }
+              }}
+              submitting={submitting}
+            />
           </div>
         </div>
-
-        <FooterBenefits />
       </div>
+
+      <FooterBenefits />
     </div>
   );
 }

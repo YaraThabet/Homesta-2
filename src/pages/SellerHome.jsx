@@ -34,10 +34,9 @@ const SellerHome = () => {
                 let currentId = localStorage.getItem('storeId');
                 const userEmail = localStorage.getItem('userEmail');
 
-                // Always check stores to ensure we have the RIGHT one for this email
-                const storesRes = await api.get('/Store');
+                // 1. Verify Store
+                const storesRes = await api.get('Store');
                 const stores = Array.isArray(storesRes.data) ? storesRes.data : [storesRes.data];
-
                 const myStore = stores.find(s => s.email?.toLowerCase() === userEmail?.toLowerCase());
 
                 if (myStore) {
@@ -46,37 +45,42 @@ const SellerHome = () => {
                 }
 
                 if (currentId) {
-                    // Fetch Products for Inventory Count
-                    const productsRes = await api.get(`/Store/${currentId}/products`);
-                    const products = Array.isArray(productsRes.data) ? productsRes.data : [];
-                    setLiveInventory(products.length.toString());
-
-                    // Try to fetch Revenue and Orders if endpoints exist
+                    // 2. Fetch Products for Inventory Count
                     try {
-                        // Assuming /Order/store/{id} returns list of orders
-                        const ordersRes = await api.get(`/Order/store/${currentId}`);
+                        const productsRes = await api.get(`/Store/${currentId}/products`);
+                        const productsList = productsRes.data?.products || (Array.isArray(productsRes.data) ? productsRes.data : []);
+                        setLiveInventory(productsList.length.toString());
+                    } catch (e) {
+                        console.error("Products fetch failed", e);
+                    }
+
+                    // 3. Fetch Orders & Calculate Revenue (Strictly Delivered)
+                    try {
+                        const ordersRes = await api.get(`Order/by-store/${currentId}`);
                         const orders = Array.isArray(ordersRes.data) ? ordersRes.data : [];
+
+                        // Total Orders Received (Volume check)
                         setOrdersCount(orders.length.toString());
 
-                        // Sum up revenue
-                        const totalRev = orders.reduce((sum, order) => sum + (Number(order.totalAmount || order.totalPayment || 0)), 0);
-                        setRevenue(`$${totalRev.toLocaleString()}`);
+                        // Sum revenue strictly from DELIVERED orders
+                        const deliveredRevenue = orders.reduce((sum, order) => {
+                            if (order.status?.toLowerCase() !== 'delivered') return sum;
+                            const price = parseFloat(order.totalPrice || order.totalAmount || order.orderTotal || order.totalPayment || 0);
+                            return sum + price;
+                        }, 0);
+                        setRevenue(`$${deliveredRevenue.toLocaleString()}`);
                     } catch (e) {
-                        console.log("Orders/Revenue endpoints not found or failed, using defaults");
+                        console.error("Orders sync failed", e);
                     }
 
-                    // Try to fetch store visitors/analytics
+                    // 4. Try Analytics endpoint for visitors
                     try {
-                        const analyticsRes = await api.get(`/Analytics/store/${currentId}`).catch(() => ({ data: {} }));
-                        if (analyticsRes.data.visitors) setVisitors(analyticsRes.data.visitors.toString());
-                        if (analyticsRes.data.revenue) setRevenue(`$${Number(analyticsRes.data.revenue).toLocaleString()}`);
-                        if (analyticsRes.data.orders) setOrdersCount(analyticsRes.data.orders.toString());
-                    } catch (e) {
-                        // Silent fail for analytics
-                    }
+                        const statsRes = await api.get(`/Analytics/store/${currentId}`).catch(() => ({ data: {} }));
+                        if (statsRes.data?.visitors) setVisitors(statsRes.data.visitors.toString());
+                    } catch (e) { }
                 }
             } catch (err) {
-                console.error("Failed to verify store or fetch stats:", err);
+                console.error("Global dashboard sync failed:", err);
             } finally {
                 setLoading(false);
             }

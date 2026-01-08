@@ -17,7 +17,7 @@ const AdminStores = () => {
     const fetchStores = async () => {
         try {
             setLoading(true);
-            const response = await api.get('/Store');
+            const response = await api.get('Store');
             setStores(Array.isArray(response.data) ? response.data : [response.data]);
         } catch (err) {
             console.error("Failed to fetch stores:", err);

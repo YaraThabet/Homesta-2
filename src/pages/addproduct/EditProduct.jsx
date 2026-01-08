@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -15,10 +15,14 @@ import {
     X,
     ChevronDown,
     Save,
-    Star
+    Star,
+    Bold,
+    Italic,
+    List
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import api from '../../lib/axios';
+import SafeImage from '../../components/SafeImage';
 
 const EditProduct = () => {
     const { showAlert } = useAppContext();
@@ -36,8 +40,9 @@ const EditProduct = () => {
     const [rating, setRating] = useState('0');
     const [currentColor, setCurrentColor] = useState('');
     const [colors, setColors] = useState([]);
-    const [images, setImages] = useState([]);
-    const [imagePreviews, setImagePreviews] = useState([]);
+    const [serverImages, setServerImages] = useState([]); // [{productImageId, imageUrl}]
+    const [newFiles, setNewFiles] = useState([]);
+    const [newPreviews, setNewPreviews] = useState([]);
 
     const [categories, setCategories] = useState([]);
     const [subCategories, setSubCategories] = useState([]);
@@ -48,6 +53,33 @@ const EditProduct = () => {
     const [showSuccessPopup, setShowSuccessPopup] = useState(false);
     const [reviews, setReviews] = useState([]);
     const [reviewsLoading, setReviewsLoading] = useState(false);
+    const descriptionRef = useRef(null);
+    const [activeFormats, setActiveFormats] = useState({ bold: false, italic: false, list: false });
+
+    const checkFormats = () => {
+        setActiveFormats({
+            bold: document.queryCommandState('bold'),
+            italic: document.queryCommandState('italic'),
+            list: document.queryCommandState('insertUnorderedList')
+        });
+    };
+
+    const formatText = (command) => {
+        const cmd = command === 'list' ? 'insertUnorderedList' : command;
+        document.execCommand(cmd, false, null);
+        if (descriptionRef.current) {
+            setDescription(descriptionRef.current.innerHTML);
+            descriptionRef.current.focus();
+            checkFormats();
+        }
+    };
+
+    // Sync state to DOM
+    useEffect(() => {
+        if (descriptionRef.current && document.activeElement !== descriptionRef.current && descriptionRef.current.innerHTML !== description) {
+            descriptionRef.current.innerHTML = description;
+        }
+    }, [description]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -55,12 +87,11 @@ const EditProduct = () => {
                 setLoading(true);
                 const userEmail = localStorage.getItem('userEmail');
 
-                // Fetch Categories, Stores, Product Data, AND the specific product images
                 const [catRes, storeRes, prodRes, imgRes, revRes] = await Promise.all([
                     api.get('/Category'),
                     api.get('/Store'),
                     api.get(`/Product/GetProductById/${id}`),
-                    api.get(`/ProductImages/product/${id}`),
+                    api.get(`/ProductImages/product/${id}`).catch(() => ({ data: { images: [] } })),
                     api.get(`/Review/product/${id}`).catch(() => ({ data: [] }))
                 ]);
 
@@ -90,19 +121,21 @@ const EditProduct = () => {
                 setColors(product.colors || []);
 
                 // Handle images from the dedicated endpoint
-                // Structure is usually [{ productId, imageUrls: [] }]
-                const imgData = Array.isArray(imgRes.data) ? imgRes.data[0] : imgRes.data;
-                const backendBase = 'http://homefinish.runasp.net';
+                // Can be { images: [...] } or just [...]
+                const fetchedImages = Array.isArray(imgRes.data)
+                    ? imgRes.data
+                    : (imgRes.data?.images || []);
 
-                if (imgData && imgData.imageUrls) {
-                    const fullUrls = imgData.imageUrls.map(url =>
-                        url.startsWith('http') ? url : `${backendBase}${url}`
-                    );
-                    setImagePreviews(fullUrls);
-                } else if (product.image) {
-                    // Fallback to the main product image if no images in dedicated endpoint
-                    const mainUrl = product.image.startsWith('http') ? product.image : `${backendBase}${product.image}`;
-                    setImagePreviews([mainUrl]);
+                if (fetchedImages.length > 0) {
+                    setServerImages(fetchedImages);
+                } else {
+                    // Fallback to the main product image (check both fields)
+                    const mainImg = product.imagePath || product.image;
+                    if (mainImg) {
+                        setServerImages([{ productImageId: 0, imageUrl: mainImg }]);
+                    } else {
+                        setServerImages([]);
+                    }
                 }
 
                 if (product.categoryId) {
@@ -112,7 +145,7 @@ const EditProduct = () => {
 
             } catch (err) {
                 console.error("Failed to fetch product data", err);
-                alert("Could not load product details.");
+                showAlert("Could not load product details.", "error", "Load Error");
                 navigate('/seller-products');
             } finally {
                 setLoading(false);
@@ -142,23 +175,58 @@ const EditProduct = () => {
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
-        if (files.length + images.length > 5) {
-            alert("Maximum 5 images allowed");
+        if (files.length + serverImages.length + newFiles.length > 5) {
+            showAlert("Maximum 5 images allowed", "warning", "Image Limit");
             return;
         }
 
-        const newImages = [...images, ...files];
-        setImages(newImages);
+        const updatedFiles = [...newFiles, ...files];
+        setNewFiles(updatedFiles);
 
-        const newPreviews = files.map(file => URL.createObjectURL(file));
-        setImagePreviews([...imagePreviews, ...newPreviews]);
+        const updatedPreviews = [...newPreviews, ...files.map(file => URL.createObjectURL(file))];
+        setNewPreviews(updatedPreviews);
     };
 
-    const removeImage = (index) => {
-        const updatedImages = images.filter((_, i) => i !== index);
-        const updatedPreviews = imagePreviews.filter((_, i) => i !== index);
-        setImages(updatedImages);
-        setImagePreviews(updatedPreviews);
+    const removeNewImage = (index) => {
+        const updatedFiles = newFiles.filter((_, i) => i !== index);
+        const updatedPreviews = newPreviews.filter((_, i) => i !== index);
+        setNewFiles(updatedFiles);
+        setNewPreviews(updatedPreviews);
+    };
+
+    const handleDeleteServerImage = async (imgId) => {
+        if (imgId === 0) {
+            setServerImages([]);
+            return;
+        }
+        try {
+            await api.delete(`/ProductImages/${imgId}`);
+            setServerImages(prev => prev.filter(img => img.productImageId !== imgId));
+            showAlert("Image removed from server", "success", "Deleted");
+        } catch (err) {
+            showAlert("Failed to delete image", "error", "Error");
+        }
+    };
+
+    const handleUpdateServerImage = async (imgId, file) => {
+        const formData = new FormData();
+        formData.append('ProductImageId', parseInt(imgId));
+        formData.append('Image', file);
+
+        try {
+            await api.put('/ProductImages/update', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            // Refresh images
+            const imgRes = await api.get(`/ProductImages/product/${id}`);
+            const updatedImages = Array.isArray(imgRes.data)
+                ? imgRes.data
+                : (imgRes.data?.images || []);
+            setServerImages(updatedImages);
+            showAlert("Image updated on server", "success", "Updated");
+        } catch (err) {
+            showAlert("Failed to update image", "error", "Update Error");
+        }
     };
 
     const addColor = (e) => {
@@ -206,7 +274,6 @@ const EditProduct = () => {
         try {
             // Update Product Metadata (matching exact backend schema)
             const payload = {
-                id: parseInt(id),
                 name: name,
                 description: description,
                 colors: colors,
@@ -221,7 +288,20 @@ const EditProduct = () => {
             };
 
             console.log("🚀 Updating Product Metadata...", payload);
-            await api.put(`/Product/Update?id=${id}`, payload);
+            await api.put(`/Product/Update/${id}`, payload);
+
+            // Handle image uploads if any new files
+            if (newFiles.length > 0) {
+                console.log(`📤 Uploading ${newFiles.length} new images...`);
+                const formData = new FormData();
+                formData.append('ProductId', parseInt(id));
+                newFiles.forEach(file => {
+                    formData.append('Images', file);
+                });
+                await api.post('/ProductImages/upload', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+            }
 
             console.log("✅ Product Updated Successfully");
             showAlert('Product updated successfully!', 'success', 'Success');
@@ -323,38 +403,74 @@ const EditProduct = () => {
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                                     <AnimatePresence>
-                                        {imagePreviews.map((preview, index) => (
+                                        {/* Server Images */}
+                                        {serverImages.map((img, index) => (
                                             <motion.div
-                                                key={index}
+                                                key={`existing-${img.productImageId || index}-${img.imageUrl}`}
                                                 layout
                                                 initial={{ opacity: 0, scale: 0.9 }}
                                                 animate={{ opacity: 1, scale: 1 }}
                                                 exit={{ opacity: 0, scale: 0.9 }}
-                                                className="relative aspect-[4/5] rounded-[30px] overflow-hidden shadow-xl border-4 border-white group"
+                                                className="relative aspect-square rounded-[30px] overflow-hidden shadow-xl border-4 border-white group"
                                             >
-                                                <SafeImage src={preview} className="w-full h-full object-cover" alt="Preview" />
-                                                <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-center">
+                                                <SafeImage src={img.imageUrl} className="w-full h-full object-cover" alt="Product" />
+                                                <div className="absolute top-4 left-4">
+                                                    <span className="bg-[#205457] text-white text-[8px] font-black px-2 py-1 rounded-full uppercase tracking-widest shadow-lg">Live</span>
+                                                </div>
+                                                <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-2">
+                                                    <label className="w-full py-2 bg-white/20 backdrop-blur-md text-white rounded-xl text-[9px] font-black tracking-widest uppercase border border-white/30 text-center cursor-pointer hover:bg-white/40 transition-all">
+                                                        Change
+                                                        <input type="file" className="hidden" accept="image/*" onChange={(e) => {
+                                                            if (e.target.files[0]) handleUpdateServerImage(img.productImageId, e.target.files[0]);
+                                                        }} />
+                                                    </label>
                                                     <button
                                                         type="button"
-                                                        onClick={() => removeImage(index)}
-                                                        className="px-6 py-2 bg-white/20 backdrop-blur-md text-white rounded-xl text-[10px] font-black tracking-widest uppercase border border-white/30 hover:bg-red-500 transition-all"
+                                                        onClick={() => handleDeleteServerImage(img.productImageId)}
+                                                        className="w-full py-2 bg-red-500/80 backdrop-blur-md text-white rounded-xl text-[9px] font-black tracking-widest uppercase border border-transparent hover:bg-red-600 transition-all"
                                                     >
-                                                        Remove
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+
+                                        {/* Newly Added Local Previews */}
+                                        {newPreviews.map((preview, index) => (
+                                            <motion.div
+                                                key={`new-${index}`}
+                                                layout
+                                                initial={{ opacity: 0, scale: 0.9 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                exit={{ opacity: 0, scale: 0.9 }}
+                                                className="relative aspect-square rounded-[30px] overflow-hidden shadow-xl border-4 border-dashed border-[#205457]/20 group"
+                                            >
+                                                <img src={preview} className="w-full h-full object-cover" alt="New Preview" />
+                                                <div className="absolute top-4 left-4">
+                                                    <span className="bg-amber-500 text-white text-[8px] font-black px-2 py-1 rounded-full uppercase tracking-widest shadow-lg">Pending</span>
+                                                </div>
+                                                <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-center">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => removeNewImage(index)}
+                                                        className="w-full py-2 bg-white/20 backdrop-blur-md text-white rounded-xl text-[9px] font-black tracking-widest uppercase border border-white/30 hover:bg-red-500 transition-all"
+                                                    >
+                                                        Cancel
                                                     </button>
                                                 </div>
                                             </motion.div>
                                         ))}
                                     </AnimatePresence>
 
-                                    {imagePreviews.length < 5 && (
-                                        <label className="aspect-[4/5] rounded-[30px] border-3 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-[#205457]/30 hover:bg-[#205457]/5 transition-all group">
+                                    {(serverImages.length + newFiles.length) < 5 && (
+                                        <label className="aspect-square rounded-[30px] border-3 border-dashed border-gray-100 flex flex-col items-center justify-center cursor-pointer hover:border-[#205457]/30 hover:bg-[#205457]/5 transition-all group">
                                             <input type="file" multiple onChange={handleImageChange} className="hidden" accept="image/*" />
-                                            <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center group-hover:bg-white transition-all">
-                                                <Upload size={28} className="text-[#205457]" />
+                                            <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center group-hover:bg-white transition-all shadow-sm">
+                                                <Upload size={24} className="text-[#205457]" />
                                             </div>
-                                            <span className="text-[11px] font-black text-gray-300 mt-5 tracking-[0.2em] uppercase">Upload New</span>
+                                            <span className="text-[9px] font-black text-gray-300 mt-4 tracking-[0.2em] uppercase">Add Media</span>
                                         </label>
                                     )}
                                 </div>
@@ -383,13 +499,46 @@ const EditProduct = () => {
                                         />
                                     </div>
                                     <div className="space-y-4">
-                                        <label className="text-[12px] font-black uppercase tracking-[0.3em] text-gray-500 ml-2">Description</label>
-                                        <textarea
-                                            required
-                                            value={description}
-                                            onChange={(e) => setDescription(e.target.value)}
-                                            rows={8}
-                                            className="w-full rounded-[30px] px-8 py-8 bg-gray-50/80 border-2 border-transparent focus:border-[#205457]/20 focus:bg-white outline-none transition-all resize-none text-lg text-gray-900 leading-relaxed"
+                                        <div className="flex justify-between items-center ml-2">
+                                            <label className="text-[12px] font-black uppercase tracking-[0.3em] text-gray-500">Description</label>
+                                            <div className="flex gap-1 bg-gray-100 rounded-lg p-1 mr-2">
+                                                <button
+                                                    type="button"
+                                                    onMouseDown={(e) => e.preventDefault()}
+                                                    onClick={() => formatText('bold')}
+                                                    className={`p-1.5 rounded-md transition-all ${activeFormats.bold ? 'bg-white text-[#205457] shadow-sm ring-1 ring-[#205457]/10' : 'text-gray-500 hover:bg-white hover:shadow-sm'}`}
+                                                    title="Bold"
+                                                >
+                                                    <Bold size={14} strokeWidth={activeFormats.bold ? 2.5 : 2} />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onMouseDown={(e) => e.preventDefault()}
+                                                    onClick={() => formatText('italic')}
+                                                    className={`p-1.5 rounded-md transition-all ${activeFormats.italic ? 'bg-white text-[#205457] shadow-sm ring-1 ring-[#205457]/10' : 'text-gray-500 hover:bg-white hover:shadow-sm'}`}
+                                                    title="Italic"
+                                                >
+                                                    <Italic size={14} strokeWidth={activeFormats.italic ? 2.5 : 2} />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onMouseDown={(e) => e.preventDefault()}
+                                                    onClick={() => formatText('list')}
+                                                    className={`p-1.5 rounded-md transition-all ${activeFormats.list ? 'bg-white text-[#205457] shadow-sm ring-1 ring-[#205457]/10' : 'text-gray-500 hover:bg-white hover:shadow-sm'}`}
+                                                    title="Bullet List"
+                                                >
+                                                    <List size={14} strokeWidth={activeFormats.list ? 2.5 : 2} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div
+                                            ref={descriptionRef}
+                                            contentEditable
+                                            onInput={(e) => setDescription(e.currentTarget.innerHTML)}
+                                            onKeyUp={checkFormats}
+                                            onMouseUp={checkFormats}
+                                            className="w-full rounded-[30px] px-8 py-8 bg-gray-50/80 border-2 border-transparent focus:border-[#205457]/20 focus:bg-white outline-none transition-all leading-relaxed [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
+                                            style={{ minHeight: '200px' }}
                                         />
                                     </div>
                                 </div>
@@ -496,6 +645,15 @@ const EditProduct = () => {
                                                 />
                                             </div>
                                         </div>
+
+                                        {discount > 0 && price > 0 && (
+                                            <div className="p-4 bg-[#205457]/5 rounded-2xl border border-[#205457]/10">
+                                                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-[#205457]">
+                                                    <span>Final Selling Price:</span>
+                                                    <span className="text-xl font-black">${(price * (1 - discount / 100)).toFixed(2)}</span>
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {/* Delivery Time */}
                                         <div className="space-y-3">

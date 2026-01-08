@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { CiLogout } from "react-icons/ci";
-import { X, ShieldCheck, LayoutDashboard, Store, Package, Layers, BarChart3, Bell } from "lucide-react";
+import { X, ShieldCheck, LayoutDashboard, Store, Package, Layers, BarChart3, Bell, ShoppingBag } from "lucide-react";
 import { logo } from "../assets/index";
 import { createPortal } from "react-dom";
 
@@ -22,9 +22,10 @@ const AdminNavbar = () => {
     const navItems = [
         { name: 'Dashboard', to: '/admin/dashboard', icon: LayoutDashboard },
         { name: 'Stores', to: '/admin/stores', icon: Store },
+        { name: 'Orders', to: '/admin/orders', icon: ShoppingBag },
         { name: 'Products', to: '/admin/products', icon: Package },
         { name: 'Categories', to: '/admin/categories', icon: Layers },
-        { name: 'Analytics', to: '/admin/analytics', icon: BarChart3 },
+
     ];
 
     return (

@@ -63,13 +63,13 @@ const SafeImage = ({ src, alt, type = 'product', className = '', ...props }) => 
 
     // Handle relative URLs by prepending the base URL if needed
     const getImageUrl = (url) => {
-      if (!url) return '';
-      // If it's already a full URL or a data URL, return as is
-      if (url.startsWith('http') || url.startsWith('blob:') || url.startsWith('data:')) {
-        return url;
-      }
-      // If it's a relative URL, prepend the base URL
-      return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+        if (!url || typeof url !== 'string') return '';
+        // If it's already a full URL or a data URL, return as is
+        if (url.startsWith('http') || url.startsWith('//') || url.startsWith('blob:') || url.startsWith('data:')) {
+            return url;
+        }
+        // If it's a relative URL, prepend the base URL (https for stability)
+        return `https://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
     };
 
     const imageUrl = getImageUrl(src);

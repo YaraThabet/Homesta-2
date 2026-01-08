@@ -3,6 +3,7 @@ import { useAppContext } from '../../context/AppContext';
 import SafeImage from '../../components/SafeImage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Layers, Plus, Edit2, Trash2, Search, X, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import ConfirmModal from '../../components/ConfirmModal';
 import api from '../../lib/axios';
 
 const AdminCategories = () => {
@@ -11,6 +12,7 @@ const AdminCategories = () => {
     const [subCategoriesMap, setSubCategoriesMap] = useState({});
     const [loading, setLoading] = useState(true);
     const [modal, setModal] = useState({ show: false, type: '', mode: 'add', data: null, parentId: null });
+    const [deleteConfirm, setDeleteConfirm] = useState({ show: false, id: null, type: '', parentId: null });
 
     useEffect(() => {
         fetchData();
@@ -19,7 +21,7 @@ const AdminCategories = () => {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const catRes = await api.get('/Category');
+            const catRes = await api.get('Category');
             const cats = Array.isArray(catRes.data) ? catRes.data : [catRes.data];
             setCategories(cats);
 
@@ -65,14 +67,20 @@ const AdminCategories = () => {
         return `http://homefinish.runasp.net/${cleanPath}`;
     };
 
-    const handleDelete = async (id, type, parentId = null) => {
-        if (!window.confirm(`Are you sure you want to delete this ${type}?`)) return;
+    const handleDelete = (id, type, parentId = null) => {
+        setDeleteConfirm({ show: true, id, type, parentId });
+    };
+
+    const confirmDelete = async () => {
+        const { id, type } = deleteConfirm;
         try {
             const endpoint = type === 'category' ? '/Category' : '/SubCategory';
             await api.delete(`${endpoint}/${id}`);
             fetchData();
         } catch (err) {
             showAlert("Failed to delete. It might be in use.", "error", "Error");
+        } finally {
+            setDeleteConfirm({ show: false, id: null, type: '', parentId: null });
         }
     };
 
@@ -217,6 +225,18 @@ const AdminCategories = () => {
                     showAlert={showAlert}
                 />
             )}
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmModal
+                isOpen={deleteConfirm.show}
+                onClose={() => setDeleteConfirm({ show: false, id: null, type: '', parentId: null })}
+                onConfirm={confirmDelete}
+                title={`Delete ${deleteConfirm.type || 'Item'}?`}
+                message={`Are you sure you want to delete this ${deleteConfirm.type || 'item'}? This action cannot be undone.`}
+                confirmText="Delete"
+                cancelText="Cancel"
+                type="danger"
+            />
         </div>
     );
 };

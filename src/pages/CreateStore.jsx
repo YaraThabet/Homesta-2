@@ -53,7 +53,7 @@ const CreateStore = () => {
         // Check if store already exists to prevent duplicate creation
         const checkExistingStore = async () => {
             try {
-                const response = await api.get('/Store');
+                const response = await api.get('Store');
                 const stores = Array.isArray(response.data) ? response.data : [response.data];
                 const myStore = stores.find(s => s.email?.toLowerCase() === userEmail?.toLowerCase());
 

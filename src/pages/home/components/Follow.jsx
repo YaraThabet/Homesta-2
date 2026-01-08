@@ -9,7 +9,7 @@ const Follow = () => {
     "/img/follow3.jpg",
     "/img/follow4.jpg",
     "/img/furniture.jpeg",
-    "/public/img/kitchen.jpg",
+    "/img/kitchen.jpg",
     "/img/kitchen.jpg",
     "/img/item1.png",
     "/img/item3.png",

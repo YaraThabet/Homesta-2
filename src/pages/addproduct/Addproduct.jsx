@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -14,7 +14,10 @@ import {
 	Check,
 	X,
 	ChevronDown,
-	Star
+	Star,
+	Bold,
+	Italic,
+	List
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import api from '../../lib/axios';
@@ -138,6 +141,33 @@ const AddProduct = () => {
 	};
 
 	const [errors, setErrors] = useState({});
+	const descriptionRef = useRef(null);
+	const [activeFormats, setActiveFormats] = useState({ bold: false, italic: false, list: false });
+
+	const checkFormats = () => {
+		setActiveFormats({
+			bold: document.queryCommandState('bold'),
+			italic: document.queryCommandState('italic'),
+			list: document.queryCommandState('insertUnorderedList')
+		});
+	};
+
+	const formatText = (command) => {
+		const cmd = command === 'list' ? 'insertUnorderedList' : command;
+		document.execCommand(cmd, false, null);
+		if (descriptionRef.current) {
+			setDescription(descriptionRef.current.innerHTML);
+			descriptionRef.current.focus();
+			checkFormats();
+		}
+	};
+
+	// Sync state to DOM for initial load or external updates (reset), preventing cursor jumps
+	useEffect(() => {
+		if (descriptionRef.current && document.activeElement !== descriptionRef.current && descriptionRef.current.innerHTML !== description) {
+			descriptionRef.current.innerHTML = description;
+		}
+	}, [description]);
 
 	const resetForm = () => {
 		setName('');
@@ -387,14 +417,45 @@ const AddProduct = () => {
 										</div>
 
 										<div className="space-y-2">
-											<label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Description <span className="text-red-500">*</span></label>
-											<textarea
-												required
-												value={description}
-												onChange={(e) => setDescription(e.target.value)}
-												placeholder="Tell the story of your product..."
-												rows={6}
-												className="w-full bg-gray-50 border border-transparent focus:bg-white focus:border-[#205457]/30 rounded-2xl px-5 py-4 text-gray-700 outline-none transition-all resize-none leading-relaxed"
+											<div className="flex justify-between items-center">
+												<label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Description <span className="text-red-500">*</span></label>
+												<div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+													<button
+														type="button"
+														onMouseDown={(e) => e.preventDefault()}
+														onClick={() => formatText('bold')}
+														className={`p-1.5 rounded-md transition-all ${activeFormats.bold ? 'bg-white text-[#205457] shadow-sm ring-1 ring-[#205457]/10' : 'text-gray-500 hover:bg-white hover:shadow-sm'}`}
+														title="Bold"
+													>
+														<Bold size={14} strokeWidth={activeFormats.bold ? 2.5 : 2} />
+													</button>
+													<button
+														type="button"
+														onMouseDown={(e) => e.preventDefault()}
+														onClick={() => formatText('italic')}
+														className={`p-1.5 rounded-md transition-all ${activeFormats.italic ? 'bg-white text-[#205457] shadow-sm ring-1 ring-[#205457]/10' : 'text-gray-500 hover:bg-white hover:shadow-sm'}`}
+														title="Italic"
+													>
+														<Italic size={14} strokeWidth={activeFormats.italic ? 2.5 : 2} />
+													</button>
+													<button
+														type="button"
+														onMouseDown={(e) => e.preventDefault()}
+														onClick={() => formatText('list')}
+														className={`p-1.5 rounded-md transition-all ${activeFormats.list ? 'bg-white text-[#205457] shadow-sm ring-1 ring-[#205457]/10' : 'text-gray-500 hover:bg-white hover:shadow-sm'}`}
+														title="Bullet List"
+													>
+														<List size={14} strokeWidth={activeFormats.list ? 2.5 : 2} />
+													</button>
+												</div>
+											</div>
+											<div
+												ref={descriptionRef}
+												contentEditable
+												onInput={(e) => setDescription(e.currentTarget.innerHTML)}
+												onKeyUp={checkFormats}
+												onMouseUp={checkFormats}
+												className="w-full bg-gray-50 border border-transparent focus:bg-white focus:border-[#205457]/30 rounded-2xl px-5 py-4 text-gray-700 outline-none transition-all leading-relaxed min-h-[150px] overflow-y-auto [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
 											/>
 										</div>
 									</div>
@@ -487,6 +548,15 @@ const AddProduct = () => {
 												className="w-full bg-gray-50 border border-transparent focus:bg-white focus:border-[#205457]/30 rounded-2xl px-5 py-4 font-bold text-gray-900 outline-none transition-all"
 											/>
 										</div>
+
+										{discount > 0 && price > 0 && (
+											<div className="col-span-2 p-4 bg-[#205457]/5 rounded-2xl border border-[#205457]/10">
+												<div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest text-[#205457]">
+													<span>Final Selling Price:</span>
+													<span className="text-lg font-black">${(price * (1 - discount / 100)).toFixed(2)}</span>
+												</div>
+											</div>
+										)}
 
 										<div className="space-y-2">
 											<label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Stock <span className="text-red-500">*</span></label>

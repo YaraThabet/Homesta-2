@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import ConfirmModal from "../../components/ConfirmModal";
 
 const countryData = {
   US: { flag: "🇺🇸", name: "United States" },
@@ -27,6 +28,7 @@ const ManageAddress = () => {
 
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState({ show: false, id: null });
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -80,9 +82,12 @@ const ManageAddress = () => {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm("Are you sure you want to delete this address?")) {
-      setAddresses(addresses.filter((addr) => addr.id !== id));
-    }
+    setDeleteConfirm({ show: true, id });
+  };
+
+  const confirmDelete = () => {
+    setAddresses(addresses.filter((addr) => addr.id !== deleteConfirm.id));
+    setDeleteConfirm({ show: false, id: null });
   };
 
   const handleSubmit = () => {
@@ -91,11 +96,11 @@ const ManageAddress = () => {
         addresses.map((addr) =>
           addr.id === editingId
             ? {
-                ...addr,
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                address: formData.streetAddress,
-              }
+              ...addr,
+              firstName: formData.firstName,
+              lastName: formData.lastName,
+              address: formData.streetAddress,
+            }
             : addr
         )
       );
@@ -364,6 +369,18 @@ const ManageAddress = () => {
           Add New Address
         </button>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={deleteConfirm.show}
+        onClose={() => setDeleteConfirm({ show: false, id: null })}
+        onConfirm={confirmDelete}
+        title="Delete Address?"
+        message="Are you sure you want to delete this address? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 };

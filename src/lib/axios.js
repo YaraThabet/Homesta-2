@@ -14,7 +14,12 @@ api.interceptors.request.use(
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
-        console.log("⬆️ API Request:", config.method.toUpperCase(), config.url, config.data);
+        console.log(`%c⬆️ API Request: ${config.method.toUpperCase()} ${config.url}`, "color: #3b82f6; font-weight: bold;");
+        console.log("Headers:", {
+            Authorization: token ? `Bearer ${token.substring(0, 15)}...` : 'None',
+            Accept: config.headers.accept
+        });
+        if (config.params) console.log("Params:", config.params);
         return config;
     },
     (error) => {

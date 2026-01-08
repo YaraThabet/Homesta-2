@@ -47,6 +47,7 @@ const SellerNavbar = () => {
                         { name: 'Dashboard', to: '/seller-home' },
                         { name: 'Product Feed', to: '/seller-products' },
                         { name: 'Add Product', to: '/addproduct' },
+                        { name: 'Orders', to: '/seller-orders' },
                         { name: 'Reviews', to: '/seller-reviews' },
                         { name: 'Analytics', to: '/analytics' },
 
@@ -129,6 +130,7 @@ const SellerNavbar = () => {
                                             { name: 'Dashboard', to: '/seller-home' },
                                             { name: 'Product Feed', to: '/seller-products' },
                                             { name: 'Add Piece', to: '/addproduct' },
+                                            { name: 'Orders', to: '/seller-orders' },
                                             { name: 'Reviews', to: '/seller-reviews' },
                                             { name: 'Analytics', to: '/analytics' },
                                             { name: 'My Store', to: '/store-settings' },

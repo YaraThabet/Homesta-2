@@ -3,10 +3,12 @@ import { ArrowLeft, Calendar, Clock, Share2, BookOpen, Tag, User } from "lucide-
 import { useParams, Link, useNavigate } from "react-router-dom";
 import FooterBenefits from "../shop/components/FooterBenefits";
 import { blogPosts } from "../../data/blogsData";
+import { useAppContext } from "../../context/AppContext";
 
 const BlogDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { showAlert } = useAppContext();
   const post = blogPosts.find(p => String(p.id) === String(id));
 
   // Get related posts (exclude current post)
@@ -48,7 +50,7 @@ const BlogDetail = () => {
       });
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert("Link copied to clipboard!");
+      showAlert("Link copied to clipboard!", "success", "Copied!");
     }
   };
 
