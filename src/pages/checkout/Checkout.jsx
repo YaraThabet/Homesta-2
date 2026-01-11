@@ -21,8 +21,8 @@ const Checkout = () => {
       companyName: "",
       country: "Egypt",
       streetAddress: "",
-      city: "Cairo",
-      state: "Cairo",
+      city: "",
+      state: "",
       zipCode: "",
       phone: "",
       email: localStorage.getItem('userEmail') || "",
@@ -42,7 +42,10 @@ const Checkout = () => {
         const items = res.data.cartItems || [];
 
         // Calculate original subtotal to show discount breakdown
-        const originalSubtotal = items.reduce((acc, item) => acc + ((item.unitPrice || 0) * (item.quantity || 0)), 0);
+        const originalSubtotal = items.reduce((acc, item) => {
+          const price = item.unitPrice || item.price || item.finalUnitPrice || 0;
+          return acc + (price * (item.quantity || 0));
+        }, 0);
         const currentSubtotal = res.data.subTotal || 0;
         const discount = originalSubtotal - currentSubtotal;
 
@@ -153,7 +156,7 @@ const Checkout = () => {
                     value={formData.firstName}
                     onChange={handleChange}
                     placeholder="Maram"
-                    className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-gray-400"
                   />
                 </div>
                 <div>
@@ -167,25 +170,12 @@ const Checkout = () => {
                     value={formData.lastName}
                     onChange={handleChange}
                     placeholder="Elamly"
-                    className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-gray-400"
                   />
                 </div>
               </div>
 
-              {/* Company Name */}
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  Company Name (Optional)
-                </label>
-                <input
-                  type="text"
-                  name="companyName"
-                  value={formData.companyName}
-                  onChange={handleChange}
-                  placeholder="Enter Company Name"
-                  className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                />
-              </div>
+
 
               {/* Country */}
               <div>
@@ -199,9 +189,19 @@ const Checkout = () => {
                     onChange={handleChange}
                     className="w-full px-4 py-3 border border-border rounded-lg bg-background appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-muted-foreground"
                   >
+                    <option value="" disabled>Select Country</option>
+                    <option value="Palestine">Palestine</option>
                     <option value="Egypt">Egypt</option>
                     <option value="Saudi Arabia">Saudi Arabia</option>
                     <option value="UAE">UAE</option>
+                    <option value="Lebanon">Lebanon</option>
+                    <option value="Jordan">Jordan</option>
+                    <option value="Kuwait">Kuwait</option>
+                    <option value="Qatar">Qatar</option>
+                    <option value="Bahrain">Bahrain</option>
+                    <option value="Yemen">Yemen</option>
+                    <option value="Oman">Oman</option>
+
                   </select>
                   <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground pointer-events-none" />
                 </div>
@@ -219,7 +219,7 @@ const Checkout = () => {
                   value={formData.streetAddress}
                   onChange={handleChange}
                   placeholder="Enter Street Address"
-                  className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-gray-400"
                 />
               </div>
 
@@ -235,7 +235,7 @@ const Checkout = () => {
                   value={formData.city}
                   onChange={handleChange}
                   placeholder="Enter City"
-                  className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-gray-400"
                 />
               </div>
 
@@ -251,7 +251,7 @@ const Checkout = () => {
                   value={formData.state}
                   onChange={handleChange}
                   placeholder="Enter State"
-                  className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-gray-400"
                 />
               </div>
 
@@ -267,7 +267,7 @@ const Checkout = () => {
                   value={formData.zipCode}
                   onChange={handleChange}
                   placeholder="Enter Zip Code"
-                  className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-gray-400"
                 />
               </div>
 
@@ -283,7 +283,7 @@ const Checkout = () => {
                   value={formData.phone}
                   onChange={handleChange}
                   placeholder="Enter Phone Number"
-                  className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-gray-400"
                 />
               </div>
 
@@ -299,7 +299,7 @@ const Checkout = () => {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="Enter your email"
-                  className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-gray-400"
                 />
               </div>
 

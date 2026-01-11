@@ -7,7 +7,7 @@ const OrderStatus = ({ status }) => {
   // Logic to determine which steps are completed based on status string
   const getStatusIndex = (s) => {
     const lowerStatus = (s || '').toLowerCase();
-    if (lowerStatus === 'cancelled') return 0; // Or handle separately
+    if (lowerStatus === 'cancelled') return -1;
     if (lowerStatus === 'delivered') return 5;
     if (lowerStatus === 'shipped') return 4;
     if (lowerStatus === 'processing' || lowerStatus === 'accepted') return 3;
@@ -16,6 +16,7 @@ const OrderStatus = ({ status }) => {
   };
 
   const activeIndex = getStatusIndex(status);
+  const isCancelled = activeIndex === -1;
 
   const steps = [
     {
@@ -58,11 +59,11 @@ const OrderStatus = ({ status }) => {
           <div className="grid grid-cols-5 text-center mb-8">
             {steps.map((step) => (
               <div key={step.id} className="flex flex-col items-center justify-end h-20">
-                <div className={`text-4xl mb-3 transition-all duration-500 ${step.isCompleted ? 'text-[#205457]' : 'text-gray-200'}`}>
+                <div className={`text-4xl mb-3 transition-all duration-500 ${isCancelled ? 'text-red-400 opacity-50' : step.isCompleted ? 'text-[#205457]' : 'text-gray-200'}`}>
                   {step.icon}
                 </div>
-                <h3 className={`text-xs font-black uppercase tracking-widest ${step.isCompleted ? 'text-gray-900' : 'text-gray-300'}`}>
-                  {step.title}
+                <h3 className={`text-xs font-black uppercase tracking-widest ${isCancelled ? 'text-red-500 font-bold' : step.isCompleted ? 'text-gray-900' : 'text-gray-300'}`}>
+                  {isCancelled ? 'Cancelled' : step.title}
                 </h3>
               </div>
             ))}
@@ -75,16 +76,16 @@ const OrderStatus = ({ status }) => {
             <div className="grid grid-cols-5 relative z-10 w-full">
               {steps.map((step, index) => {
                 const isLast = index === steps.length - 1;
-                const isLineActive = step.isCompleted && steps[index + 1]?.isCompleted;
+                const isLineActive = !isCancelled && step.isCompleted && steps[index + 1]?.isCompleted;
 
                 return (
                   <div key={step.id} className="relative flex items-center justify-center">
                     {!isLast && (
-                      <div className={`absolute left-[50%] w-full h-1 top-1/2 -translate-y-1/2 -z-10 transition-all duration-700 ${isLineActive ? 'bg-[#205457]' : 'bg-transparent'}`} />
+                      <div className={`absolute left-[50%] w-full h-1 top-1/2 -translate-y-1/2 -z-10 transition-all duration-700 ${isLineActive ? 'bg-[#205457]' : isCancelled ? 'bg-red-200/50' : 'bg-transparent'}`} />
                     )}
 
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-all duration-500 ${step.isCompleted ? 'bg-[#205457] text-white scale-110' : 'bg-white text-gray-200 border border-gray-100'}`}>
-                      <FaCheck className="text-[10px]" />
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg transition-all duration-500 ${isCancelled ? 'bg-red-500 text-white scale-110' : step.isCompleted ? 'bg-[#205457] text-white scale-110' : 'bg-white text-gray-200 border border-gray-100'}`}>
+                      {isCancelled ? <FaBoxOpen className="text-[14px]" /> : <FaCheck className="text-[10px]" />}
                     </div>
                   </div>
                 )
@@ -96,8 +97,8 @@ const OrderStatus = ({ status }) => {
           <div className="grid grid-cols-5 text-center mt-6">
             {steps.map((step) => (
               <div key={step.id}>
-                <p className={`text-[10px] font-black uppercase tracking-widest ${step.isCompleted ? 'text-[#205457]' : 'text-gray-200'}`}>
-                  {step.isCompleted ? 'Verified' : 'Pending'}
+                <p className={`text-[10px] font-black uppercase tracking-widest ${isCancelled ? 'text-red-400' : step.isCompleted ? 'text-[#205457]' : 'text-gray-200'}`}>
+                  {isCancelled ? 'Stopped' : step.isCompleted ? 'Verified' : 'Pending'}
                 </p>
               </div>
             ))}

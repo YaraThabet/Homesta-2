@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Package, X } from "lucide-react";
 import PageLoader from "../components/PageLoader";
 import api from "../lib/axios";
+import SafeImage from "../components/SafeImage";
 
 const SubCategory = () => {
   const { categoryId } = useParams();
@@ -87,15 +88,11 @@ const SubCategory = () => {
                 >
                   {/* Image Container */}
                   <div className="h-56 bg-gray-100 overflow-hidden">
-                    <img
-                      src={item.imagePath
-                        ? `http://homefinish.runasp.net/${item.imagePath.startsWith('/') ? item.imagePath.substring(1) : item.imagePath}`
-                        : 'https://via.placeholder.com/300x200?text=No+Image'}
+                    <SafeImage
+                      src={item.imagePath}
                       alt={item.name}
+                      type="subcategory"
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                      onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/300x200?text=No+Image';
-                      }}
                     />
                   </div>
 
@@ -124,8 +121,8 @@ const SubCategory = () => {
                     key={i}
                     onClick={() => setCurrentPage(i + 1)}
                     className={`w-10 h-10 flex items-center justify-center rounded-full font-bold transition-all ${currentPage === i + 1
-                        ? 'bg-[#205457] text-white shadow-md'
-                        : 'text-[#205457] hover:bg-[#205457] hover:text-white border border-[#205457]'
+                      ? 'bg-[#205457] text-white shadow-md'
+                      : 'text-[#205457] hover:bg-[#205457] hover:text-white border border-[#205457]'
                       }`}
                   >
                     {i + 1}

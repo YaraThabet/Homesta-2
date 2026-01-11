@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { ShoppingCart, Star, Check, Heart } from "lucide-react";
+import { ShoppingCart, Star, Check, Heart, Package } from "lucide-react";
+
 import { Link, useNavigate } from "react-router-dom";
 import api from "../../../lib/axios";
 import SafeImage from "../../../components/SafeImage";
@@ -42,6 +43,7 @@ const getColorValue = (colorName) => {
 
 const ProductCard = ({ product }) => {
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showOutOfStock, setShowOutOfStock] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
   const navigate = useNavigate();
 
@@ -141,6 +143,13 @@ const ProductCard = ({ product }) => {
   const handleAddToCart = async (e) => {
     e.preventDefault();
     e.stopPropagation();
+
+    // Check Stock
+    if ((product.quantity || 0) <= 0) {
+      setShowOutOfStock(true);
+      return;
+    }
+
     const token = localStorage.getItem('token');
     if (!token) {
       setShowLoginModal(true);
@@ -242,13 +251,38 @@ const ProductCard = ({ product }) => {
         {/* Floating Cart Button */}
         <button
           onClick={handleAddToCart}
-          className="absolute bottom-16 right-4 w-10 h-10 rounded-full shadow-lg flex items-center justify-center transition-all bg-white text-[#205457] hover:bg-[#205457] hover:text-white"
+          className={`absolute bottom-16 right-4 w-10 h-10 rounded-full shadow-lg flex items-center justify-center transition-all ${(product.quantity || 0) <= 0
+              ? 'bg-gray-100 text-gray-400'
+              : 'bg-white text-[#205457] hover:bg-[#205457] hover:text-white'
+            }`}
           disabled={adding}
-          title="Add to Cart"
+          title={(product.quantity || 0) <= 0 ? "Out of Stock" : "Add to Cart"}
         >
           <ShoppingCart className={`h-5 w-5 ${adding ? 'animate-bounce' : ''}`} />
         </button>
       </div>
+
+      {/* Out of Stock Modal */}
+      {showOutOfStock && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-sm w-full text-center relative" onClick={(e) => e.stopPropagation()}>
+            <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Package size={32} />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Sorry!</h3>
+            <p className="text-gray-600 mb-6 font-medium">
+              This item is currently out of stock. Please check back later.
+            </p>
+            <button
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); setShowOutOfStock(false); }}
+              className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-xl font-bold transition-colors"
+            >
+              Close
+            </button>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Login Required Modal (Portaled) */}
       {showLoginModal && createPortal(

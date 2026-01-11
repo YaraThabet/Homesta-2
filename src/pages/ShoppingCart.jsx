@@ -43,9 +43,14 @@ const ShoppingCart = () => {
         });
 
         // Fetch images
+        // Fetch images and stock details
         mappedItems.forEach(async (item) => {
           try {
-            const imgRes = await api.get(`/ProductImages/product/${item.productId}`);
+            const [imgRes, prodRes] = await Promise.all([
+              api.get(`/ProductImages/product/${item.productId}`).catch(() => ({ data: null })),
+              api.get(`/Product/GetProductById/${item.productId}`).catch(() => ({ data: null }))
+            ]);
+
             let url = null;
             if (imgRes.data && Array.isArray(imgRes.data.images) && imgRes.data.images.length > 0) {
               url = imgRes.data.images[0].imageUrl;
@@ -53,12 +58,20 @@ const ShoppingCart = () => {
               url = imgRes.data.imageUrls[0];
             }
 
+            let fullUrl = null;
             if (url && typeof url === 'string') {
-              const fullUrl = url.startsWith('http') ? url : `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
-              setCartItems(prev => prev.map(p => p.id === item.id ? { ...p, image: fullUrl } : p));
+              fullUrl = url.startsWith('http') ? url : `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
             }
+
+            const stock = prodRes?.data?.quantity !== undefined ? prodRes.data.quantity : 100;
+
+            setCartItems(prev => prev.map(p => p.id === item.id ? {
+              ...p,
+              image: fullUrl || p.image,
+              maxQuantity: stock
+            } : p));
           } catch (e) {
-            console.log('Failed to load image for cart item', item.id);
+            console.log('Failed to load details for cart item', item.id);
           }
         });
 
@@ -82,6 +95,11 @@ const ShoppingCart = () => {
 
     const newQty = item.quantity + delta;
     if (newQty < 1) return;
+
+    if (item.maxQuantity !== undefined && newQty > item.maxQuantity && delta > 0) {
+      showAlert(`Only ${item.maxQuantity} items available in stock.`, "warning", "Stock Limit");
+      return;
+    }
 
     setProcessingId(item.id);
 
@@ -242,13 +260,12 @@ const ShoppingCart = () => {
                           <h3 className="text-lg font-bold text-gray-900 mb-1">{item.name}</h3>
                           <p className="text-sm text-gray-500 font-medium mb-1">
                             {item.color ? (
-                              <span className="inline-flex items-center gap-1">
+                              <span className="inline-flex items-center gap-1" title={item.color}>
                                 Color:
                                 <span
-                                  className="w-3 h-3 rounded-full border border-gray-200 inline-block"
-                                  style={{ backgroundColor: item.color.startsWith('#') || ['red', 'blue', 'green', 'black', 'white'].includes(item.color.toLowerCase()) ? item.color : '#eee' }}
+                                  className="w-4 h-4 rounded-full border border-gray-200 inline-block shadow-sm ml-1"
+                                  style={{ backgroundColor: item.color }}
                                 />
-                                {item.color}
                               </span>
                             ) : 'No options selected'}
                           </p>

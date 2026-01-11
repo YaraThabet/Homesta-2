@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Store, Package, Mail, Phone, MapPin, ArrowLeft, Trash2, Search, AlertCircle, Eye, Star, X, Image as ImageIcon } from 'lucide-react';
 import api from '../../lib/axios';
 import PageLoader from '../../components/PageLoader';
+import SafeImage from '../../components/SafeImage';
 
 const COLOR_MAP = {
     "brown": "#A67B5B",
@@ -171,7 +172,21 @@ const ProductDetailsModal = ({ product, onClose }) => {
                                 </div>
                             </div>
                             <span className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-2 block">Description</span>
-                            <p className="text-gray-500 leading-relaxed font-light italic">"{product.description || 'No description provided.'}"</p>
+                            <div
+                                className="text-gray-500 leading-relaxed font-light italic prose prose-sm max-w-none"
+                                dangerouslySetInnerHTML={{
+                                    __html: (() => {
+                                        let raw = product.description || "";
+                                        const unescape = (str) => str
+                                            .replace(/&amp;/g, '&')
+                                            .replace(/&lt;/g, '<')
+                                            .replace(/&gt;/g, '>')
+                                            .replace(/&nbsp;/g, ' ')
+                                            .replace(/&quot;/g, '"');
+                                        return unescape(unescape(unescape(raw))) || 'No description provided.';
+                                    })()
+                                }}
+                            />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
@@ -197,12 +212,23 @@ const ProductDetailsModal = ({ product, onClose }) => {
                         {product.colors && (
                             <div>
                                 <span className="text-xs font-black text-gray-400 uppercase tracking-[0.2em] mb-3 block">Colors</span>
-                                <div className="flex flex-wrap gap-2">
-                                    {(Array.isArray(product.colors) ? product.colors : product.colors.split(',')).map((color, i) => (
-                                        <span key={i} className="px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-[10px] font-black text-gray-700 uppercase tracking-widest">
-                                            {getColorName(color.trim())}
-                                        </span>
-                                    ))}
+                                <div className="flex flex-wrap gap-3">
+                                    {(Array.isArray(product.colors) ? product.colors : product.colors.split(',')).map((colorVal, i) => {
+                                        const trimmed = colorVal.trim();
+                                        const hex = trimmed.startsWith('#') ? trimmed : (COLOR_MAP[trimmed.toLowerCase()] || '#E5E7EB');
+                                        return (
+                                            <div key={i} className="group/color relative flex flex-col items-center">
+                                                <div
+                                                    className="w-8 h-8 rounded-full border-2 border-white shadow-md ring-1 ring-gray-100 transition-transform hover:scale-110 cursor-help"
+                                                    style={{ backgroundColor: hex }}
+                                                    title={getColorName(trimmed)}
+                                                />
+                                                <span className="text-[8px] font-black text-gray-400 mt-1 uppercase tracking-tighter opacity-0 group-hover/color:opacity-100 transition-opacity">
+                                                    {getColorName(trimmed)}
+                                                </span>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}
@@ -326,17 +352,10 @@ const StoreProductCard = ({ product, onDeleteClick, onViewClick }) => {
                 <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
                     <button
                         onClick={() => onViewClick(product)}
-                        className="w-10 h-10 bg-white text-[#205457] rounded-full flex items-center justify-center shadow-xl hover:bg-[#205457] hover:text-white transition-all transform -translate-y-4 group-hover:translate-y-0 duration-500"
+                        className="p-3 bg-white text-[#205457] rounded-full flex items-center justify-center shadow-xl hover:bg-[#205457] hover:text-white transition-all transform -translate-y-4 group-hover:translate-y-0 duration-500"
                         title="View Details"
                     >
-                        <Eye size={18} />
-                    </button>
-                    <button
-                        onClick={() => onDeleteClick(product.productId || product.id)}
-                        className="w-10 h-10 bg-white text-red-500 rounded-full flex items-center justify-center shadow-xl hover:bg-red-500 hover:text-white transition-all transform translate-y-4 group-hover:translate-y-0 duration-500"
-                        title="Delete Product"
-                    >
-                        <Trash2 size={18} />
+                        <Eye size={22} />
                     </button>
                 </div>
 
@@ -381,28 +400,76 @@ const StoreOrdersList = ({ storeId }) => {
         const fetchOrders = async () => {
             try {
                 setLoading(true);
-                // 1. Fetch all orders
-                const res = await api.get('Order/all');
-                const rawOrders = Array.isArray(res.data) ? res.data : [];
+                // Fetch orders and products in parallel
+                const [ordersRes, productsRes] = await Promise.all([
+                    api.get('Order/all'),
+                    api.get('Product/GetAllProducts').catch(() => ({ data: [] }))
+                ]);
+
+                const rawOrders = Array.isArray(ordersRes.data) ? ordersRes.data : [];
+                const products = productsRes.data || [];
+
+                console.log('📦 Store Orders Raw:', rawOrders.length);
+                console.log('🏪 Products loaded:', products.length);
 
                 // 2. Filter orders where at least one item belongs to this store
-                const storeOrders = rawOrders.filter(order =>
-                    (order.items || []).some(item => (item.storeId?.toString() === storeId?.toString()))
-                ).map(order => {
-                    // Filter items to only show this store's items in the total calculation
-                    const storeItems = (order.items || []).filter(item => item.storeId?.toString() === storeId?.toString());
-                    const itemsTotal = storeItems.reduce((sum, item) => {
-                        return sum + ((item.price || 0) * (item.quantity || 0));
+                const filteredOrders = rawOrders.filter(order =>
+                    (order.items || order.orderItems || []).some(item => (item.storeId?.toString() === storeId?.toString()))
+                );
+
+                // 3. Process and enrich orders with images matching this store
+                const processedOrders = await Promise.all(filteredOrders.map(async (order) => {
+                    // Filter items to only show this store's items
+                    const storeItems = (order.items || order.orderItems || []).filter(item => item.storeId?.toString() === storeId?.toString());
+
+                    // Enrich items with images
+                    const enrichedItems = await Promise.all(storeItems.map(async (item) => {
+                        const matchingProduct = products.find(p =>
+                            p.name?.toLowerCase().trim() === item.productName?.toLowerCase().trim()
+                        );
+
+                        const productId = item.productId || matchingProduct?.productId;
+                        let imageUrl = item.image || item.imagePath;
+
+                        if (!imageUrl && productId) {
+                            try {
+                                const imgRes = await api.get(`/ProductImages/product/${productId}`);
+                                if (imgRes.data?.images?.length) {
+                                    imageUrl = imgRes.data.images[0].imageUrl;
+                                } else if (imgRes.data?.imageUrls?.length) {
+                                    imageUrl = imgRes.data.imageUrls[0];
+                                }
+
+                                if (imageUrl) {
+                                    imageUrl = imageUrl.startsWith('http') ? imageUrl : `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+                                }
+                            } catch (err) {
+                                console.log(`Failed to load image for ${item.productName}`);
+                            }
+                        } else if (imageUrl && !imageUrl.startsWith('http')) {
+                            imageUrl = `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+                        }
+
+                        return {
+                            ...item,
+                            productId,
+                            image: imageUrl,
+                            imagePath: imageUrl
+                        };
+                    }));
+
+                    const itemsTotal = enrichedItems.reduce((sum, item) => {
+                        return sum + (item.total ?? ((item.finalUnitPrice ?? item.price ?? 0) * (item.quantity || 1)));
                     }, 0);
 
                     return {
                         ...order,
-                        items: storeItems, // Optional: Only show relevant items
-                        displayTotal: itemsTotal > 0 ? itemsTotal : (order.totalPrice || 0)
+                        items: enrichedItems,
+                        displayTotal: itemsTotal > 0 ? itemsTotal : (order.orderTotal ?? order.totalPrice ?? 0)
                     };
-                });
+                }));
 
-                setOrders(storeOrders);
+                setOrders(processedOrders);
             } catch (err) {
                 console.error("Failed to fetch store orders:", err);
             } finally {
@@ -434,11 +501,25 @@ const StoreOrdersList = ({ storeId }) => {
                             <p className="font-bold text-gray-900 leading-none pb-1">#{order.orderId || order.id}</p>
                         </div>
                     </div>
+                    {/* Customer Info */}
                     <div className="flex-1">
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Customer</p>
+                        <p className="font-bold text-gray-700 text-sm">
+                            {order.firstName && order.lastName
+                                ? `${order.firstName} ${order.lastName}`
+                                : (order.firstName || order.userName || 'Guest User')}
+                        </p>
+                        <p className="text-[10px] text-gray-400 font-medium mt-0.5">
+                            {new Date(order.orderDate).toLocaleDateString()}
+                        </p>
+                    </div>
+
+                    {/* Items Preview */}
+                    <div className="hidden lg:block flex-1">
                         <div className="flex -space-x-3">
                             {(order.items || []).slice(0, 5).map((item, i) => (
                                 <div key={i} title={item.productName} className="w-8 h-8 rounded-full border-2 border-white bg-gray-100 overflow-hidden shadow-sm">
-                                    <img src={item.image || `http://homefinish.runasp.net${item.imagePath}`} className="w-full h-full object-cover" />
+                                    <SafeImage src={item.image || item.imagePath} className="w-full h-full object-cover" alt={item.productName} type="product" />
                                 </div>
                             ))}
                         </div>
@@ -447,7 +528,12 @@ const StoreOrdersList = ({ storeId }) => {
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Amount</p>
                         <p className="text-lg font-black text-[#205457]">${(order.displayTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                     </div>
-                    <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${order.status === 'Delivered' ? 'bg-green-50 text-green-600' : 'bg-amber-50 text-amber-600'}`}>
+                    <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${order.status === 'Delivered' ? 'bg-green-50 text-green-600' :
+                        order.status === 'Cancelled' ? 'bg-red-50 text-red-600' :
+                            order.status === 'Shipped' ? 'bg-indigo-50 text-indigo-600' :
+                                order.status === 'Processing' ? 'bg-blue-50 text-blue-600' :
+                                    'bg-amber-50 text-amber-600'
+                        }`}>
                         {order.status || 'Accepted'}
                     </div>
                 </div>
@@ -465,7 +551,6 @@ const AdminStoreDetails = () => {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState('inventory');
-    const [deleteModal, setDeleteModal] = useState({ show: false, productId: null });
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [storeReviews, setStoreReviews] = useState([]);
     const [loadingReviews, setLoadingReviews] = useState(false);
@@ -515,18 +600,6 @@ const AdminStoreDetails = () => {
 
         if (id) fetchData();
     }, [id]);
-
-    const handleDeleteProduct = async () => {
-        if (!deleteModal.productId) return;
-        try {
-            await api.delete(`/Product/Delete/${deleteModal.productId}`);
-            setProducts(prev => prev.filter(p => (p.productId || p.id) !== deleteModal.productId));
-            setDeleteModal({ show: false, productId: null });
-        } catch (err) {
-            console.error("Delete product failed", err);
-            showAlert("Failed to delete product.", "error", "Error");
-        }
-    };
 
     const handleViewProductById = (productId) => {
         const product = products.find(p => (p.productId || p.id).toString() === productId?.toString());
@@ -637,7 +710,6 @@ const AdminStoreDetails = () => {
                                     <StoreProductCard
                                         key={product.productId || product.id}
                                         product={product}
-                                        onDeleteClick={(id) => setDeleteModal({ show: true, productId: id })}
                                         onViewClick={setSelectedProduct}
                                     />
                                 ))}
@@ -770,34 +842,7 @@ const AdminStoreDetails = () => {
                 </AnimatePresence>
             </div>
 
-            {/* Delete Confirmation Modal */}
-            {deleteModal.show && (
-                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-                    <div className="bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl">
-                        <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <AlertCircle size={32} />
-                        </div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">Delete Product?</h3>
-                        <p className="text-gray-500 mb-6 text-sm">
-                            Are you sure you want to remove this product from the store? This action cannot be undone.
-                        </p>
-                        <div className="flex gap-4">
-                            <button
-                                onClick={() => setDeleteModal({ show: false, productId: null })}
-                                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleDeleteProduct}
-                                className="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-colors shadow-lg shadow-red-500/20"
-                            >
-                                Delete
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Content area end */}
 
             {/* Product Details Modal */}
             <AnimatePresence>

@@ -18,24 +18,17 @@ import PageLoader from '../../components/PageLoader';
 // HELPER: Image URL Fixer
 const getImageUrl = (path) => {
     if (!path || path === 'null' || path === 'undefined') return null;
-    if (path.startsWith('http')) return path; // Already a full URL
-
-    // Clean leading slashes
-    const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-
-    // Use protocol-relative URL to avoid Mixed Content blocks on HTTPS
-    return `//homefinish.runasp.net/${cleanPath}`;
+    if (path.startsWith('http')) return path;
+    return `http://homefinish.runasp.net${path.startsWith('/') ? '' : '/'}${path}`;
 };
 
 // COMPONENT: Resolved Image for Product
 const ResolvedImage = ({ src, productId, className = "" }) => {
-    const [resolvedSrc, setResolvedSrc] = useState(src);
-
+    const [fetchedSrc, setFetchedSrc] = useState(null);
     const [error, setError] = useState(false);
 
     useEffect(() => {
         setError(false);
-        // If we have no src, or it's a known placeholder string, try to fetch
         const needsFetch = !src || src === 'null' || src === 'undefined' || src === '';
 
         if (needsFetch && productId) {
@@ -49,14 +42,13 @@ const ResolvedImage = ({ src, productId, className = "" }) => {
                         if (res.data.images && Array.isArray(res.data.images) && res.data.images.length > 0) {
                             foundUrl = res.data.images[0].imageUrl;
                         } else if (Array.isArray(res.data) && res.data.length > 0) {
-                            // Check for various array formats
                             foundUrl = res.data[0].imageUrl || res.data[0].imageUrls?.[0] || res.data[0].image;
                         }
                     }
 
                     if (foundUrl) {
                         console.log(`[IMG RESOLVER] Success! Found: ${foundUrl}`);
-                        setResolvedSrc(foundUrl);
+                        setFetchedSrc(foundUrl);
                     }
                 } catch (e) {
                     console.warn(`[IMG RESOLVER] Failed for ${productId}`, e);
@@ -66,7 +58,9 @@ const ResolvedImage = ({ src, productId, className = "" }) => {
         }
     }, [src, productId]);
 
-    const finalPath = getImageUrl(resolvedSrc);
+    // Priority: Prop src > Fetched src
+    const displaySrc = (!src || src === 'null' || src === 'undefined') ? fetchedSrc : src;
+    const finalPath = getImageUrl(displaySrc);
 
     if (error || !finalPath) {
         return (
@@ -95,7 +89,7 @@ const normalizeOrder = (o) => {
         Object.values(o).find(val => Array.isArray(val)) || []).filter(i => i && typeof i === 'object');
 
     const items = rawItems.map(i => {
-        const p = parseFloat(i.unitPrice || i.price || i.finalPrice || i.productPrice || i.itemPrice || 0) || 0;
+        const p = parseFloat(i.originalUnitPrice || i.unitPrice || i.price || i.finalPrice || 0) || 0;
         const q = parseInt(i.quantity || i.count || i.qty || 1) || 1;
 
         // Prioritize PRODUCT id over ORDER ITEM id
@@ -105,11 +99,13 @@ const normalizeOrder = (o) => {
             productId: pid,
             name: i.productName || i.name || i.product?.name || "Product",
             color: i.productColor || i.color || i.product?.color || 'Standard',
-            price: p,
+            price: p, // This is original price
+            finalUnitPrice: parseFloat(i.finalUnitPrice) || p,
             quantity: q,
-            subTotal: parseFloat(i.subTotal) || (p * q) || 0,
-            image: i.productImage || i.image || i.imageUrl || i.imagePath || i.product?.image || i.product?.imageUrl,
-            discount: parseFloat(i.discount) || 0
+            subTotal: parseFloat(i.subtotal || i.subTotal) || (p * q) || 0,
+            image: i.image || i.productImage || i.imageUrl || i.imagePath || i.product?.image || i.product?.imageUrl || i.product?.imagePath,
+            discount: parseFloat(i.discountAmountPerUnit || i.discount) || 0,
+            totalDiscount: parseFloat(i.totalDiscount) || 0
         };
     });
 
@@ -182,15 +178,23 @@ const generateInvoice = (order) => {
             </div>
             <table>
                 <thead>
-                    <tr><th>Description</th><th style="text-align:center">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Total</th></tr>
+                    <tr><th style="width: 60px;">Image</th><th>Description</th><th style="text-align:center">Qty</th><th style="text-align:right">Unit Price</th><th style="text-align:right">Total</th></tr>
                 </thead>
                 <tbody>
                     ${order.items.map(i => `
                         <tr>
-                            <td>${i.name} <span style="color:#888; font-size:12px">(${i.color})</span></td>
+                            <td>
+                                <img src="${getImageUrl(i.image || i.imagePath)}" 
+                                     style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #eee;" 
+                                     alt="product">
+                            </td>
+                            <td>
+                                <div style="font-weight: 700;">${i.name}</div>
+                                <div style="color:#888; font-size:12px; margin-top:2px;">${i.color || ''}</div>
+                            </td>
                             <td style="text-align:center">${i.quantity}</td>
-                            <td style="text-align:right">$${(i.price).toFixed(2)}</td>
-                            <td style="text-align:right">$${(i.price * i.quantity).toFixed(2)}</td>
+                            <td style="text-align:right">$${(i.finalUnitPrice || i.price).toFixed(2)}</td>
+                            <td style="text-align:right">$${((i.finalUnitPrice || i.price) * i.quantity).toFixed(2)}</td>
                         </tr>
                     `).join('')}
                 </tbody>
@@ -218,25 +222,69 @@ const OrderDetailsModal = ({ orderId, initialData, onClose, onUpdateStatus, onIn
         const fetchDetails = async () => {
             setLoading(true);
             try {
-                // MATCHING CURL EXACTLY: GET .../api/Order/OrderDetails?orderId=X
-                const manualUrl = `Order/OrderDetails?orderId=${orderId}`;
-                const res = await api.get(manualUrl, {
-                    headers: { 'Accept': '*/*' }
-                });
+                // Fetch order details and products in parallel
+                const [orderRes, productsRes] = await Promise.all([
+                    api.get(`Order/OrderDetails?orderId=${orderId}`, {
+                        headers: { 'Accept': '*/*' }
+                    }),
+                    api.get('Product/GetAllProducts').catch(() => ({ data: [] }))
+                ]);
 
                 console.group(`%c[DATA SCAN] Order Detail Response #${orderId}`, "color: #3b82f6; font-weight: bold;");
-                console.log("Response Type:", Array.isArray(res.data) ? "ARRAY (Flat list)" : "OBJECT (Wrapped)");
-                console.log("Raw Response Data:", res.data);
+                console.log("Response Type:", Array.isArray(orderRes.data) ? "ARRAY (Flat list)" : "OBJECT (Wrapped)");
+                console.log("Raw Response Data:", orderRes.data);
                 console.groupEnd();
 
-                if (res.data) {
-                    // Logic: If the endpoint returns a flat list of items, wrap it so normalizeOrder can find it
-                    if (Array.isArray(res.data)) {
-                        setDetails({ items: res.data });
-                    } else {
-                        setDetails(res.data);
+                if (orderRes.data) {
+                    const products = productsRes.data || [];
+                    let orderData = Array.isArray(orderRes.data) ? { items: orderRes.data } : orderRes.data;
+                    // Enrichment logic
+                    if (orderData.items || orderData.orderItems) {
+                        const itemsToEnrich = orderData.items || orderData.orderItems;
+                        const enrichedItems = await Promise.all(
+                            itemsToEnrich.map(async (item) => {
+                                const itemName = item.productName || item.name || item.product?.name || "";
+                                const matchingProduct = products.find(p =>
+                                    p.name?.toLowerCase().trim() === itemName?.toLowerCase().trim()
+                                );
+
+                                const productId = item.productId || matchingProduct?.productId || item.product?.id || item.productID;
+                                let imageUrl = item.image || item.imagePath || item.productImage || item.product?.image || item.product?.imageUrl;
+
+                                if (!imageUrl && productId) {
+                                    try {
+                                        const imgRes = await api.get(`/ProductImages/product/${productId}`);
+                                        if (imgRes.data?.images?.length) {
+                                            imageUrl = imgRes.data.images[0].imageUrl;
+                                        } else if (imgRes.data?.imageUrls?.length) {
+                                            imageUrl = imgRes.data.imageUrls[0];
+                                        }
+
+                                        if (imageUrl) {
+                                            imageUrl = imageUrl.startsWith('http') ? imageUrl : `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+                                        }
+                                    } catch (err) {
+                                        console.log(`Failed to load image for ${item.productName}`);
+                                    }
+                                } else if (imageUrl && !imageUrl.startsWith('http')) {
+                                    imageUrl = `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+                                }
+
+                                return {
+                                    ...item,
+                                    productId,
+                                    image: imageUrl,
+                                    imagePath: imageUrl
+                                };
+                            })
+                        );
+
+                        orderData.items = enrichedItems;
+                        orderData.orderItems = enrichedItems;
                     }
-                    if (onInfoLoaded) onInfoLoaded(res.data);
+
+                    setDetails(orderData);
+                    if (onInfoLoaded) onInfoLoaded(orderData);
                 }
             } catch (err) {
                 console.error("OrderDetails fetch failed", err);
@@ -302,7 +350,13 @@ const OrderDetailsModal = ({ orderId, initialData, onClose, onUpdateStatus, onIn
                                     key={s}
                                     onClick={() => onUpdateStatus(displayData.id, s)}
                                     className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${displayData.status === s
-                                        ? 'bg-white text-gray-900 shadow-lg'
+                                        ? (
+                                            s === 'Delivered' ? 'bg-green-500 text-white shadow-lg shadow-green-900/20' :
+                                                s === 'Cancelled' ? 'bg-red-500 text-white shadow-lg shadow-red-900/20' :
+                                                    s === 'Shipped' ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-900/20' :
+                                                        s === 'Processing' ? 'bg-blue-500 text-white shadow-lg shadow-blue-900/20' :
+                                                            'bg-amber-500 text-white shadow-lg shadow-amber-900/20'
+                                        )
                                         : 'bg-white/10 text-white hover:bg-white/20'
                                         }`}
                                 >
@@ -355,17 +409,28 @@ const OrderDetailsModal = ({ orderId, initialData, onClose, onUpdateStatus, onIn
                                 <Package size={14} className="text-[#205457]" /> Products List
                             </h3>
                             <div className="space-y-3">
-                                {displayData.items.map((item, idx) => (
-                                    <div key={idx} className="flex gap-4 p-3 bg-white rounded-2xl shadow-sm border border-gray-100">
-                                        <div className="w-12 h-12 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0">
-                                            <ResolvedImage src={item.image} productId={item.productId} className="w-full h-full object-cover" />
+                                {displayData.items.map((item, idx) => {
+                                    const hasDiscount = item.finalUnitPrice && item.finalUnitPrice < item.price;
+                                    const displayPrice = hasDiscount ? item.finalUnitPrice : item.price;
+
+                                    return (
+                                        <div key={idx} className="flex gap-4 p-3 bg-white rounded-2xl shadow-sm border border-gray-100">
+                                            <div className="w-12 h-12 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0">
+                                                <ResolvedImage src={item.image} productId={item.productId} className="w-full h-full object-cover" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2">
+                                                    <p className="font-black text-gray-900 text-xs truncate">{item.name}</p>
+                                                    {hasDiscount && <span className="text-[9px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded">SAVE</span>}
+                                                </div>
+                                                <p className="text-[10px] text-gray-400 font-bold mt-1">
+                                                    {item.quantity}x @ ${displayPrice.toFixed(2)}
+                                                    {hasDiscount && <span className="line-through opacity-50 ml-1.5">${item.price.toFixed(2)}</span>}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="font-black text-gray-900 text-xs truncate">{item.name}</p>
-                                            <p className="text-[10px] text-gray-400 font-bold mt-1">{item.quantity}x @ ${item.price.toFixed(2)}</p>
-                                        </div>
-                                    </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
@@ -374,7 +439,12 @@ const OrderDetailsModal = ({ orderId, initialData, onClose, onUpdateStatus, onIn
                 {/* Settlement Footer */}
                 <div className="p-8 bg-gray-50 flex justify-between items-center border-t border-gray-100">
                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">Net Settlement</span>
-                    <span className="text-3xl font-black text-[#205457]">${displayData.totalPrice.toFixed(2)}</span>
+                    <span className="text-3xl font-black text-[#205457]">
+                        ${(displayData.items.reduce((sum, item) => {
+                            const effectivePrice = (item.finalUnitPrice && item.finalUnitPrice < item.price) ? item.finalUnitPrice : item.price;
+                            return sum + (effectivePrice * (item.quantity || 1));
+                        }, 0)).toFixed(2)}
+                    </span>
                 </div>
             </motion.div>
         </div>
@@ -414,14 +484,55 @@ const SellerOrders = () => {
         }
         try {
             setLoading(true);
-            const res = await api.get(`Order/by-store/${storeId}`);
-            const rawList = Array.isArray(res.data) ? res.data : [];
-            console.log(`%c[DEBUG] PROBING ${rawList.length} ORDERS...`, "color: #205457; font-weight: bold; font-size: 14px; border-bottom: 2px solid #205457;");
 
-            const normalized = rawList.map(normalizeOrder);
-            setOrders(normalized);
+            // 0. Fetch products catalog for enrichment in parallel
+            const [ordersRes, productsRes] = await Promise.all([
+                api.get(`Order/by-store/${storeId}`),
+                api.get('Product/GetAllProducts').catch(() => ({ data: [] }))
+            ]);
 
-            // DEEP PROBE: Success hydration
+            const rawList = Array.isArray(ordersRes.data) ? ordersRes.data : [];
+            const products = productsRes.data || [];
+
+            console.log(`%c[DEBUG] PROBING ${rawList.length} ORDERS WITH ${products.length} PRODUCTS...`, "color: #205457; font-weight: bold; font-size: 14px; border-bottom: 2px solid #205457;");
+
+            // Utility for enrichment
+            const enrichItems = async (items) => {
+                if (!items || !Array.isArray(items)) return items;
+                return await Promise.all(items.map(async (item) => {
+                    const itemName = item.productName || item.name || item.product?.name || "";
+                    const matchingProduct = products.find(p =>
+                        p.name?.toLowerCase().trim() === itemName?.toLowerCase().trim()
+                    );
+                    const productId = item.productId || matchingProduct?.productId || item.productID || item.product?.id;
+                    let imageUrl = item.image || item.imagePath || item.productImage || item.product?.image || item.product?.imageUrl;
+
+                    if (!imageUrl && productId) {
+                        try {
+                            const imgRes = await api.get(`/ProductImages/product/${productId}`);
+                            const foundUrl = imgRes.data?.images?.[0]?.imageUrl || imgRes.data?.[0]?.imageUrl || imgRes.data?.imageUrls?.[0];
+                            if (foundUrl) imageUrl = foundUrl;
+                        } catch (e) { }
+                    }
+
+                    if (imageUrl && !imageUrl.startsWith('http')) {
+                        imageUrl = `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+                    }
+
+                    return { ...item, productId, image: imageUrl, imagePath: imageUrl };
+                }));
+            };
+
+            // 1. Initial Processing
+            const enrichedList = await Promise.all(rawList.map(async (order) => {
+                const norm = normalizeOrder(order);
+                const enrichedItems = await enrichItems(norm.items);
+                return { ...norm, items: enrichedItems, orderItems: enrichedItems };
+            }));
+
+            setOrders(enrichedList);
+
+            // 2. Background Hydration (for full details if needed)
             rawList.forEach(async (smallOrder) => {
                 const id = (smallOrder.orderId || smallOrder.id);
                 const endpoints = [
@@ -435,8 +546,11 @@ const SellerOrders = () => {
                     try {
                         const dr = await api.get(url, { headers: { 'Accept': '*/*' } });
                         if (dr.data) {
-                            handleInfoLoaded(dr.data);
-                            console.log(`%c[HYDRATED] Order #${id} via ${url}`, "color: #10b981; font-weight: bold;");
+                            const norm = normalizeOrder(dr.data);
+                            const enriched = await enrichItems(norm.items);
+                            const finalOrder = { ...norm, items: enriched, orderItems: enriched };
+                            setOrders(prev => prev.map(o => o.id === finalOrder.id ? { ...o, ...finalOrder } : o));
+                            console.log(`%c[HYDRATED] Order #${id} with images`, "color: #10b981; font-weight: bold;");
                         }
                         break;
                     } catch (err) { }
@@ -458,6 +572,47 @@ const SellerOrders = () => {
         try {
             await api.put('/Order/status', { orderId: parseInt(id), status: newStatus });
             setOrders(prev => prev.map(o => o.id === id ? { ...o, status: newStatus } : o));
+
+            // Restock Inventory if Cancelled
+            if (newStatus === 'Cancelled') {
+                const targetOrder = orders.find(o => o.id === id);
+                if (targetOrder) {
+                    const items = targetOrder.items || targetOrder.orderItems || [];
+                    for (const item of items) {
+                        try {
+                            const pid = item.productId || item.product?.id;
+                            if (!pid) continue;
+
+                            const prodRes = await api.get(`/Product/GetProductById/${pid}`);
+                            const product = prodRes.data;
+
+                            if (product) {
+                                const newQuantity = (product.quantity || 0) + (item.quantity || 1);
+
+                                // Payload must match EditProduct payload structure
+                                const payload = {
+                                    name: product.name,
+                                    description: product.description,
+                                    colors: product.colors,
+                                    price: parseFloat(product.price),
+                                    rating: parseFloat(product.rating || 0),
+                                    quantity: parseInt(newQuantity),
+                                    discount: parseFloat(product.discount || 0),
+                                    deliveryTime: parseInt(product.deliveryTime || 0),
+                                    subCategoryId: parseInt(product.subCategoryId),
+                                    categoryId: parseInt(product.categoryId),
+                                    storeId: parseInt(product.storeId)
+                                };
+
+                                await api.put(`/Product/Update/${pid}`, payload);
+                                console.log(`Restocked product ${pid}. New Qty: ${newQuantity}`);
+                            }
+                        } catch (e) {
+                            console.error(`Failed to restock item in order ${id}`, e);
+                        }
+                    }
+                }
+            }
         } catch (err) {
             console.error("Status update failed", err);
         }
@@ -587,7 +742,9 @@ const SellerOrders = () => {
                                                 onChange={(e) => updateOrderStatus(order.id, e.target.value)}
                                                 className={`pl-3 pr-8 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all cursor-pointer outline-none appearance-none bg-no-repeat bg-[right_0.5rem_center] ${order.status === 'Delivered' ? 'bg-green-50 text-green-700 border-green-100' :
                                                     order.status === 'Cancelled' ? 'bg-red-50 text-red-700 border-red-100' :
-                                                        'bg-gray-50 text-gray-900 border-gray-200'
+                                                        order.status === 'Shipped' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
+                                                            order.status === 'Processing' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                                                'bg-amber-50 text-amber-900 border-amber-100' // Pending/Default
                                                     }`}
                                                 style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundSize: '1rem' }}
                                             >

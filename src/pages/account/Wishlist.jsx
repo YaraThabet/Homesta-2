@@ -333,12 +333,11 @@ const Wishlist = () => {
                               </div>
                               <div className="flex items-center gap-2 text-xs font-bold">
                                 <span className="text-gray-400">Color:</span>
-                                <div className="flex items-center gap-1.5">
+                                <div className="flex items-center gap-1.5" title={item.color}>
                                   <div
-                                    className="w-3 h-3 rounded-full border border-gray-100 shadow-sm"
+                                    className="w-4 h-4 rounded-full border border-gray-100 shadow-sm"
                                     style={{ backgroundColor: COLOR_MAP[item.color?.toLowerCase()] || item.color || '#ccc' }}
                                   ></div>
-                                  <span className="text-[#205457] uppercase tracking-widest">{getColorName(item.color)}</span>
                                 </div>
                               </div>
                             </div>

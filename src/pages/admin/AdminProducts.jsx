@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import SafeImage from '../../components/SafeImage';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Package, Search, Plus, Filter, MoreVertical, Edit2, Trash2, Eye, Star, DollarSign, Tag, Image as ImageIcon, X } from 'lucide-react';
+import { Package, Search, Plus, Filter, MoreVertical, Eye, Star, DollarSign, Tag, Image as ImageIcon, X } from 'lucide-react';
 import ConfirmModal from '../../components/ConfirmModal';
 import api from '../../lib/axios';
 
@@ -13,28 +13,61 @@ const getImageUrl = (url) => {
     return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
 };
 
+const COLOR_MAP = {
+    "brown": "#A67B5B",
+    "grey": "#9E9E9E",
+    "gray": "#9E9E9E",
+    "green": "#5B8C5A",
+    "red": "#D64545",
+    "orange": "#E8915B",
+    "blue": "#5B9BD5",
+    "white": "#FFFFFF",
+    "black": "#2D2D2D",
+    "yellow": "#F59E0B",
+    "purple": "#8B5CF6",
+    "pink": "#EC4899",
+    "beige": "#F5F5DC",
+    "gold": "#FFD700",
+    "silver": "#C0C0C0"
+};
+
+const getColorStyle = (colorVal) => {
+    if (!colorVal) return { backgroundColor: '#E5E7EB' };
+    const val = colorVal.trim().toLowerCase();
+    if (val.startsWith('#')) return { backgroundColor: val };
+    return { backgroundColor: COLOR_MAP[val] || val };
+};
+
 // --- MODAL COMPONENT ---
-const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) => {
+const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap, storeMap }) => {
     const [images, setImages] = useState([]);
+    const [reviews, setReviews] = useState([]);
     const [loadingImages, setLoadingImages] = useState(true);
+    const [loadingReviews, setLoadingReviews] = useState(true);
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
     useEffect(() => {
-        const fetchImages = async () => {
+        const fetchDetails = async () => {
             try {
                 const id = product.productId || product.id;
-                const res = await api.get(`/ProductImages/product/${id}`);
-                if (res.data && Array.isArray(res.data.images)) {
-                    setImages(res.data.images.map(img => img.imageUrl).filter(Boolean));
+                // 1. Fetch Images
+                const imgRes = await api.get(`/ProductImages/product/${id}`);
+                if (imgRes.data && Array.isArray(imgRes.data.images)) {
+                    setImages(imgRes.data.images.map(img => img.imageUrl).filter(Boolean));
                     setSelectedImageIndex(0);
                 }
+
+                // 2. Fetch Reviews
+                const revRes = await api.get(`/Review/product/${id}`);
+                setReviews(Array.isArray(revRes.data) ? revRes.data : []);
             } catch (err) {
-                console.error("Failed to fetch modal images", err);
+                console.error("Failed to fetch modal details", err);
             } finally {
                 setLoadingImages(false);
+                setLoadingReviews(false);
             }
         };
-        fetchImages();
+        fetchDetails();
     }, [product]);
 
     return (
@@ -107,14 +140,37 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) 
                                     {categoryMap[product.categoryId] || 'Unknown Category'}
                                 </span>
                                 {product.subCategoryId && (
-                                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs font-bold uppercase tracking-wider">
+                                    <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs font-bold uppercase tracking-wider border border-gray-100">
                                         {subCategoryMap[product.subCategoryId] || 'Unknown Subcategory'}
                                     </span>
                                 )}
+                                {product.storeId && (
+                                    <span className="px-3 py-1 bg-[#B19470]/10 text-[#B19470] rounded-lg text-xs font-bold uppercase tracking-wider border border-[#B19470]/20 flex items-center gap-1.5">
+                                        <Package size={12} />
+                                        {storeMap[product.storeId] || `Store #${product.storeId}`}
+                                    </span>
+                                )}
                             </div>
-                            <p className="text-gray-500 leading-relaxed text-sm bg-gray-50 p-4 rounded-2xl border border-gray-100">
-                                {product.description || "No description provided."}
-                            </p>
+                            <div
+                                className="text-gray-500 leading-relaxed text-sm bg-gray-50 p-6 rounded-3xl border border-gray-100 prose prose-sm max-w-none shadow-inner"
+                                dangerouslySetInnerHTML={{
+                                    __html: (() => {
+                                        let raw = product.description || "";
+                                        const unescape = (str) => {
+                                            if (!str) return "";
+                                            return str
+                                                .replace(/&amp;/g, '&')
+                                                .replace(/&lt;/g, '<')
+                                                .replace(/&gt;/g, '>')
+                                                .replace(/&nbsp;/g, ' ')
+                                                .replace(/&quot;/g, '"')
+                                                .replace(/&#39;/g, "'");
+                                        };
+                                        // Triple pass for double-encoded entities
+                                        return unescape(unescape(unescape(raw))) || "No description provided.";
+                                    })()
+                                }}
+                            />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
@@ -126,34 +182,73 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) 
                                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Stock</span>
                                 <div className="text-2xl font-black text-gray-900 mt-1">{product.quantity || product.stock || 0}</div>
                             </div>
-                            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                            <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
                                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Rating</span>
                                 <div className="flex items-center gap-1 mt-1">
                                     <Star size={18} className="fill-yellow-400 text-yellow-400" />
                                     <span className="text-xl font-bold text-gray-900">{product.rating || 0}</span>
                                 </div>
                             </div>
-                            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                            <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
                                 <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Discount</span>
-                                <div className="text-2xl font-black text-gray-900 mt-1">{product.discount || 0}%</div>
+                                <div className="text-2xl font-black text-red-500 mt-1">{product.discount || 0}%</div>
+                            </div>
+                            <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Delivery</span>
+                                <div className="text-lg font-black text-gray-900 mt-1">{product.deliveryTime || 0} Days</div>
+                            </div>
+                            <div className="p-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Store ID</span>
+                                <div className="text-lg font-black text-gray-900 mt-1">#{product.storeId}</div>
                             </div>
                         </div>
 
                         {product.colors && (
                             <div>
-                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">Colors</span>
-                                <div className="flex flex-wrap gap-2">
-                                    {Array.isArray(product.colors)
-                                        ? product.colors.map((c, i) => (
-                                            <span key={i} className="px-3 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-700 shadow-sm">{c}</span>
-                                        ))
-                                        : product.colors.split(',').map((c, i) => (
-                                            <span key={i} className="px-3 py-1 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-700 shadow-sm">{c}</span>
-                                        ))
-                                    }
+                                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 block">Available Colors</span>
+                                <div className="flex flex-wrap gap-3">
+                                    {(Array.isArray(product.colors) ? product.colors : product.colors.split(',')).map((c, i) => (
+                                        <div key={i} className="group/color relative flex flex-col items-center">
+                                            <div
+                                                className="w-10 h-10 rounded-full border-2 border-white shadow-md ring-1 ring-gray-100 transition-transform hover:scale-110 cursor-help"
+                                                style={getColorStyle(c)}
+                                                title={c.trim()}
+                                            />
+                                            <span className="text-[9px] font-bold text-gray-400 mt-1 uppercase opacity-0 group-hover/color:opacity-100 transition-opacity">
+                                                {c.trim()}
+                                            </span>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         )}
+
+                        {/* Reviews Section */}
+                        <div className="pt-6 border-t border-gray-100">
+                            <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                <Star size={16} className="text-[#B19470]" />
+                                Customer Reviews ({reviews.length})
+                            </h4>
+                            {loadingReviews ? (
+                                <div className="h-10 animate-pulse bg-gray-50 rounded-xl" />
+                            ) : reviews.length > 0 ? (
+                                <div className="space-y-3">
+                                    {reviews.slice(0, 3).map((rev, i) => (
+                                        <div key={i} className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <span className="text-xs font-bold text-gray-900">{rev.userName || 'Customer'}</span>
+                                                <div className="flex gap-0.5">
+                                                    {[1, 2, 3, 4, 5].map(s => <Star key={s} size={8} className={s <= rev.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-200"} />)}
+                                                </div>
+                                            </div>
+                                            <p className="text-[11px] text-gray-500 italic line-clamp-2">"{rev.comment}"</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <p className="text-xs text-gray-400 italic">No feedback available yet.</p>
+                            )}
+                        </div>
                     </div>
                 </div>
             </motion.div>
@@ -162,7 +257,7 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) 
 };
 
 // --- PRODUCT CARD COMPONENT ---
-const ProductCard = ({ product, handleDelete, onViewDetails, categoryMap }) => {
+const ProductCard = ({ product, handleDelete, onViewDetails, categoryMap, storeMap }) => {
     const [images, setImages] = useState([]);
     const [loadingImage, setLoadingImage] = useState(true);
 
@@ -201,14 +296,12 @@ const ProductCard = ({ product, handleDelete, onViewDetails, categoryMap }) => {
                     {categoryMap[product.categoryId] || 'Uncategorized'}
                 </div>
                 <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0 duration-300">
-                    <button className="p-2 bg-white/90 backdrop-blur-md rounded-full text-[#205457] hover:bg-[#205457] hover:text-white transition-colors shadow-sm">
-                        <Edit2 size={14} />
-                    </button>
                     <button
-                        onClick={() => handleDelete(product.productId || product.id)}
-                        className="p-2 bg-white/90 backdrop-blur-md rounded-full text-red-500 hover:bg-red-500 hover:text-white transition-colors shadow-sm"
+                        onClick={() => onViewDetails(product)}
+                        className="p-2 bg-white/90 backdrop-blur-md rounded-full text-[#205457] hover:bg-[#205457] hover:text-white transition-colors shadow-sm"
+                        title="View Full Details"
                     >
-                        <Trash2 size={14} />
+                        <Eye size={14} />
                     </button>
                 </div>
                 {images.length > 1 && (
@@ -229,11 +322,17 @@ const ProductCard = ({ product, handleDelete, onViewDetails, categoryMap }) => {
                         <span className="text-xs font-bold text-yellow-700">{product.rating || 0}</span>
                     </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs text-gray-400 font-medium mb-auto">
-                    <span>{product.quantity || 0} in stock</span>
+                <div className="flex items-center gap-2 text-xs text-gray-400 font-medium mb-1">
+                    <span className={`px-2 py-0.5 rounded-md ${product.quantity <= 5 ? 'bg-red-50 text-red-600' : 'bg-gray-100'}`}>
+                        {product.quantity || 0} in stock
+                    </span>
+                    <span className="text-[10px] opacity-50">•</span>
+                    <span className="text-[#B19470] font-bold truncate max-w-[100px]">
+                        {storeMap[product.storeId] || 'Homesta Partner'}
+                    </span>
                 </div>
 
-                <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-3">
+                <div className="flex items-center justify-between pt-3 border-t border-gray-50 mt-auto">
                     <div className="flex items-center gap-1.5">
                         <DollarSign size={16} className="text-[#205457]" />
                         <span className="text-xl font-black text-gray-900">{product.price}</span>
@@ -269,7 +368,6 @@ const AdminProducts = () => {
     const [maxPrice, setMaxPrice] = useState('');
 
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [deleteConfirm, setDeleteConfirm] = useState({ show: false, id: null });
 
     useEffect(() => {
         const fetchAllData = async () => {
@@ -319,21 +417,7 @@ const AdminProducts = () => {
     }, []);
 
     const handleDelete = (id) => {
-        setDeleteConfirm({ show: true, id });
-    };
-
-    const confirmDelete = async () => {
-        const id = deleteConfirm.id;
-        try {
-            await api.delete(`/Product/Delete/${id}`);
-            setProducts(products.filter(p => (p.productId || p.id) !== id));
-            showAlert("Product deleted successfully!", "success");
-        } catch (err) {
-            console.error("Delete failed", err);
-            showAlert("Failed to delete product.", "error", "Error");
-        } finally {
-            setDeleteConfirm({ show: false, id: null });
-        }
+        // Protected for Admin View
     };
 
     // --- DERIVED STATE FOR FILTERS ---
@@ -494,15 +578,20 @@ const AdminProducts = () => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
                         <AnimatePresence>
-                            {filteredProducts.map(product => (
-                                <ProductCard
-                                    key={product.productId || product.id}
-                                    product={product}
-                                    categoryMap={categoryMap}
-                                    handleDelete={handleDelete}
-                                    onViewDetails={setSelectedProduct}
-                                />
-                            ))}
+                            {(() => {
+                                const sm = {};
+                                stores.forEach(s => sm[s.storeId || s.id] = s.name);
+                                return filteredProducts.map(product => (
+                                    <ProductCard
+                                        key={product.productId || product.id}
+                                        product={product}
+                                        categoryMap={categoryMap}
+                                        storeMap={sm}
+                                        handleDelete={handleDelete}
+                                        onViewDetails={setSelectedProduct}
+                                    />
+                                ));
+                            })()}
                         </AnimatePresence>
                     </div>
                 )}
@@ -515,22 +604,15 @@ const AdminProducts = () => {
                         product={selectedProduct}
                         categoryMap={categoryMap}
                         subCategoryMap={subCategoryMap}
+                        storeMap={(() => {
+                            const sm = {};
+                            stores.forEach(s => sm[s.storeId || s.id] = s.name);
+                            return sm;
+                        })()}
                         onClose={() => setSelectedProduct(null)}
                     />
                 )}
             </AnimatePresence>
-
-            {/* Delete Confirmation Modal */}
-            <ConfirmModal
-                isOpen={deleteConfirm.show}
-                onClose={() => setDeleteConfirm({ show: false, id: null })}
-                onConfirm={confirmDelete}
-                title="Delete Product?"
-                message="Are you sure you want to delete this product? This action cannot be undone."
-                confirmText="Delete"
-                cancelText="Cancel"
-                type="danger"
-            />
         </div>
     );
 };

@@ -12,12 +12,9 @@ import { Image as ImageIcon, User, Package, FolderTree } from 'lucide-react';
  */
 const SafeImage = ({ src, alt, type = 'product', className = '', ...props }) => {
     const [error, setError] = useState(false);
-    const [loading, setLoading] = useState(true);
-
     // Reset error state if src changes
     useEffect(() => {
         setError(false);
-        setLoading(true);
     }, [src]);
 
     const getPlaceholder = () => {
@@ -69,7 +66,7 @@ const SafeImage = ({ src, alt, type = 'product', className = '', ...props }) => 
             return url;
         }
         // If it's a relative URL, prepend the base URL (https for stability)
-        return `https://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+        return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
     };
 
     const imageUrl = getImageUrl(src);
@@ -80,20 +77,13 @@ const SafeImage = ({ src, alt, type = 'product', className = '', ...props }) => 
 
     return (
         <div className={`relative overflow-hidden ${className}`}>
-            {loading && (
-                <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-50 animate-pulse">
-                    <ImageIcon className="w-8 h-8 text-gray-200" />
-                </div>
-            )}
             <img
                 src={imageUrl}
                 alt={alt || 'Image'}
-                className={`${className} transition-opacity duration-500 ${loading ? 'opacity-0' : 'opacity-100'}`}
-                onError={() => {
-                    setError(true);
-                    setLoading(false);
-                }}
-                onLoad={() => setLoading(false)}
+                className="w-full h-full object-cover transition-opacity duration-300"
+                referrerPolicy="no-referrer"
+                loading="lazy"
+                onError={() => setError(true)}
                 {...props}
             />
         </div>

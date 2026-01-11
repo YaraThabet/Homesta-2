@@ -6,7 +6,8 @@ import ProductItem from "./components/ProductItem";
 import TrackingHeader from "./components/TrackingHeader";
 import FooterBenefits from "../shop/components/FooterBenefits";
 import PageLoader from "../../components/PageLoader";
-import { Search, AlertCircle } from "lucide-react";
+import { Search, AlertCircle, XCircle } from "lucide-react";
+import { useAppContext } from "../../context/AppContext";
 
 const TrackingOrder = () => {
   const { id } = useParams();
@@ -15,6 +16,7 @@ const TrackingOrder = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchId, setSearchId] = useState("");
+  const { showAlert } = useAppContext();
 
   const getImageUrl = (url) => {
     if (!url || typeof url !== 'string') return null;
@@ -34,10 +36,66 @@ const TrackingOrder = () => {
       try {
         setLoading(true);
         setError(null);
-        const res = await api.get(`Order/OrderDetails?orderId=${id}`);
+
+        // Fetch order details and all products in parallel
+        const [orderRes, productsRes] = await Promise.all([
+          api.get(`Order/OrderDetails?orderId=${id}`),
+          api.get('Product/GetAllProducts').catch(() => ({ data: [] }))
+        ]);
+
         // Check if data is valid
-        if (res.data && res.data.orderId) {
-          setOrder(res.data);
+        if (orderRes.data && orderRes.data.orderId) {
+          const orderData = orderRes.data;
+          const products = productsRes.data || [];
+
+          console.log('📦 Order items for tracking:', orderData.items);
+          console.log('🏪 Products from API:', products);
+
+          // Enrich order items with productId from products
+          if (orderData.items) {
+            const enrichedItems = await Promise.all(
+              orderData.items.map(async (item) => {
+                // Find matching product by name (case-insensitive)
+                const matchingProduct = products.find(p =>
+                  p.name?.toLowerCase().trim() === item.productName?.toLowerCase().trim()
+                );
+
+                const productId = item.productId || matchingProduct?.productId;
+                let imageUrl = item.imagePath || item.image || item.productImage;
+
+                // Fetch image if we have productId but no image
+                if (!imageUrl && productId) {
+                  try {
+                    console.log(`🖼️ Fetching image for: ${item.productName} (ID: ${productId})`);
+                    const imgRes = await api.get(`/ProductImages/product/${productId}`);
+
+                    if (imgRes.data?.images?.length) {
+                      imageUrl = imgRes.data.images[0].imageUrl;
+                    } else if (imgRes.data?.imageUrls?.length) {
+                      imageUrl = imgRes.data.imageUrls[0];
+                    }
+
+                    if (imageUrl) {
+                      console.log(`✅ Image loaded for ${item.productName}`);
+                    }
+                  } catch (err) {
+                    console.log(`❌ Failed to load image for ${item.productName}:`, err.message);
+                  }
+                }
+
+                return {
+                  ...item,
+                  productId,
+                  imagePath: imageUrl,
+                  image: imageUrl
+                };
+              })
+            );
+
+            orderData.items = enrichedItems;
+          }
+
+          setOrder(orderData);
         } else {
           setError("Order not found. Please check your Reference ID.");
           setOrder(null);
@@ -81,7 +139,7 @@ const TrackingOrder = () => {
               <input
                 type="text"
                 placeholder="Track another ID..."
-                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#205457]/10 focus:border-[#205457] transition-all text-sm font-medium"
+                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#205457]/10 focus:border-[#205457] transition-all text-sm font-medium placeholder:text-gray-400"
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
               />
@@ -91,9 +149,11 @@ const TrackingOrder = () => {
           </div>
 
           {order && (
-            <div className="text-right">
-              <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">Estimated Delivery</p>
-              <p className="text-sm font-bold text-[#205457]">3-5 Business Days</p>
+            <div className="text-right flex flex-col items-end gap-3">
+              <div>
+                <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">Estimated Delivery</p>
+                <p className="text-sm font-bold text-[#205457]">3-5 Business Days</p>
+              </div>
             </div>
           )}
         </div>
@@ -133,14 +193,19 @@ const TrackingOrder = () => {
                     color: item.productColor || item.color,
                     image: getImageUrl(item.imagePath || item.image || item.productImage),
                     quantity: item.quantity,
-                    price: item.unitPrice || item.price
+                    price: item.finalUnitPrice ?? item.unitPrice ?? item.price
                   }} />
                 ))}
               </div>
 
               <div className="mt-10 pt-8 border-t border-gray-50 flex justify-between items-center">
                 <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">Total Value</span>
-                <span className="text-3xl font-black text-[#205457]">${order.totalPrice?.toLocaleString()}</span>
+                <span className="text-3xl font-black text-[#205457]">
+                  ${(order.totalPrice || (order.items || order.orderItems)?.reduce((sum, item) => {
+                    const price = item.finalUnitPrice ?? item.unitPrice ?? item.price ?? 0;
+                    return sum + (Number(price) * (item.quantity || 1));
+                  }, 0))?.toLocaleString()}
+                </span>
               </div>
             </div>
           </>
@@ -157,7 +222,7 @@ const TrackingOrder = () => {
                 <input
                   type="text"
                   placeholder="Enter Order Reference (e.g. 1045)"
-                  className="flex-1 px-6 py-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#205457]/10 focus:border-[#205457] transition-all text-sm font-medium shadow-sm"
+                  className="flex-1 px-6 py-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#205457]/10 focus:border-[#205457] transition-all text-sm font-medium shadow-sm placeholder:text-gray-400"
                   value={searchId}
                   onChange={(e) => setSearchId(e.target.value)}
                 />
@@ -169,6 +234,7 @@ const TrackingOrder = () => {
           </div>
         )}
       </div>
+
 
       <FooterBenefits />
     </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../lib/axios";
 import PageLoader from "../components/PageLoader";
+import SafeImage from "../components/SafeImage";
 
 const Category = () => {
   const navigate = useNavigate();
@@ -52,38 +53,37 @@ const Category = () => {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-          {categories
-            .filter((category) => ![1, 4, 12, 16].includes(category.categoryId))
-            .map((category) => (
-              <button
-                type="button"
-                key={category.categoryId}
-                onClick={() => navigate(`/category/${category.categoryId}`)}
-                className=" relative h-[238px] rounded-[18px] overflow-hidden
-                 focus:outline-none focus:ring-4 focus:ring-[#43766C]/40
-                 transform transition-all duration-300
-                 hover:scale-[1.03] hover:shadow-xl
-                 active:scale-[0.97]"
-                style={{
-                  backgroundImage: category.imagePath
-                    ? `url(http://homefinish.runasp.net/${category.imagePath.startsWith('/') ? category.imagePath.substring(1) : category.imagePath})`
-                    : 'none',
-                  backgroundColor: '#e5e7eb', // Fallback color
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
-              >
-                {/* Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
+          {categories.map((category) => (
+            <button
+              type="button"
+              key={category.categoryId}
+              onClick={() => navigate(`/category/${category.categoryId}`)}
+              className=" relative h-[238px] rounded-[18px] overflow-hidden
+               focus:outline-none focus:ring-4 focus:ring-[#43766C]/40
+               transform transition-all duration-300
+               hover:scale-[1.03] hover:shadow-xl
+               active:scale-[0.97] group"
+            >
+              <div className="absolute inset-0 z-0">
+                <SafeImage
+                  src={category.imagePath}
+                  alt={category.name}
+                  type="category"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+              </div>
 
-                {/* Category Name */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <h2 className="text-white text-2xl font-semibold text-center">
-                    {category.name}
-                  </h2>
-                </div>
-              </button>
-            ))}
+              {/* Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent z-10"></div>
+
+              {/* Category Name */}
+              <div className="absolute inset-0 flex items-center justify-center z-20">
+                <h2 className="text-white text-2xl font-semibold text-center drop-shadow-md">
+                  {category.name}
+                </h2>
+              </div>
+            </button>
+          ))}
         </div>
 
         {categories.length === 0 && (

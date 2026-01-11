@@ -168,7 +168,7 @@ const ProfileForm = ({
         <div className="relative group">
           <div className="h-[100px] w-[100px] rounded-full border-4 border-white bg-gray-100 shadow-md overflow-hidden flex items-center justify-center">
             <SafeImage
-              src={profileImage}
+              src={profileImage ? `http://homefinish.runasp.net${profileImage.startsWith('/') ? '' : '/'}${profileImage}` : null}
               alt="Profile"
               type="profile"
               className="w-full h-full object-cover"
@@ -273,9 +273,8 @@ const ProfileForm = ({
                 <input
                   type="text"
                   placeholder="e.g., John"
-                  className={`w-full h-12 px-4 rounded-xl border ${
-                    errors.firstName ? "border-red-500" : "border-gray-300"
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                  className={`w-full h-12 px-4 rounded-xl border ${errors.firstName ? "border-red-500" : "border-gray-300"
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   {...register("firstName")}
                 />
                 {errors.firstName && (
@@ -294,9 +293,8 @@ const ProfileForm = ({
                 <input
                   type="text"
                   placeholder="e.g., Doe"
-                  className={`w-full h-12 px-4 rounded-xl border ${
-                    errors.lastName ? "border-red-500" : "border-gray-300"
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                  className={`w-full h-12 px-4 rounded-xl border ${errors.lastName ? "border-red-500" : "border-gray-300"
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   {...register("lastName")}
                 />
                 {errors.lastName && (
@@ -342,9 +340,8 @@ const ProfileForm = ({
                   <input
                     type="tel"
                     placeholder="xxxx-xxx-xxxx"
-                    className={`flex-1 h-12 px-4 rounded-r-xl border-l-0 ${
-                      errors.mobileNumber ? "border-red-500" : "border-gray-300"
-                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                    className={`flex-1 h-12 px-4 rounded-r-xl border-l-0 ${errors.mobileNumber ? "border-red-500" : "border-gray-300"
+                      } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                     {...register("mobileNumber")}
                   />
                 </div>
@@ -385,9 +382,8 @@ const ProfileForm = ({
               <div className="relative">
                 <input
                   type="date"
-                  className={`w-full h-12 px-4 rounded-xl border ${
-                    errors.birthday ? "border-red-500" : "border-gray-300"
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                  className={`w-full h-12 px-4 rounded-xl border ${errors.birthday ? "border-red-500" : "border-gray-300"
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   {...register("birthday")}
                 />
                 {errors.birthday && (
@@ -435,9 +431,8 @@ const ProfileForm = ({
               <input
                 type="text"
                 placeholder="e.g., 123 Main Street, Apt 4B"
-                className={`w-full h-12 px-4 rounded-xl border ${
-                  errors.address ? "border-red-500" : "border-gray-300"
-                } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                className={`w-full h-12 px-4 rounded-xl border ${errors.address ? "border-red-500" : "border-gray-300"
+                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                 {...register("address")}
               />
               {errors.address && (
@@ -458,9 +453,8 @@ const ProfileForm = ({
                 <input
                   type="text"
                   placeholder="e.g., 12345 or 12345-6789"
-                  className={`w-full h-12 px-4 rounded-xl border ${
-                    errors.zipCode ? "border-red-500" : "border-gray-300"
-                  } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                  className={`w-full h-12 px-4 rounded-xl border ${errors.zipCode ? "border-red-500" : "border-gray-300"
+                    } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
                   {...register("zipCode")}
                 />
                 {errors.zipCode && (

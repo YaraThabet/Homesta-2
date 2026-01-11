@@ -49,12 +49,26 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    // Check auth state on mount and route change
-    const checkAuth = () => {
+    // Check auth state and fetch user details
+    const checkAuth = async () => {
       const token = localStorage.getItem('token');
-      const userName = localStorage.getItem('userName');
-      if (token) {
-        setUser({ name: userName || 'Account', isLoggedIn: true });
+      const storedUserName = localStorage.getItem('userName');
+      const userId = localStorage.getItem('userId');
+
+      if (token && userId) {
+        // Optimistic default
+        setUser({ name: storedUserName || 'Account', isLoggedIn: true, image: null });
+
+        // Fetch latest details (specifically for image)
+        try {
+          const res = await api.get(`/User/${userId}`);
+          if (res.data) {
+            const freshImage = res.data.imageUrl;
+            setUser(prev => ({ ...prev, image: freshImage }));
+          }
+        } catch (err) {
+          console.error("Silent auth check failed for image", err);
+        }
       } else {
         setUser(null);
       }
@@ -210,7 +224,17 @@ const Navbar = () => {
                   )}
 
                 <Link to="/account" className={`p-2 rounded-full transition-all duration-300 group ${isDarkText ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'}`} title="Profile">
-                  <CiUser className="text-[24px] group-hover:scale-110 transition-transform" />
+                  {user.image ? (
+                    <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200">
+                      <img
+                        src={`http://homefinish.runasp.net${user.image.startsWith('/') ? '' : '/'}${user.image}`}
+                        alt={user.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <CiUser className="text-[24px] group-hover:scale-110 transition-transform" />
+                  )}
                 </Link>
                 <button
                   onClick={() => setShowLogoutModal(true)}

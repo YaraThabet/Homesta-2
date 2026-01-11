@@ -73,7 +73,15 @@ const getColorName = (colorVal) => {
     }
   });
 
-  return nearestName;
+  return nearestName.startsWith('#') ? "Custom Color" : nearestName;
+};
+
+const safeUnescape = (str) => {
+  if (!str) return "";
+  const unescape = (s) => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
+    .replace(/&nbsp;/g, ' ').replace(/&quot;/g, '"');
+  // Decode multiple times to handle double/triple encoding
+  return unescape(unescape(unescape(str)));
 };
 
 const ProductDetail = () => {
@@ -187,14 +195,26 @@ const ProductDetail = () => {
 
           // Fix related product images
           const relatedWithImages = await Promise.all(related.map(async (p) => {
-            // We might need to fetch images for each if GetAll doesn't have it.
-            // Or just use p.imagePath if available
-            let img = p.imagePath;
+            let img = p.imagePath || p.image;
+            const pid = p.productId || p.id;
+
+            if (!img && pid) {
+              try {
+                const imgRes = await api.get(`/ProductImages/product/${pid}`);
+                if (imgRes.data?.images?.length) {
+                  img = imgRes.data.images[0].imageUrl;
+                } else if (imgRes.data?.imageUrls?.length) {
+                  img = imgRes.data.imageUrls[0];
+                }
+              } catch (e) {
+                // ignore
+              }
+            }
+
             if (!img) {
-              // Try fetch? Too many requests. Use placeholder if missing.
-              img = "https://via.placeholder.com/300";
-            } else if (!img.startsWith('http')) {
-              img = `${IMG_BASE_URL}${img}`;
+              img = "https://via.placeholder.com/300?text=No+Image";
+            } else if (typeof img === 'string' && !img.startsWith('http')) {
+              img = `${IMG_BASE_URL}${img.startsWith('/') ? img.substring(1) : img}`;
             }
             return { ...p, image: img };
           }));
@@ -341,7 +361,11 @@ const ProductDetail = () => {
   };
 
   const increaseQuantity = () => {
-    setQuantity(quantity + 1);
+    if (quantity < (product.quantity || 0)) {
+      setQuantity(quantity + 1);
+    } else {
+      showAlert(`Only ${product.quantity} items available in stock.`, "warning", "Stock Limit");
+    }
   };
 
   const handleAddToCart = async (e) => {
@@ -365,7 +389,13 @@ const ProductDetail = () => {
       setShowSuccessModal(true);
     } catch (err) {
       console.error("Add to cart error", err);
-      showAlert("Failed to add to cart. " + (err.response?.data?.message || err.message), "error", "Error");
+      let msg = err.response?.data?.message || "Failed to add to cart.";
+      if (msg.includes("Only") && msg.includes("items available")) {
+        msg = "Sorry, high demand! " + msg;
+      } else if (msg.includes("Cannot add more")) {
+        msg = "You cannot add more of this item than is currently in stock.";
+      }
+      showAlert(msg, "error", "Stock Limit Reached");
     } finally {
       setAddingToCart(false);
     }
@@ -552,9 +582,10 @@ const ProductDetail = () => {
 
             <div className="mb-6">
               <h3 className="text-sm font-medium text-foreground mb-2">Description</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                {product.description || "No description available for this product."}
-              </p>
+              <div
+                className="text-muted-foreground text-sm leading-relaxed prose prose-sm max-w-none"
+                dangerouslySetInnerHTML={{ __html: safeUnescape(product.description || "No description available for this product.") }}
+              />
             </div>
 
             {/* Colors */}
@@ -666,8 +697,10 @@ const ProductDetail = () => {
                 <div className="prose prose-lg max-w-none">
                   {/* Description Paragraph(s) */}
                   <div
-                    className="text-gray-600 leading-loose text-lg font-light mb-10"
-                    dangerouslySetInnerHTML={{ __html: product.description || "No detailed description available." }}
+                    className="text-gray-600 leading-loose text-lg font-light mb-10 prose prose-lg max-w-none"
+                    dangerouslySetInnerHTML={{
+                      __html: safeUnescape(product.description || "No detailed description available.")
+                    }}
                   />
 
                   {/* Features / Bullet Points */}
@@ -895,9 +928,10 @@ const ProductDetail = () => {
                   className="group bg-white rounded-2xl overflow-hidden border border-gray-100 transition-all hover:shadow-lg hover:-translate-y-1 cursor-pointer"
                 >
                   <div className="relative aspect-square bg-gray-50 overflow-hidden">
-                    <img
+                    <SafeImage
                       src={p.image}
                       alt={p.name}
+                      type="product"
                       className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500 mix-blend-multiply"
                     />
                     {p.discount > 0 && (

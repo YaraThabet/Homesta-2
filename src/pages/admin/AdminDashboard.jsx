@@ -35,7 +35,7 @@ const AdminDashboard = () => {
                 const revenue = orders.reduce((sum, order) => {
                     const isDelivered = order.status?.toLowerCase() === 'delivered';
                     if (isDelivered) {
-                        return sum + (order.totalPrice || order.totalAmount || 0);
+                        return sum + (order.orderTotal ?? order.totalPrice ?? order.totalAmount ?? 0);
                     }
                     return sum;
                 }, 0);
@@ -133,15 +133,21 @@ const AdminDashboard = () => {
                                                 <ShoppingBag size={18} />
                                             </div>
                                             <div>
-                                                <p className="text-sm font-bold text-gray-900 line-clamp-1">{order.userName || 'Guest User'}</p>
+                                                <p className="text-sm font-bold text-gray-900 line-clamp-1">
+                                                    {order.firstName && order.lastName
+                                                        ? `${order.firstName} ${order.lastName}`
+                                                        : (order.firstName || order.userName || 'Guest User')}
+                                                </p>
                                                 <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Order ID: #{order.orderId || order.id}</p>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-6">
                                             <div className="text-right hidden sm:block">
-                                                <p className="text-sm font-black text-[#205457]">${(order.totalPrice || order.totalAmount || 0).toLocaleString()}</p>
+                                                <p className="text-sm font-black text-[#205457]">${(order.orderTotal ?? order.totalPrice ?? order.totalAmount ?? 0).toLocaleString()}</p>
                                                 <span className={`text-[9px] font-black uppercase tracking-tighter ${order.status === 'Delivered' ? 'text-green-500' :
-                                                    order.status === 'Cancelled' ? 'text-red-500' : 'text-amber-500'
+                                                    order.status === 'Cancelled' ? 'text-red-500' :
+                                                        order.status === 'Shipped' ? 'text-blue-600' :
+                                                            'text-amber-500'
                                                     }`}>
                                                     {order.status || 'Processing'}
                                                 </span>

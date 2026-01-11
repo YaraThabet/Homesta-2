@@ -140,8 +140,9 @@ const FilterSidebar = ({
           ) : (
             availableColors.map((colorName) => {
               const isSelected = selectedColors.includes(colorName);
-              const hex = COLOR_MAP[colorName.toLowerCase()] || "#CCCCCC";
-              const isWhite = colorName.toLowerCase() === "white";
+              const isHex = colorName.startsWith('#');
+              const hex = isHex ? colorName : (COLOR_MAP[colorName.toLowerCase()] || "#CCCCCC");
+              const isWhite = colorName.toLowerCase() === "white" || colorName === "#ffffff" || colorName === "#FFFFFF";
 
               return (
                 <div
@@ -152,12 +153,13 @@ const FilterSidebar = ({
                   <div
                     className={`relative w-5 h-5 rounded-full flex items-center justify-center transition-all border ${isWhite ? "border-gray-300" : "border-transparent"}`}
                     style={{ backgroundColor: hex }}
+                    title={colorName} // Show name/hex on hover
                   >
                     {isSelected && (
                       <Check className={`h-3 w-3 ${isWhite ? "text-gray-900" : "text-white"}`} />
                     )}
                   </div>
-                  {colorName}
+                  {!isHex && colorName}
                 </div>
               );
             })

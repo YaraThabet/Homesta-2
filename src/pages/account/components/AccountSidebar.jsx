@@ -19,7 +19,7 @@ const sidebarItems = [
   { icon: Package, label: "My Orders", to: "/account/orders" },
   { icon: Heart, label: "Wishlist", to: "/wishlist" },
   { icon: Star, label: "My Reviews", to: "/account/reviews" },
-  { icon: Notebook, label: "Manage Address", to: "/account/ManageAddress" },
+  // TODO// { icon: Notebook, label: "Manage Address", to: "/account/ManageAddress" },
   { icon: HelpCircle, label: "Help Center", to: "/account/help-center" },
 ];
 
@@ -39,7 +39,7 @@ const AccountSidebar = ({
         <div className="h-12 w-12 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center overflow-hidden">
           {profileImage ? (
             <img
-              src={profileImage}
+              src={`http://homefinish.runasp.net${profileImage.startsWith('/') ? '' : '/'}${profileImage}`}
               alt={`${firstName} ${lastName}`}
               className="w-full h-full object-cover"
             />
@@ -54,7 +54,7 @@ const AccountSidebar = ({
           <h3 className="font-semibold text-gray-900 text-[15px] truncate">
             {firstName} {lastName}
           </h3>
-          <p className="text-sm text-gray-500 truncate">Customer Operations</p>
+
         </div>
       </div>
 
@@ -70,12 +70,10 @@ const AccountSidebar = ({
               to={item.to}
               onClick={onNavigate}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 ${
-                  isActive
-                    ? "text-white shadow-sm"
-                    : "text-gray-700 hover:bg-gray-100"
-                } ${
-                  isActive ? "bg-gradient-to-r from-[#46B6BD] to-[#205457]" : ""
+                `flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors duration-200 ${isActive
+                  ? "text-white shadow-sm"
+                  : "text-gray-700 hover:bg-gray-100"
+                } ${isActive ? "bg-gradient-to-r from-[#46B6BD] to-[#205457]" : ""
                 }`
               }
             >

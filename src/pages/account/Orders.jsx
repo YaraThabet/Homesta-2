@@ -4,6 +4,8 @@ import api from '../../lib/axios';
 import PageLoader from '../../components/PageLoader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useAppContext } from '../../context/AppContext';
+import SafeImage from '../../components/SafeImage';
 
 const OrderDetailsModal = ({ order, isOpen, onClose, loading }) => {
   if (!isOpen) return null;
@@ -58,6 +60,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose, loading }) => {
                     </div>
                     <div>
                       <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Billing Address</p>
+                      <p className="text-sm font-bold text-gray-900 mb-1">{order.firstName} {order.lastName}</p>
                       <p className="text-sm font-bold text-gray-900">{order.address}</p>
                       <p className="text-xs text-gray-500 font-medium">{order.city}, {order.country}</p>
                     </div>
@@ -91,28 +94,49 @@ const OrderDetailsModal = ({ order, isOpen, onClose, loading }) => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-border print:divide-gray-200">
-                      {order.items?.map((item, idx) => (
-                        <tr key={idx} className="bg-white">
-                          <td className="px-4 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-border print:hidden">
-                                <img
-                                  src={getImageUrl(item.image || item.imagePath || item.productImage)}
-                                  alt={item.productName}
-                                  className="w-full h-full object-cover"
-                                />
+                      {order.items?.map((item, idx) => {
+                        const unitPrice = item.originalUnitPrice ?? item.unitPrice ?? item.price ?? 0;
+                        const finalPrice = item.finalUnitPrice ?? unitPrice;
+                        const total = item.total ?? item.subtotal ?? (finalPrice * item.quantity);
+                        return (
+                          <tr key={idx} className="bg-white">
+                            <td className="px-4 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-border print:hidden">
+                                  <img
+                                    src={getImageUrl(item.image || item.imagePath || item.productImage)}
+                                    alt={item.productName}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <div>
+                                  <p className="font-bold text-gray-900 line-clamp-1">{item.productName}</p>
+                                  <p className="text-[10px] text-muted-foreground font-black uppercase flex items-center gap-1.5 mt-1" title={item.productColor}>
+                                    Color:
+                                    <span
+                                      className="w-3 h-3 rounded-full border border-gray-100 shadow-sm inline-block"
+                                      style={{ backgroundColor: item.productColor || '#ccc' }}
+                                    />
+                                    {(finalPrice < unitPrice) && (
+                                      <span className="ml-2 text-green-600 font-bold">Discounted</span>
+                                    )}
+                                  </p>
+                                </div>
                               </div>
-                              <div>
-                                <p className="font-bold text-gray-900 line-clamp-1">{item.productName}</p>
-                                <p className="text-[10px] text-muted-foreground font-bold uppercase">{item.productColor}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-4 py-4 text-center font-bold text-gray-600">{item.quantity}</td>
-                          <td className="px-4 py-4 text-right font-medium text-gray-600">${item.unitPrice.toLocaleString()}</td>
-                          <td className="px-4 py-4 text-right font-black text-gray-900">${(item.unitPrice * item.quantity).toLocaleString()}</td>
-                        </tr>
-                      ))}
+                            </td>
+                            <td className="px-4 py-4 text-center font-bold text-gray-600">
+                              {item.quantity}x @ ${finalPrice.toLocaleString()}
+                              {(finalPrice < unitPrice) && (
+                                <div className="text-[10px] line-through text-red-300">
+                                  ${unitPrice.toLocaleString()}
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-4 py-4 text-right font-medium text-gray-600 hidden"></td>
+                            <td className="px-4 py-4 text-right font-black text-gray-900">${total.toLocaleString()}</td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
@@ -122,7 +146,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose, loading }) => {
               <div className="bg-[#205457] p-8 rounded-xl text-white flex justify-between items-center shadow-xl shadow-[#205457]/10 print:bg-white print:text-gray-900 print:border print:border-gray-200 print:shadow-none">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-1 print:opacity-100">Total Amount Paid</p>
-                  <h3 className="text-3xl font-black">${order.totalPrice?.toLocaleString()}</h3>
+                  <h3 className="text-3xl font-black">${(order.orderTotal ?? order.totalPrice ?? 0).toLocaleString()}</h3>
                 </div>
                 <div className="text-right">
                   <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-xl border border-white/10 print:bg-white print:border-gray-200">
@@ -147,6 +171,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose, loading }) => {
 
 const Orders = () => {
   const navigate = useNavigate();
+  const { showAlert } = useAppContext();
   const [filterStatus, setFilterStatus] = useState('All');
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -155,6 +180,69 @@ const Orders = () => {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  const fetchUserOrders = async () => {
+    try {
+      setLoading(true);
+      // 1. Fetch User Orders and All Products
+      const [ordersRes, productsRes] = await Promise.all([
+        api.get('Order/UserOrders'),
+        api.get('Product/GetAllProducts').catch(() => ({ data: [] }))
+      ]);
+
+      const basicOrders = Array.isArray(ordersRes.data) ? ordersRes.data : [];
+      const products = productsRes.data || [];
+
+      // 2. Fetch full details for each order and enrich with images
+      const enrichedOrders = await Promise.all(basicOrders.map(async (order) => {
+        try {
+          const detailRes = await api.get(`Order/OrderDetails?orderId=${order.orderId}`);
+          const detailedOrder = detailRes.data;
+
+          if (detailedOrder.items) {
+            const enrichedItems = await Promise.all(detailedOrder.items.map(async (item) => {
+              const matchingProduct = products.find(p =>
+                p.name?.toLowerCase().trim() === item.productName?.toLowerCase().trim()
+              );
+
+              const productId = item.productId || matchingProduct?.productId;
+              let imageUrl = item.image || item.imagePath || item.productImage;
+
+              if (!imageUrl && productId) {
+                try {
+                  const imgRes = await api.get(`/ProductImages/product/${productId}`);
+                  if (imgRes.data?.images?.length) {
+                    imageUrl = imgRes.data.images[0].imageUrl;
+                  } else if (imgRes.data?.imageUrls?.length) {
+                    imageUrl = imgRes.data.imageUrls[0];
+                  }
+
+                  if (imageUrl) {
+                    imageUrl = imageUrl.startsWith('http') ? imageUrl : `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+                  }
+                } catch (err) {
+                  // ignore image fetch error
+                }
+              }
+              return { ...item, productId, image: imageUrl, imagePath: imageUrl };
+            }));
+            detailedOrder.items = enrichedItems;
+          }
+
+          return { ...order, ...detailedOrder };
+        } catch (err) {
+          console.error(`Failed to fetch items for order ${order.orderId}`, err);
+          return order;
+        }
+      }));
+
+      setOrders(enrichedOrders);
+    } catch (err) {
+      console.error("Failed to fetch user orders:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const getImageUrl = (url) => {
     if (!url || typeof url !== 'string') return null;
     if (url.startsWith('http')) return url;
@@ -162,29 +250,6 @@ const Orders = () => {
   };
 
   useEffect(() => {
-    const fetchUserOrders = async () => {
-      try {
-        setLoading(true);
-        const res = await api.get('Order/UserOrders');
-        const basicOrders = Array.isArray(res.data) ? res.data : [];
-        setOrders(basicOrders);
-
-        for (const order of basicOrders) {
-          api.get(`Order/OrderDetails?orderId=${order.orderId}`)
-            .then(detailRes => {
-              setOrders(prev => prev.map(o =>
-                o.orderId === order.orderId ? { ...o, ...detailRes.data } : o
-              ));
-            })
-            .catch(err => console.error(`Failed to fetch items for order ${order.orderId}`, err));
-        }
-      } catch (err) {
-        console.error("Failed to fetch user orders:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUserOrders();
   }, []);
 
@@ -199,8 +264,57 @@ const Orders = () => {
     setOrderDetails(null);
     try {
       setLoadingDetails(true);
-      const res = await api.get(`Order/OrderDetails?orderId=${orderId}`);
-      setOrderDetails(res.data);
+
+      // Fetch order details and products in parallel
+      const [orderRes, productsRes] = await Promise.all([
+        api.get(`Order/OrderDetails?orderId=${orderId}`),
+        api.get('Product/GetAllProducts').catch(() => ({ data: [] }))
+      ]);
+
+      const orderData = orderRes.data;
+      const products = productsRes.data || [];
+
+      // Enrich order items with product images
+      if (orderData.items) {
+        const enrichedItems = await Promise.all(
+          orderData.items.map(async (item) => {
+            const matchingProduct = products.find(p =>
+              p.name?.toLowerCase().trim() === item.productName?.toLowerCase().trim()
+            );
+
+            const productId = item.productId || matchingProduct?.productId;
+            let imageUrl = item.image || item.imagePath;
+
+            if (!imageUrl && productId) {
+              try {
+                const imgRes = await api.get(`/ProductImages/product/${productId}`);
+                if (imgRes.data?.images?.length) {
+                  imageUrl = imgRes.data.images[0].imageUrl;
+                } else if (imgRes.data?.imageUrls?.length) {
+                  imageUrl = imgRes.data.imageUrls[0];
+                }
+
+                if (imageUrl) {
+                  imageUrl = imageUrl.startsWith('http') ? imageUrl : `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+                }
+              } catch (err) {
+                console.log(`Failed to load image for ${item.productName}`);
+              }
+            }
+
+            return {
+              ...item,
+              productId,
+              image: imageUrl,
+              imagePath: imageUrl
+            };
+          })
+        );
+
+        orderData.items = enrichedItems;
+      }
+
+      setOrderDetails(orderData);
     } catch (err) {
       console.error("Invoice retrieval failed:", err);
     } finally {
@@ -290,19 +404,29 @@ const Orders = () => {
                     (order.items || order.orderItems || []).map((item, itemIndex) => (
                       <div key={itemIndex} className="flex items-center gap-4 py-3 border-b border-gray-50 last:border-0">
                         <div className="w-16 h-16 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 border border-border shadow-inner">
-                          <img
-                            src={getImageUrl(item.image || item.imagePath || item.productImage)}
+                          <SafeImage
+                            src={item.image || item.imagePath || item.productImage}
                             alt={item.productName}
+                            type="product"
                             className="w-full h-full object-cover"
-                            onError={(e) => { e.target.src = 'https://via.placeholder.com/100?text=Product' }}
                           />
                         </div>
                         <div className="flex-1">
                           <h3 className="font-bold text-foreground text-sm">{item.productName}</h3>
-                          <p className="text-xs text-muted-foreground font-medium mt-1">Qty: {item.quantity} · {item.productColor}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-muted-foreground font-medium">Qty: {item.quantity}</span>
+                            <span className="text-muted-foreground text-xs">•</span>
+                            <div className="flex items-center gap-1.5" title={item.productColor}>
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Color:</span>
+                              <span
+                                className="w-3 h-3 rounded-full border border-gray-100 shadow-sm inline-block"
+                                style={{ backgroundColor: item.productColor || '#ccc' }}
+                              />
+                            </div>
+                          </div>
                         </div>
                         <div className="text-right">
-                          <p className="text-sm font-bold text-gray-900">${(item.unitPrice * item.quantity).toLocaleString()}</p>
+                          <p className="text-sm font-bold text-gray-900">${(item.total ?? (item.finalUnitPrice ?? item.unitPrice ?? 0) * item.quantity).toLocaleString()}</p>
                           <p className="text-[9px] font-bold text-gray-300 uppercase tracking-widest mt-0.5">Subtotal</p>
                         </div>
                       </div>
@@ -364,6 +488,7 @@ const Orders = () => {
           loading={loadingDetails}
         />
       </AnimatePresence>
+
     </div>
   );
 };

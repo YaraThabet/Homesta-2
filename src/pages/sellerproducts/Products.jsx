@@ -192,7 +192,7 @@ const Products = () => {
         if (!deleteId) return;
         try {
             setIsDeleting(true);
-            await api.delete(`/Product/Delete?productId=${deleteId}`);
+            await api.delete(`/Product/Delete/${deleteId}`);
             setProducts(products.filter(p => (p.productId || p.id) !== deleteId));
             setDeleteId(null);
         } catch (err) {
@@ -568,9 +568,21 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) 
                                         </span>
                                     )}
                                 </div>
-                                <p className="text-gray-500 leading-relaxed text-sm bg-gray-50/50 p-6 rounded-3xl border border-gray-100/50 font-light italic">
-                                    "{product.description || "No description provided for this piece."}"
-                                </p>
+                                <div
+                                    className="text-gray-500 leading-relaxed text-sm bg-gray-50/50 p-6 rounded-3xl border border-gray-100/50 font-light italic prose prose-sm max-w-none"
+                                    dangerouslySetInnerHTML={{
+                                        __html: (() => {
+                                            let raw = product.description || "";
+                                            const unescape = (str) => str
+                                                .replace(/&amp;/g, '&')
+                                                .replace(/&lt;/g, '<')
+                                                .replace(/&gt;/g, '>')
+                                                .replace(/&nbsp;/g, ' ')
+                                                .replace(/&quot;/g, '"');
+                                            return unescape(unescape(unescape(raw))) || "No description provided for this piece.";
+                                        })()
+                                    }}
+                                />
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
