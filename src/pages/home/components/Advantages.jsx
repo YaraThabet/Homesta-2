@@ -1,11 +1,62 @@
 import React from "react";
-import AdvantagesItems from "../../../components/AdvantagesItems";
+import { LuBox } from "react-icons/lu";
+import { CiCreditCard1 } from "react-icons/ci";
+import { CiHeadphones } from "react-icons/ci";
 
 const Advantages = () => {
   return (
     <div className="w-full min-h-screen px-4 md:px-8 lg:px-16 xl:px-24 py-8 md:py-16">
-      <AdvantagesItems/>
+
+      <div className="flex flex-col lg:flex-row justify-between items-center lg:items-start gap-8 md:gap-12 mb-12 md:mb-24">
+
+        <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left w-full sm:w-[341px] gap-4 sm:gap-3">
+          <div className="relative w-[53px] h-[51px] flex-shrink-0">
+            <div className="bg-[#FEBB36] rounded-3xl w-[40px] h-[40px] top-[12.5px] left-[13px] absolute z-0"></div>
+            <LuBox className="text-[#205457] w-[48px] h-[48px] top-[1.5px] z-10 absolute" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="font-[Outfit] font-medium text-[18px] md:text-[20px]">
+              Free Shipping
+            </p>
+            <p className="font-[Outfit] font-normal text-[16px] md:text-[18px] text-[#4D4A4A] max-w-[280px]">
+              Free shipping for order above $180
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left w-full sm:w-[318px] gap-4 sm:gap-3">
+          <div className="relative w-[53px] h-[51px] flex-shrink-0">
+            <div className="bg-[#FEBB36] rounded-3xl w-[40px] h-[40px] top-[12.5px] left-[13px] absolute z-0"></div>
+            <CiCreditCard1 className="text-[#205457] w-[48px] h-[48px] top-[1.5px] z-10 absolute" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="font-[Outfit] font-medium text-[18px] md:text-[20px]">
+              Flexible Payment
+            </p>
+            <p className="font-[Outfit] font-normal text-[16px] md:text-[18px] text-[#4D4A4A] max-w-[280px]">
+              Multiple secure payment options
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center sm:items-start text-center sm:text-left w-full sm:w-[318px] gap-4 sm:gap-3">
+          <div className="relative w-[53px] h-[51px] flex-shrink-0">
+            <div className="bg-[#FEBB36] rounded-3xl w-[40px] h-[40px] top-[12.5px] left-[13px] absolute z-0"></div>
+            <CiHeadphones className="text-[#205457] w-[48px] h-[48px] top-[1.5px] z-10 absolute" />
+          </div>
+          <div className="flex flex-col gap-2">
+            <p className="font-[Outfit] font-medium text-[18px] md:text-[20px]">
+              24×7 Support
+            </p>
+            <p className="font-[Outfit] font-normal text-[16px] md:text-[18px] text-[#4D4A4A] max-w-[280px]">
+              We support online all days.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="flex flex-col xl:flex-row gap-8 md:gap-12 xl:gap-16">
+        {/* Chairs Category - Large on left for desktop, full width on mobile */}
         <div className="w-full xl:w-1/2 bg-[#E0DFDF] rounded-[20px] p-4 md:p-8 relative min-h-[400px] md:min-h-[672px] flex flex-col">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center flex-1">
             <div className="flex flex-col gap-6 md:gap-8 w-full md:w-auto">
@@ -44,7 +95,7 @@ const Advantages = () => {
             <div className="w-full md:w-1/2 flex justify-center md:justify-end mt-6 md:mt-0">
               <div className="relative w-[200px] h-[200px] md:w-[300px] md:h-[300px] lg:w-[324px] lg:h-[412px]">
                 <img
-                  src="/public/img/item1.png"
+                  src="/img/item1.png"
                   alt="Chairs"
                   className="w-full h-full object-contain"
                 />
@@ -53,7 +104,9 @@ const Advantages = () => {
           </div>
         </div>
 
+
         <div className="w-full xl:w-1/2 flex flex-col gap-8 md:gap-12">
+
           <div className="bg-[#E0DFDF] rounded-[20px] p-4 md:p-8 relative min-h-[300px] md:min-h-[325px] flex flex-col">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center flex-1">
               <div className="flex flex-col gap-6 md:gap-8 w-full md:w-auto">
@@ -88,7 +141,7 @@ const Advantages = () => {
               <div className="w-full md:w-1/2 flex justify-center md:justify-end mt-6 md:mt-0">
                 <div className="relative w-[150px] h-[150px] md:w-[200px] md:h-[200px] lg:w-[216px] lg:h-[309px]">
                   <img
-                    src="/public/img/item2.png"
+                    src="/img/item2.png"
                     alt="Sofa"
                     className="w-full h-full object-contain"
                   />
@@ -131,7 +184,7 @@ const Advantages = () => {
               <div className="w-full md:w-1/2 flex justify-center md:justify-end mt-6 md:mt-0">
                 <div className="relative w-[150px] h-[150px] md:w-[200px] md:h-[200px] lg:w-[216px] lg:h-[309px]">
                   <img
-                    src="/public/img/item3.png"
+                    src="/img/item3.png"
                     alt="Lighting"
                     className="w-full h-full object-contain"
                   />
@@ -142,7 +195,11 @@ const Advantages = () => {
         </div>
       </div>
     </div>
+
+
   );
 };
 
 export default Advantages;
+
+

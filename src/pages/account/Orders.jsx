@@ -1,149 +1,538 @@
-import React, { useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ChevronDown, Package, CreditCard, Calendar, Truck, X, MapPin, Printer } from 'lucide-react';
+import api from '../../lib/axios';
+import PageLoader from '../../components/PageLoader';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { useAppContext } from '../../context/AppContext';
+import SafeImage from '../../components/SafeImage';
+
+const OrderDetailsModal = ({ order, isOpen, onClose, loading }) => {
+  if (!isOpen) return null;
+
+  const getImageUrl = (url) => {
+    if (!url || typeof url !== 'string') return null;
+    if (url.startsWith('http')) return url;
+    return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm print:bg-white print:p-0">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="bg-white w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] print:max-h-none print:shadow-none print:w-full print:rounded-none"
+      >
+        <div className="flex justify-between items-center p-6 border-b border-border print:border-gray-200">
+          <div>
+            <h2 className="text-xl font-bold text-gray-900">Order Invoice</h2>
+            <p className="text-xs text-muted-foreground font-bold uppercase tracking-widest mt-1">#ID: {order?.orderId}</p>
+          </div>
+          <div className="flex items-center gap-2 print:hidden">
+            <button onClick={handlePrint} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-[#205457]" title="Print Invoice">
+              <Printer size={20} />
+            </button>
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors text-gray-400">
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+
+        <div className="overflow-y-auto p-6 space-y-8 print:overflow-visible">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 gap-4 print:hidden">
+              <div className="w-8 h-8 border-4 border-[#205457]/10 border-t-[#205457] rounded-full animate-spin" />
+              <p className="text-sm font-bold text-gray-400">Loading Invoice Details...</p>
+            </div>
+          ) : order ? (
+            <>
+              {/* Shipping & Payment Info */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50 p-6 rounded-xl border border-border print:bg-white print:border-gray-200">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm text-[#205457] print:border">
+                      <MapPin size={16} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Billing Address</p>
+                      <p className="text-sm font-bold text-gray-900 mb-1">{order.firstName} {order.lastName}</p>
+                      <p className="text-sm font-bold text-gray-900">{order.address}</p>
+                      <p className="text-xs text-gray-500 font-medium">{order.city}, {order.country}</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center shadow-sm text-[#205457] print:border">
+                      <CreditCard size={16} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Payment Method</p>
+                      <p className="text-sm font-bold text-gray-900">{order.paymentMethod}</p>
+                      <p className="text-[10px] text-muted-foreground font-bold uppercase">{order.status}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Items Table */}
+              <div>
+                <h3 className="text-xs font-black text-gray-300 uppercase tracking-[0.2em] mb-4 print:text-gray-600">Purchase Details</h3>
+                <div className="space-y-0 border border-border rounded-xl overflow-hidden print:border-gray-200">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-gray-50 text-[10px] font-black uppercase text-muted-foreground tracking-widest border-b border-border print:bg-white">
+                      <tr>
+                        <th className="px-4 py-3">Product</th>
+                        <th className="px-4 py-3 text-center">Qty</th>
+                        <th className="px-4 py-3 text-right">Price</th>
+                        <th className="px-4 py-3 text-right">Subtotal</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border print:divide-gray-200">
+                      {order.items?.map((item, idx) => {
+                        const unitPrice = item.originalUnitPrice ?? item.unitPrice ?? item.price ?? 0;
+                        const finalPrice = item.finalUnitPrice ?? unitPrice;
+                        const total = item.total ?? item.subtotal ?? (finalPrice * item.quantity);
+                        return (
+                          <tr key={idx} className="bg-white">
+                            <td className="px-4 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-border print:hidden">
+                                  <img
+                                    src={getImageUrl(item.image || item.imagePath || item.productImage)}
+                                    alt={item.productName}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <div>
+                                  <p className="font-bold text-gray-900 line-clamp-1">
+                                    {item.productName}
+                                    {item.isDeleted && (
+                                      <span className="ml-2 text-[8px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded uppercase font-black tracking-widest leading-none align-middle">
+                                        Product Deleted
+                                      </span>
+                                    )}
+                                  </p>
+                                  <p className="text-[10px] text-muted-foreground font-black uppercase flex items-center gap-1.5 mt-1" title={item.productColor}>
+                                    Color:
+                                    <span
+                                      className="w-3 h-3 rounded-full border border-gray-100 shadow-sm inline-block"
+                                      style={{ backgroundColor: item.productColor || '#ccc' }}
+                                    />
+                                    {(finalPrice < unitPrice) && (
+                                      <span className="ml-2 text-green-600 font-bold">Discounted</span>
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-4 text-center font-bold text-gray-600">
+                              {item.quantity}x @ ${finalPrice.toLocaleString()}
+                              {(finalPrice < unitPrice) && (
+                                <div className="text-[10px] line-through text-red-300">
+                                  ${unitPrice.toLocaleString()}
+                                </div>
+                              )}
+                            </td>
+                            <td className="px-4 py-4 text-right font-medium text-gray-600 hidden"></td>
+                            <td className="px-4 py-4 text-right font-black text-gray-900">${total.toLocaleString()}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Grand Total */}
+              <div className="bg-[#205457] p-8 rounded-xl text-white flex justify-between items-center shadow-xl shadow-[#205457]/10 print:bg-white print:text-gray-900 print:border print:border-gray-200 print:shadow-none">
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-1 print:opacity-100">Total Amount Paid</p>
+                  <h3 className="text-3xl font-black">${(order.orderTotal ?? order.totalPrice ?? 0).toLocaleString()}</h3>
+                </div>
+                <div className="text-right">
+                  <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-xl border border-white/10 print:bg-white print:border-gray-200">
+                    <Calendar size={14} />
+                    <span className="text-xs font-bold">{order.orderDateFormatted}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="hidden print:block text-center pt-8 border-t border-gray-100">
+                <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Thank you for shopping with Homesta</p>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-20 text-gray-400 font-bold">Failed to load invoice.</div>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
 const Orders = () => {
-  const [sortBy, setSortBy] = useState('All');
+  const navigate = useNavigate();
+  const { showAlert } = useAppContext();
+  const [filterStatus, setFilterStatus] = useState('All');
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
+  const [orderDetails, setOrderDetails] = useState(null);
+  const [loadingDetails, setLoadingDetails] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const orders = [
-    {
-      id: '#SDGT1254FD',
-      totalPayment: 840.00,
-      paymentMethod: 'Paypal',
-      estimatedDelivery: '24 April 2024',
-      status: 'Accepted',
-      statusMessage: 'Your Order has been Accepted',
-      items: [
-        { name: 'Wingback Chair', color: 'Light Brown', image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=100&h=100&fit=crop' },
-        { name: 'Wooden Sofa Chair', color: 'Grey', image: 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=100&h=100&fit=crop' },
-        { name: 'Bar Stool', color: 'Brown', image: 'https://images.unsplash.com/photo-1503602642458-232111445657?w=100&h=100&fit=crop' },
-        { name: 'Brown Bean Bag Chair', color: 'Brown', image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=100&h=100&fit=crop' },
-      ],
-      actions: ['Track Order', 'Invoice', 'Cancel Order']
-    },
-    {
-      id: '#SDGT1254FD',
-      totalPayment: 375.00,
-      paymentMethod: 'Cash',
-      estimatedDelivery: '24 April 2024',
-      status: 'Delivered',
-      statusMessage: 'Your Order has been Delivered',
-      items: [
-        { name: 'Brown Bean Bag Chair', color: 'Brown', image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=100&h=100&fit=crop' },
-      ],
-      actions: ['Add Review', 'Invoice']
+  const fetchUserOrders = async () => {
+    try {
+      setLoading(true);
+      // 1. Fetch User Orders and All Products
+      const [ordersRes, productsRes] = await Promise.all([
+        api.get('Order/UserOrders'),
+        api.get('Product/GetAllProducts').catch(() => ({ data: [] }))
+      ]);
+
+      const basicOrders = Array.isArray(ordersRes.data) ? ordersRes.data : [];
+      const products = productsRes.data || [];
+
+      // 2. Fetch full details for each order and enrich with images
+      const enrichedOrders = await Promise.all(basicOrders.map(async (order) => {
+        try {
+          const detailRes = await api.get(`Order/OrderDetails?orderId=${order.orderId}`);
+          const detailedOrder = detailRes.data;
+
+          if (detailedOrder.items) {
+            const enrichedItems = await Promise.all(detailedOrder.items.map(async (item) => {
+              const currentOrderName = item.productName || item.name || "";
+
+              // Priority 1: Match by ID
+              let matchingProduct = item.productId
+                ? products.find(p => (p.productId || p.id) == item.productId)
+                : null;
+
+              // Verify ID match with name similarity
+              if (matchingProduct && currentOrderName) {
+                const catName = (matchingProduct.name || "").toLowerCase();
+                const ordName = currentOrderName.toLowerCase();
+                if (!catName.includes(ordName) && !ordName.includes(catName)) {
+                  matchingProduct = null;
+                }
+              }
+
+              // Priority 2: Match by name if ID failed
+              if (!matchingProduct && currentOrderName) {
+                matchingProduct = products.find(p => p.name?.toLowerCase().trim() === currentOrderName.toLowerCase().trim());
+              }
+
+              const productId = item.productId || matchingProduct?.productId;
+              let imageUrl = item.image || item.imagePath || item.productImage || matchingProduct?.imagePath || matchingProduct?.image;
+
+              if (!imageUrl && productId) {
+                try {
+                  const imgRes = await api.get(`/ProductImages/product/${productId}`);
+                  if (imgRes.data?.images?.length) {
+                    imageUrl = imgRes.data.images[0].imageUrl;
+                  } else if (imgRes.data?.imageUrls?.length) {
+                    imageUrl = imgRes.data.imageUrls[0];
+                  }
+
+                  if (imageUrl) {
+                    imageUrl = imageUrl.startsWith('http') ? imageUrl : `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+                  }
+                } catch (err) { }
+              }
+              const isDeleted = !matchingProduct;
+
+              return {
+                ...item,
+                name: currentOrderName,
+                productName: currentOrderName,
+                color: item.color || item.productColor,
+                productId,
+                image: imageUrl,
+                imagePath: imageUrl,
+                isDeleted
+              };
+            }));
+
+            detailedOrder.items = enrichedItems;
+          }
+
+          return { ...order, ...detailedOrder };
+        } catch (err) {
+          console.error(`Failed to fetch items for order ${order.orderId}`, err);
+          return order;
+        }
+      }));
+
+      setOrders(enrichedOrders);
+    } catch (err) {
+      console.error("Failed to fetch user orders:", err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+
+  const getImageUrl = (url) => {
+    if (!url || typeof url !== 'string') return null;
+    if (url.startsWith('http')) return url;
+    return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+  };
+
+  useEffect(() => {
+    fetchUserOrders();
+  }, []);
+
+  const handleTrackOrder = (orderId) => {
+    navigate(`/tracking-order/${orderId}`);
+  };
+
+  const handleViewInvoice = async (orderId) => {
+    // Selection and modal opening
+    setSelectedOrderId(orderId);
+    setIsModalOpen(true);
+    setOrderDetails(null);
+    try {
+      setLoadingDetails(true);
+
+      // Fetch order details and products in parallel
+      const [orderRes, productsRes] = await Promise.all([
+        api.get(`Order/OrderDetails?orderId=${orderId}`),
+        api.get('Product/GetAllProducts').catch(() => ({ data: [] }))
+      ]);
+
+      const orderData = orderRes.data;
+      const products = productsRes.data || [];
+
+      // Enrich order items with product images
+      if (orderData.items) {
+        const enrichedItems = await Promise.all(
+          orderData.items.map(async (item) => {
+            const matchingProduct = products.find(p =>
+              p.name?.toLowerCase().trim() === item.productName?.toLowerCase().trim()
+            );
+
+            const productId = item.productId || matchingProduct?.productId;
+            let imageUrl = item.image || item.imagePath;
+
+            if (!imageUrl && productId) {
+              try {
+                const imgRes = await api.get(`/ProductImages/product/${productId}`);
+                if (imgRes.data?.images?.length) {
+                  imageUrl = imgRes.data.images[0].imageUrl;
+                } else if (imgRes.data?.imageUrls?.length) {
+                  imageUrl = imgRes.data.imageUrls[0];
+                }
+
+                if (imageUrl) {
+                  imageUrl = imageUrl.startsWith('http') ? imageUrl : `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+                }
+              } catch (err) {
+                console.log(`Failed to load image for ${item.productName}`);
+              }
+            }
+
+            const isDeleted = !products.some(p => (p.productId || p.id) == productId);
+
+            return {
+              ...item,
+              productId,
+              image: imageUrl,
+              imagePath: imageUrl,
+              isDeleted
+            };
+          })
+        );
+
+        orderData.items = enrichedItems;
+      }
+
+      setOrderDetails(orderData);
+    } catch (err) {
+      console.error("Invoice retrieval failed:", err);
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
       case 'Accepted':
+      case 'Confirmed':
+      case 'Processing':
         return 'bg-[#FFF1E3] text-[#B19470]';
       case 'Delivered':
         return 'bg-[#C5FBD2] text-[#7BC370]';
+      case 'Shipped':
+        return 'bg-blue-50 text-blue-600';
+      case 'Cancelled':
+        return 'bg-red-50 text-red-600';
       default:
         return 'bg-gray-100 text-gray-600';
     }
   };
 
+  const filteredOrders = orders.filter(o =>
+    filterStatus === 'All' || o.status === filterStatus
+  ).sort((a, b) => b.orderId - a.orderId);
+
+  if (loading) return <PageLoader />;
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-[#FDFCFB] pb-20 font-outfit print:bg-white print:p-0">
+      <div className="max-w-4xl mx-auto px-4 py-8 print:hidden">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-xl font-semibold text-foreground">Orders ({orders.length})</h1>
-          <div className="relative">
-            <span className="text-sm text-muted-foreground mr-2">Sort by:</span>
-            <button className="inline-flex items-center gap-1 px-3 py-1.5 border border-border rounded-lg text-sm font-medium">
-              {sortBy}
-              <ChevronDown className="w-4 h-4" />
-            </button>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight flex items-center">
+              Purchase <span className="text-[#205457] mr-3">History</span>
+              <span className="text-[10px] bg-[#205457]/5 text-[#205457] px-3 py-1.5 rounded-full font-black border border-[#205457]/10 uppercase tracking-widest leading-none">
+                {orders.length} Orders
+              </span>
+            </h1>
+            <p className="text-gray-400 mt-1 text-sm font-medium">Manage and track your recent platform orders</p>
+          </div>
+
+          <div className="flex items-center gap-2 bg-white p-1.5 rounded-xl border border-border shadow-sm overflow-x-auto no-scrollbar">
+            {['All', 'Processing', 'Shipped', 'Delivered', 'Cancelled'].map(status => (
+              <button
+                key={status}
+                onClick={() => setFilterStatus(status)}
+                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${filterStatus === status ? 'bg-[#205457] text-white shadow-lg shadow-[#205457]/20' : 'text-gray-400 hover:text-gray-700'}`}
+              >
+                {status}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Orders List */}
-        <div className="space-y-6">
-          {orders.map((order, index) => (
-            <div key={index} className="bg-card rounded-xl border border-border overflow-hidden">
-              {/* Order Header */}
-              <div className="bg-[#F0F3FF] px-6 py-4 grid grid-cols-4 gap-4">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Order ID</p>
-                  <p className="text-sm font-semibold text-foreground">{order.id}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Total Payment</p>
-                  <p className="text-sm font-semibold text-foreground">${order.totalPayment.toFixed(2)}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Payment Method</p>
-                  <p className="text-sm font-semibold text-foreground">{order.paymentMethod}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">Estimated Delivery Date</p>
-                  <p className="text-sm font-semibold text-foreground">{order.estimatedDelivery}</p>
-                </div>
-              </div>
-
-              {/* Order Items */}
-              <div className="px-6 py-4 space-y-4 ">
-                {order.items.map((item, itemIndex) => (
-                  <div key={itemIndex} className="flex items-center gap-4 py-2">
-                    <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
-                      <img 
-                        src={item.image} 
-                        alt={item.name}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div>
-                      <h3 className="font-medium text-foreground">{item.name}</h3>
-                      <p className="text-sm text-muted-foreground">Color: {item.color}</p>
-                    </div>
+        {/* Orders List with Scroller */}
+        <div className="space-y-6 max-h-[850px] overflow-y-auto pr-4 custom-scrollbar scroll-smooth">
+          {filteredOrders.length > 0 ? (
+            filteredOrders.map((order, index) => (
+              <div key={order.orderId || index} className="bg-card rounded-xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all group">
+                {/* Order Header */}
+                <div className="bg-gray-50/80 px-6 py-4 grid grid-cols-2 md:grid-cols-4 gap-4 border-b border-border text-center md:text-left font-outfit">
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1 tracking-widest">Order Reference</p>
+                    <p className="text-sm font-bold text-foreground uppercase">#{order.orderId}</p>
                   </div>
-                ))}
-              </div>
-
-              {/* Order Status */}
-              <div className="px-6 py-4 border-t border-border">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                    {order.status}
-                  </span>
-                  <span className="text-sm text-foreground">{order.statusMessage}</span>
+                  <div>
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1 tracking-widest">Amount Paid</p>
+                    <p className="text-sm font-black text-[#205457]">${order.totalPrice?.toLocaleString()}</p>
+                  </div>
+                  <div className="hidden md:block">
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1 tracking-widest">Method</p>
+                    <p className="text-[11px] font-bold text-gray-600 uppercase tracking-tighter bg-white px-3 py-1 rounded-lg border border-border inline-block">{order.paymentMethod}</p>
+                  </div>
+                  <div className="text-right hidden md:block">
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground mb-1 tracking-widest">Date</p>
+                    <p className="text-[11px] font-bold text-gray-400">{order.orderDateFormatted}</p>
+                  </div>
                 </div>
 
-                {/* Action Buttons */}
-                <div className="flex items-center gap-3">
-                  {order.actions.map((action, actionIndex) => {
-                    if (action === 'Cancel Order') {
-                      return (
-                        <button 
-                          key={actionIndex}
-                          className="ml-auto text-red-500 text-sm font-medium hover:text-red-600 transition-colors"
-                        >
-                          {action}
-                        </button>
-                      );
-                    }
-                    return (
-                      <button 
-                        key={actionIndex}
-                        className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                          actionIndex === 0 
-                            ? 'bg-[#205457] text-white hover:bg-[#205457]/90' 
-                            : 'border border-border text-[#205457] hover:bg-accent'
-                        }`}
-                      >
-                        {action}
-                      </button>
-                    );
-                  })}
+                {/* Order Items Section */}
+                <div className="px-6 py-4 space-y-4">
+                  {(order.items || order.orderItems) ? (
+                    (order.items || order.orderItems || []).map((item, itemIndex) => (
+                      <div key={itemIndex} className="flex items-center gap-4 py-3 border-b border-gray-50 last:border-0">
+                        <div className="w-16 h-16 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 border border-border shadow-inner">
+                          <SafeImage
+                            src={item.image || item.imagePath || item.productImage}
+                            alt={item.productName}
+                            type="product"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-bold text-foreground text-sm">
+                            {item.productName}
+                            {item.isDeleted && (
+                              <span className="ml-2 text-[8px] bg-red-50 text-red-500 px-1.5 py-0.5 rounded uppercase font-black tracking-widest leading-none align-middle border border-red-100">
+                                Deleted
+                              </span>
+                            )}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-muted-foreground font-medium">Qty: {item.quantity}</span>
+                            <span className="text-muted-foreground text-xs">•</span>
+                            <div className="flex items-center gap-1.5" title={item.productColor}>
+                              <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Color:</span>
+                              <span
+                                className="w-3 h-3 rounded-full border border-gray-100 shadow-sm inline-block"
+                                style={{ backgroundColor: item.productColor || '#ccc' }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-gray-900">${(item.total ?? (item.finalUnitPrice ?? item.unitPrice ?? 0) * item.quantity).toLocaleString()}</p>
+                          <p className="text-[9px] font-bold text-gray-300 uppercase tracking-widest mt-0.5">Subtotal</p>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex items-center gap-3 py-4 opacity-50 justify-center">
+                      <div className="w-4 h-4 border-2 border-[#205457]/10 border-t-[#205457] rounded-full animate-spin" />
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">Loading items...</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Status & Actions */}
+                <div className="px-6 py-4 bg-gray-50/10 flex flex-col md:flex-row items-center justify-between gap-4 border-t border-border">
+                  <div className="flex items-center gap-3">
+                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${getStatusColor(order.status)}`}>
+                      {order.status}
+                    </span>
+                    <p className="text-xs text-muted-foreground font-semibold flex items-center gap-2">
+                      <Truck size={12} />
+                      {order.status === 'Cancelled' ? 'Retracted' :
+                        order.status === 'Delivered' ? 'Order in your hands' :
+                          'In transit to you'}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-3 w-full md:w-auto">
+                    <button
+                      onClick={() => handleTrackOrder(order.orderId)}
+                      className="flex-1 md:flex-none px-6 py-2 bg-[#205457] text-white rounded-xl text-xs font-bold hover:bg-[#1a4345] transition-all shadow-md shadow-[#205457]/10"
+                    >
+                      Track Order
+                    </button>
+                    <button
+                      onClick={() => handleViewInvoice(order.orderId)}
+                      className="flex-1 md:flex-none px-6 py-2 border border-border text-gray-600 rounded-xl text-xs font-bold hover:bg-white transition-all font-outfit"
+                    >
+                      View Invoice
+                    </button>
+                  </div>
                 </div>
               </div>
+            ))
+          ) : (
+            <div className="text-center py-20 bg-white rounded-xl border border-dashed border-border">
+              <Package size={48} className="mx-auto text-gray-200 mb-4" />
+              <p className="text-gray-400 font-bold">No orders found matching this filter.</p>
+              <button onClick={() => setFilterStatus('All')} className="mt-4 text-[#205457] font-bold text-sm underline">Reset</button>
             </div>
-          ))}
+          )}
         </div>
       </div>
+
+      <AnimatePresence>
+        <OrderDetailsModal
+          order={orderDetails}
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          loading={loadingDetails}
+        />
+      </AnimatePresence>
+
     </div>
   );
 };

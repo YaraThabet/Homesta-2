@@ -1,25 +1,66 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { CreditCard } from "lucide-react";
+import CheckoutStepper from "../summaryOrder/components/CheckoutStepper";
+import { useAppContext } from "../../context/AppContext";
+import api from "../../lib/axios";
 
 const Payment = () => {
-  const [paymentMethod, setPaymentMethod] = useState("paypal");
-  const [cardData, setCardData] = useState({
-    cardHolderName: "",
-    cardNumber: "",
-    expiryDate: "",
-    cvv: "",
-    saveCard: true
+  const { formatPrice, t, showAlert } = useAppContext();
+  const navigate = useNavigate();
+  const [paymentMethod, setPaymentMethod] = useState(() => {
+    return localStorage.getItem('checkoutPaymentMethod') || "paypal";
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [cartData, setCartData] = useState({ items: 0, subTotal: 0, total: 0 });
+
+  const [cardData, setCardData] = useState(() => {
+    const saved = localStorage.getItem('checkoutCardData');
+    return saved ? JSON.parse(saved) : {
+      cardHolderName: "",
+      cardNumber: "",
+      expiryDate: "",
+      cvv: "",
+      saveCard: true
+    };
   });
 
-  const orderSummary = {
-    items: 9,
-    subTotal: 740.00,
-    shipping: 0.00,
-    taxes: 0.00,
-    couponDiscount: -100.00,
-    total: 640.00
-  };
+  useEffect(() => {
+    localStorage.setItem('checkoutPaymentMethod', paymentMethod);
+  }, [paymentMethod]);
+
+  useEffect(() => {
+    localStorage.setItem('checkoutCardData', JSON.stringify(cardData));
+  }, [cardData]);
+
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        setLoading(true);
+        const res = await api.get('Cart');
+        const items = res.data.cartItems || [];
+
+        // Calculate original subtotal to show discount breakdown
+        const originalSubtotal = items.reduce((acc, item) => acc + ((item.unitPrice || 0) * (item.quantity || 0)), 0);
+        const currentSubtotal = res.data.subTotal || 0;
+        const discount = originalSubtotal - currentSubtotal;
+
+        setCartData({
+          items: res.data.totalItems || 0,
+          subTotal: currentSubtotal,
+          originalSubtotal: originalSubtotal,
+          discount: discount > 0 ? discount : 0,
+          total: res.data.totalPrice || 0
+        });
+      } catch (err) {
+        console.error("Failed to fetch cart:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchCart();
+  }, []);
 
   const handleCardChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -29,32 +70,64 @@ const Payment = () => {
     }));
   };
 
-  const handleConfirmPayment = () => {
-    console.log("Payment confirmed:", { paymentMethod, cardData });
+  const handleConfirmPayment = async () => {
+    try {
+      setSubmitting(true);
+      const orderId = localStorage.getItem('currentOrderId');
+      const userId = localStorage.getItem('userId');
+
+      if (!orderId || orderId === "[object Object]") {
+        showAlert("No valid order found. Please go back to Shipping and try again.", "error", "Error");
+        return;
+      }
+
+      // Map frontend payment method names to backend expected ones
+      let apiPaymentType = "PayPal";
+      if (paymentMethod === "cod") apiPaymentType = "CashOnDelivery";
+      if (paymentMethod === "card") apiPaymentType = "CreditCard";
+      if (paymentMethod === "googlepay") apiPaymentType = "GooglePay";
+
+      // Use a standard POST request with IDs in the body for maximum compatibility
+      await api.post('Order/payment', {
+        orderId: parseInt(orderId),
+        userId: userId,
+        paymentMethod: apiPaymentType
+      });
+
+      navigate("/summary-order");
+    } catch (err) {
+      console.error("Failed to save payment info:", err.response?.data || err.message);
+      showAlert("Could not save payment information. Please try again.", "error", "Error");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pt-[120px]">
       {/* Header */}
-      <header className="bg-header-bg py-14 text-center">
-        <h1 className="text-2xl font-semibold text-foreground mb-2 tracking-tight">Payment</h1>
+      <header className="bg-[#F6F6F6] py-14 text-center">
+        <h1 className="text-2xl font-semibold text-foreground mb-2 tracking-tight">{t('payment')}</h1>
         <nav className="text-sm text-muted-foreground">
-          <Link to="/" className="hover:text-foreground cursor-pointer">Home</Link>
+          <Link to="/" className="hover:text-foreground cursor-pointer">{t('home') || 'Home'}</Link>
           <span className="mx-1.5 text-muted-foreground/50">/</span>
-          <Link to="/cart" className="hover:text-foreground cursor-pointer">Shopping Cart</Link>
+          <Link to="/shopping-cart" className="hover:text-foreground cursor-pointer">{t('cart')}</Link>
           <span className="mx-1.5 text-muted-foreground/50">/</span>
-          <Link to="/checkout" className="hover:text-foreground cursor-pointer">Checkout</Link>
+          <Link to="/checkout" className="hover:text-foreground cursor-pointer">{t('shipping')}</Link>
           <span className="mx-1.5 text-muted-foreground/50">/</span>
-          <span className="text-foreground font-medium">Payment</span>
+          <span className="text-foreground font-medium">{t('payment')}</span>
         </nav>
       </header>
+
+      {/* Checkout Stepper */}
+      <CheckoutStepper currentStep={3} />
 
       {/* Content */}
       <div className="container mx-auto px-4 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Payment Methods */}
           <div className="lg:col-span-2">
-            <h2 className="text-2xl font-light text-primary mb-8">Select Payment Method</h2>
+            <h2 className="text-2xl font-light text-primary mb-8">{t('selectPaymentMethod') || 'Select Payment Method'}</h2>
 
             {/* Payment Options */}
             <div className="space-y-4 mb-8">
@@ -74,7 +147,7 @@ const Payment = () => {
                     <span className="text-foreground">Paypal</span>
                   </div>
                 </div>
-                <span className="text-primary text-sm cursor-pointer hover:underline">Link account</span>
+                <span className="text-primary text-sm cursor-pointer hover:underline">{t('linkAccount') || 'Link account'}</span>
               </label>
 
               {/* Google Pay */}
@@ -133,7 +206,7 @@ const Payment = () => {
                 />
                 <div className="flex items-center gap-2">
                   <CreditCard className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-foreground">Add New Credit/ Debit Card</span>
+                  <span className="text-foreground">{t('addNewCard') || 'Add New Credit/ Debit Card'}</span>
                 </div>
               </label>
 
@@ -142,7 +215,7 @@ const Payment = () => {
                 {/* Card Holder Name */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Card Holder Name<span className="text-red-500">*</span>
+                    {t('cardHolderName') || 'Card Holder Name'}<span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -157,7 +230,7 @@ const Payment = () => {
                 {/* Card Number */}
                 <div>
                   <label className="block text-sm font-medium text-foreground mb-2">
-                    Card Number<span className="text-red-500">*</span>
+                    {t('cardNumber') || 'Card Number'}<span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -173,7 +246,7 @@ const Payment = () => {
                 <div className="grid grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
-                      Expiry Date<span className="text-red-500">*</span>
+                      {t('expiryDate') || 'Expiry Date'}<span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -186,7 +259,7 @@ const Payment = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
-                      CVV<span className="text-red-500">*</span>
+                      {t('cvv') || 'CVV'}<span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
@@ -208,12 +281,12 @@ const Payment = () => {
                     onChange={handleCardChange}
                     className="w-4 h-4 accent-primary rounded"
                   />
-                  <span className="text-sm text-muted-foreground">Save card for future payments</span>
+                  <span className="text-sm text-muted-foreground">{t('saveCard') || 'Save card for future payments'}</span>
                 </label>
 
                 {/* Add Card Button */}
                 <button className="bg-[#205457] text-white px-6 py-2.5 rounded-full font-medium hover:bg-[#205457]/90 transition-colors">
-                  Add Card
+                  {t('addCard') || 'Add Card'}
                 </button>
               </div>
             </div>
@@ -222,43 +295,56 @@ const Payment = () => {
           {/* Order Summary */}
           <div className="lg:col-span-1">
             <div className="bg-background border border-border rounded-xl p-6">
-              <h2 className="text-xl font-semibold text-foreground mb-6">Order Summery</h2>
+              <h2 className="text-xl font-semibold text-foreground mb-6">{t('orderSummary')}</h2>
 
-              <div className="space-y-4 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Items</span>
-                  <span className="text-foreground">{orderSummary.items}</span>
+              <div className="space-y-4 text-sm mt-6">
+                <div className="flex justify-between text-muted-foreground font-medium">
+                  <span>{t('items')}</span>
+                  <span className="text-foreground">{cartData.items}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Sub Total</span>
-                  <span className="text-foreground">${orderSummary.subTotal.toFixed(2)}</span>
+                <div className="flex justify-between text-muted-foreground font-medium">
+                  <span>{t('subtotal')}</span>
+                  <span className={`text-foreground font-bold ${cartData.discount > 0 ? 'line-through opacity-50' : ''}`}>
+                    {formatPrice(cartData.originalSubtotal || cartData.subTotal)}
+                  </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Shipping</span>
-                  <span className="text-foreground">${orderSummary.shipping.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Taxes</span>
-                  <span className="text-foreground">${orderSummary.taxes.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Coupon Discount</span>
-                  <span className="text-foreground">-${Math.abs(orderSummary.couponDiscount).toFixed(2)}</span>
-                </div>
-
-                <div className="border-t border-border pt-4 mt-4">
-                  <div className="flex justify-between font-semibold">
-                    <span className="text-foreground">Total</span>
-                    <span className="text-foreground">${orderSummary.total.toFixed(2)}</span>
+                {cartData.discount > 0 && (
+                  <div className="flex justify-between text-green-600 font-medium">
+                    <span>{t('discount') || 'Discount'}</span>
+                    <span className="font-bold">-{formatPrice(cartData.discount)}</span>
                   </div>
+                )}
+                <div className="flex justify-between text-muted-foreground font-medium">
+                  <span>{t('shipping')}</span>
+                  <span className="text-foreground font-bold">{cartData.subTotal > 500 ? 'Free' : formatPrice(0)}</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground font-medium">
+                  <span>{t('tax')}</span>
+                  <span className="text-foreground font-bold">{formatPrice(0)}</span>
+                </div>
+
+                <div className="border-t-2 border-dashed border-border pt-6 mt-6">
+                  <div className="flex justify-between items-end">
+                    <span className="text-muted-foreground font-bold mb-1">{t('total')}</span>
+                    <span className="text-3xl font-black text-[#205457] tracking-tight">{formatPrice(cartData.total)}</span>
+                  </div>
+                  <p className="text-xs text-gray-400 text-right mt-1 italic">Including Valid Tax</p>
                 </div>
               </div>
 
               <button
                 onClick={handleConfirmPayment}
-                className="w-full bg-[#205457] text-white py-4 rounded-xl mt-6 font-medium hover:bg-[#205457]/90 transition-colors"
+                disabled={submitting || loading}
+                className="w-full bg-[#205457] text-white py-4 rounded-xl mt-6 font-medium hover:bg-[#205457]/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                Confirm Payment
+                {submitting ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    {t('processing') || 'Processing...'}
+                  </>
+                ) : (
+                  t('confirmPayment')
+                )}
               </button>
             </div>
           </div>
