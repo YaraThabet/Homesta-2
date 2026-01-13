@@ -109,12 +109,22 @@ const OrderDetailsModal = ({ order, onClose }) => {
                                         <tr key={idx}>
                                             <td className="py-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-md border border-gray-200 overflow-hidden flex-shrink-0">
-                                                        <img src={getImageUrl(item.image || item.imagePath)} className="w-full h-full object-cover" alt="" />
+                                                    <div className="w-10 h-10 rounded-md border border-gray-200 overflow-hidden flex-shrink-0 relative">
+                                                        <SafeImage src={item.image || item.imagePath} productId={item.productId} className="w-full h-full object-cover" type="product" />
+                                                        {item.isDeleted && (
+                                                            <div className="absolute inset-0 bg-red-500/10 flex items-center justify-center">
+                                                                <span className="text-[6px] font-black text-white bg-red-600 px-0.5 rounded-sm uppercase tracking-tighter">DEL</span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                     <div>
-                                                        <p className="font-bold text-gray-900">{item.productName}</p>
-                                                        <p className="text-[10px] text-gray-500 uppercase">{item.productColor}</p>
+                                                        <p className="font-bold text-gray-900">
+                                                            {item.productName || item.name}
+                                                            {item.isDeleted && (
+                                                                <span className="ml-2 text-[8px] border border-red-200 text-red-500 px-1 py-0.5 rounded-sm uppercase font-black">Deleted</span>
+                                                            )}
+                                                        </p>
+                                                        <p className="text-[10px] text-gray-400 font-bold uppercase">{item.productColor}</p>
                                                     </div>
                                                 </div>
                                             </td>
@@ -242,7 +252,14 @@ const OrderDetailsModal = ({ order, onClose }) => {
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-center gap-2 mb-1">
-                                                <h4 className="font-bold text-gray-900 text-sm truncate" title={item.productName}>{item.productName}</h4>
+                                                <h4 className="font-bold text-gray-900 text-sm truncate" title={item.productName}>
+                                                    {item.productName}
+                                                    {item.isDeleted && (
+                                                        <span className="ml-2 text-[8px] bg-red-50 text-red-500 px-1.5 py-0.5 rounded uppercase font-black tracking-widest leading-none align-middle border border-red-100">
+                                                            Product Deleted
+                                                        </span>
+                                                    )}
+                                                </h4>
                                                 {item.productColor && (
                                                     <span className="hidden sm:inline-block w-3 h-3 rounded-full border border-gray-200" style={{ backgroundColor: item.productColor }}></span>
                                                 )}
@@ -335,13 +352,29 @@ const AdminOrders = () => {
                 const processed = await Promise.all(rawOrders.map(async (order) => {
                     const enrichedItems = await Promise.all(
                         (order.items || order.orderItems || []).map(async (item) => {
-                            // Find matching product by name
-                            const matchingProduct = products.find(p =>
-                                p.name?.toLowerCase().trim() === item.productName?.toLowerCase().trim()
-                            );
+                            const currentOrderName = item.productName || item.name || "";
+
+                            // Priority 1: Match by ID
+                            let matchingProduct = item.productId
+                                ? products.find(p => (p.productId || p.id) == item.productId)
+                                : null;
+
+                            // Verify ID match with name
+                            if (matchingProduct && currentOrderName) {
+                                const catName = (matchingProduct.name || "").toLowerCase();
+                                const ordName = currentOrderName.toLowerCase();
+                                if (!catName.includes(ordName) && !ordName.includes(catName)) {
+                                    matchingProduct = null;
+                                }
+                            }
+
+                            // Priority 2: Match by name if ID failed
+                            if (!matchingProduct && currentOrderName) {
+                                matchingProduct = products.find(p => p.name?.toLowerCase().trim() === currentOrderName.toLowerCase().trim());
+                            }
 
                             const productId = item.productId || matchingProduct?.productId;
-                            let imageUrl = item.image || item.imagePath;
+                            let imageUrl = item.image || item.imagePath || matchingProduct?.imagePath || matchingProduct?.image;
 
                             // Fetch image if we have productId but no image
                             if (!imageUrl && productId) {
@@ -358,20 +391,25 @@ const AdminOrders = () => {
                                         imageUrl = imageUrl.startsWith('http') ? imageUrl : `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
                                     }
                                 } catch (err) {
-                                    console.log(`Failed to load image for ${item.productName}`);
+                                    console.log(`Failed to load image for ${currentOrderName}`);
                                 }
                             } else if (imageUrl && !imageUrl.startsWith('http')) {
                                 imageUrl = `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
                             }
 
+                            const isDeleted = !matchingProduct;
+
                             return {
                                 ...item,
+                                name: currentOrderName,
+                                productName: currentOrderName,
+                                color: item.color || item.productColor,
                                 productId,
                                 image: imageUrl,
-                                imagePath: imageUrl
+                                imagePath: imageUrl,
+                                isDeleted
                             };
-                        })
-                    );
+                        }));
 
                     return {
                         ...order,

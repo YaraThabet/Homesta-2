@@ -13,7 +13,14 @@ const ProductItem = ({ product }) => {
                     />
                 </div>
                 <div>
-                    <h3 className="font-bold text-gray-900 text-lg group-hover:text-[#205457] transition-colors">{product.name}</h3>
+                    <h3 className="font-bold text-gray-900 text-lg group-hover:text-[#205457] transition-colors">
+                        {product.name}
+                        {product.isDeleted && (
+                            <span className="ml-2 text-[8px] bg-red-50 text-red-500 px-1.5 py-0.5 rounded uppercase font-black tracking-widest leading-none align-middle border border-red-100">
+                                Product Deleted
+                            </span>
+                        )}
+                    </h3>
                     <div className="flex items-center gap-3 mt-2">
                         <span className="p-1 px-2.5 bg-gray-50 border border-gray-100 rounded-lg flex items-center gap-1.5" title={product.color}>
                             <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Color:</span>

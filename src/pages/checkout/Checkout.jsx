@@ -70,6 +70,15 @@ const Checkout = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleNumberChange = (e) => {
+    const { name, value } = e.target;
+    // Only allow numbers, spaces, hyphens, and plus signs for phone
+    const sanitizedValue = name === 'phone'
+      ? value.replace(/[^0-9+\s-]/g, '')
+      : value.replace(/[^0-9]/g, ''); // Only numbers for zipCode
+    setFormData(prev => ({ ...prev, [name]: sanitizedValue }));
+  };
+
   const handleProceedToPayment = async (e) => {
     e.preventDefault();
 
@@ -265,8 +274,10 @@ const Checkout = () => {
                   name="zipCode"
                   required
                   value={formData.zipCode}
-                  onChange={handleChange}
+                  onChange={handleNumberChange}
                   placeholder="Enter Zip Code"
+                  pattern="[0-9]*"
+                  inputMode="numeric"
                   className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-gray-400"
                 />
               </div>
@@ -281,8 +292,10 @@ const Checkout = () => {
                   name="phone"
                   required
                   value={formData.phone}
-                  onChange={handleChange}
+                  onChange={handleNumberChange}
                   placeholder="Enter Phone Number"
+                  pattern="[0-9+\s-]*"
+                  inputMode="tel"
                   className="w-full px-4 py-3 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary placeholder:text-gray-400"
                 />
               </div>

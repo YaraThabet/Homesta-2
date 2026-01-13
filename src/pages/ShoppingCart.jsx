@@ -42,14 +42,19 @@ const ShoppingCart = () => {
           total: res.data.totalPrice || 0
         });
 
-        // Fetch images
-        // Fetch images and stock details
-        mappedItems.forEach(async (item) => {
+        // Efficiently fetch all required product details and filter deleted ones
+        const enrichmentPromises = mappedItems.map(async (item) => {
           try {
             const [imgRes, prodRes] = await Promise.all([
               api.get(`/ProductImages/product/${item.productId}`).catch(() => ({ data: null })),
               api.get(`/Product/GetProductById/${item.productId}`).catch(() => ({ data: null }))
             ]);
+
+            // If product is not found (deleted), return null so we can filter it
+            if (!prodRes || !prodRes.data || (prodRes.status === 404)) {
+              console.warn(`Product ${item.productId} seems to be deleted. Removing from cart view.`);
+              return null;
+            }
 
             let url = null;
             if (imgRes.data && Array.isArray(imgRes.data.images) && imgRes.data.images.length > 0) {
@@ -63,17 +68,32 @@ const ShoppingCart = () => {
               fullUrl = url.startsWith('http') ? url : `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
             }
 
-            const stock = prodRes?.data?.quantity !== undefined ? prodRes.data.quantity : 100;
+            const stock = prodRes.data.quantity !== undefined ? prodRes.data.quantity : 100;
 
-            setCartItems(prev => prev.map(p => p.id === item.id ? {
-              ...p,
-              image: fullUrl || p.image,
+            return {
+              ...item,
+              image: fullUrl || item.image,
               maxQuantity: stock
-            } : p));
+            };
           } catch (e) {
             console.log('Failed to load details for cart item', item.id);
+            return item; // Keep it if we just had a network error on images
           }
         });
+
+        const results = await Promise.all(enrichmentPromises);
+        const filteredItems = results.filter(item => item !== null);
+        setCartItems(filteredItems);
+
+        // Recalculate summary based on filtered items if necessary, 
+        // though the backend should handle this usually. 
+        // For UI consistency, we update the subtotal.
+        const newSubtotal = filteredItems.reduce((acc, curr) => acc + (curr.price * curr.quantity), 0);
+        setCartSummary(prev => ({
+          ...prev,
+          subTotal: newSubtotal,
+          total: newSubtotal + prev.shipping + prev.tax
+        }));
 
       } else {
         setCartItems([]);

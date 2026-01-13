@@ -110,7 +110,14 @@ const OrderDetailsModal = ({ order, isOpen, onClose, loading }) => {
                                   />
                                 </div>
                                 <div>
-                                  <p className="font-bold text-gray-900 line-clamp-1">{item.productName}</p>
+                                  <p className="font-bold text-gray-900 line-clamp-1">
+                                    {item.productName}
+                                    {item.isDeleted && (
+                                      <span className="ml-2 text-[8px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded uppercase font-black tracking-widest leading-none align-middle">
+                                        Product Deleted
+                                      </span>
+                                    )}
+                                  </p>
                                   <p className="text-[10px] text-muted-foreground font-black uppercase flex items-center gap-1.5 mt-1" title={item.productColor}>
                                     Color:
                                     <span
@@ -200,12 +207,29 @@ const Orders = () => {
 
           if (detailedOrder.items) {
             const enrichedItems = await Promise.all(detailedOrder.items.map(async (item) => {
-              const matchingProduct = products.find(p =>
-                p.name?.toLowerCase().trim() === item.productName?.toLowerCase().trim()
-              );
+              const currentOrderName = item.productName || item.name || "";
+
+              // Priority 1: Match by ID
+              let matchingProduct = item.productId
+                ? products.find(p => (p.productId || p.id) == item.productId)
+                : null;
+
+              // Verify ID match with name similarity
+              if (matchingProduct && currentOrderName) {
+                const catName = (matchingProduct.name || "").toLowerCase();
+                const ordName = currentOrderName.toLowerCase();
+                if (!catName.includes(ordName) && !ordName.includes(catName)) {
+                  matchingProduct = null;
+                }
+              }
+
+              // Priority 2: Match by name if ID failed
+              if (!matchingProduct && currentOrderName) {
+                matchingProduct = products.find(p => p.name?.toLowerCase().trim() === currentOrderName.toLowerCase().trim());
+              }
 
               const productId = item.productId || matchingProduct?.productId;
-              let imageUrl = item.image || item.imagePath || item.productImage;
+              let imageUrl = item.image || item.imagePath || item.productImage || matchingProduct?.imagePath || matchingProduct?.image;
 
               if (!imageUrl && productId) {
                 try {
@@ -219,12 +243,22 @@ const Orders = () => {
                   if (imageUrl) {
                     imageUrl = imageUrl.startsWith('http') ? imageUrl : `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
                   }
-                } catch (err) {
-                  // ignore image fetch error
-                }
+                } catch (err) { }
               }
-              return { ...item, productId, image: imageUrl, imagePath: imageUrl };
+              const isDeleted = !matchingProduct;
+
+              return {
+                ...item,
+                name: currentOrderName,
+                productName: currentOrderName,
+                color: item.color || item.productColor,
+                productId,
+                image: imageUrl,
+                imagePath: imageUrl,
+                isDeleted
+              };
             }));
+
             detailedOrder.items = enrichedItems;
           }
 
@@ -302,11 +336,14 @@ const Orders = () => {
               }
             }
 
+            const isDeleted = !products.some(p => (p.productId || p.id) == productId);
+
             return {
               ...item,
               productId,
               image: imageUrl,
-              imagePath: imageUrl
+              imagePath: imageUrl,
+              isDeleted
             };
           })
         );
@@ -412,7 +449,14 @@ const Orders = () => {
                           />
                         </div>
                         <div className="flex-1">
-                          <h3 className="font-bold text-foreground text-sm">{item.productName}</h3>
+                          <h3 className="font-bold text-foreground text-sm">
+                            {item.productName}
+                            {item.isDeleted && (
+                              <span className="ml-2 text-[8px] bg-red-50 text-red-500 px-1.5 py-0.5 rounded uppercase font-black tracking-widest leading-none align-middle border border-red-100">
+                                Deleted
+                              </span>
+                            )}
+                          </h3>
                           <div className="flex items-center gap-2 mt-1">
                             <span className="text-xs text-muted-foreground font-medium">Qty: {item.quantity}</span>
                             <span className="text-muted-foreground text-xs">•</span>

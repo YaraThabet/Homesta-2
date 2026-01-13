@@ -38,7 +38,7 @@ const ContactUs = () => {
       return;
     }
 
-    const recipient = 'mohamedabozahda21@gmail.com';
+    const recipient = 'HomestaTeam@gmail.com';
     const subject = `${formData.subject || 'New message'}`;
     const bodyLines = [
       `Name: ${formData.name}`,
@@ -202,7 +202,7 @@ const ContactUs = () => {
                   </p>
                   <p className="flex items-center text-teal-100">
                     <Mail className="w-4 h-4 mr-2" />
-                    example@gmail.com
+                    HomestaTeam@gmail.com
                   </p>
                 </div>
               </div>

@@ -55,15 +55,17 @@ const TrackingOrder = () => {
           if (orderData.items) {
             const enrichedItems = await Promise.all(
               orderData.items.map(async (item) => {
-                // Find matching product by name (case-insensitive)
-                const matchingProduct = products.find(p =>
-                  p.name?.toLowerCase().trim() === item.productName?.toLowerCase().trim()
-                );
+                // Priority 1: Use productId from item response
+                // Priority 2: Match product catalog by productId (if item has it)
+                // Priority 3: Fallback match by name (if item lacks productId)
+                const matchingProduct = item.productId
+                  ? products.find(p => (p.productId || p.id) == item.productId)
+                  : products.find(p => p.name?.toLowerCase().trim() === item.productName?.toLowerCase().trim());
 
                 const productId = item.productId || matchingProduct?.productId;
-                let imageUrl = item.imagePath || item.image || item.productImage;
+                let imageUrl = item.imagePath || item.image || item.productImage || matchingProduct?.imagePath || matchingProduct?.image;
 
-                // Fetch image if we have productId but no image
+                // Fetch image from secondary API if still missing
                 if (!imageUrl && productId) {
                   try {
                     console.log(`🖼️ Fetching image for: ${item.productName} (ID: ${productId})`);
@@ -83,11 +85,18 @@ const TrackingOrder = () => {
                   }
                 }
 
+                const isDeleted = !products.some(p => (p.productId || p.id) == productId);
+
                 return {
                   ...item,
+                  // Normalize for ProductItem component
+                  name: item.name || item.productName,
+                  color: item.color || item.productColor,
+                  price: item.price || item.finalUnitPrice || (item.total && item.quantity ? item.total / item.quantity : 0),
                   productId,
                   imagePath: imageUrl,
-                  image: imageUrl
+                  image: imageUrl,
+                  isDeleted
                 };
               })
             );
@@ -193,7 +202,8 @@ const TrackingOrder = () => {
                     color: item.productColor || item.color,
                     image: getImageUrl(item.imagePath || item.image || item.productImage),
                     quantity: item.quantity,
-                    price: item.finalUnitPrice ?? item.unitPrice ?? item.price
+                    price: item.finalUnitPrice ?? item.unitPrice ?? item.price,
+                    isDeleted: item.isDeleted
                   }} />
                 ))}
               </div>

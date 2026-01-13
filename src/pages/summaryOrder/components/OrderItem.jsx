@@ -22,6 +22,7 @@ export default function OrderItem({
   onRemove,
   onQuantityChange,
   maxQuantity,
+  isDeleted,
 }) {
   const [quantity, setQuantity] = useState(initialQuantity);
   const { formatPrice, t, showAlert } = useAppContext();
@@ -73,7 +74,14 @@ export default function OrderItem({
 
         {/* Details */}
         <div className="flex-1 w-full text-center md:text-left">
-          <h3 className="text-lg font-bold text-gray-900 mb-1">{name}</h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-1">
+            {name}
+            {isDeleted && (
+              <span className="ml-2 text-[8px] bg-red-50 text-red-500 px-1.5 py-0.5 rounded uppercase font-black tracking-widest leading-none align-middle border border-red-100">
+                Product Deleted
+              </span>
+            )}
+          </h3>
           <p className="text-sm text-gray-500 font-medium mb-1">
             {color ? (
               <span className="inline-flex items-center gap-1" title={color}>

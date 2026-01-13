@@ -36,10 +36,21 @@ const StoreProducts = () => {
                 cats.forEach(c => cMap[c.id || c.categoryId] = c.name);
                 setCategoryMap(cMap);
 
-                // 3. Fetch Products for this specific store
-                const productsRes = await api.get(`/Store/${id}/products`);
+                // 3. Fetch Products for this specific store and global catalog
+                const [productsRes, globalRes] = await Promise.all([
+                    api.get(`/Store/${id}/products`),
+                    api.get('Product/GetAllProducts')
+                ]);
+
                 const productsList = productsRes.data?.products || (Array.isArray(productsRes.data) ? productsRes.data : []);
-                setProducts(productsList);
+                const globalActive = Array.isArray(globalRes.data) ? globalRes.data : [];
+
+                // Filter out products not in global active list
+                const filteredActive = productsList.filter(p =>
+                    globalActive.some(active => (active.productId || active.id) == (p.productId || p.id))
+                );
+
+                setProducts(filteredActive);
 
             } catch (err) {
                 console.error("Failed to fetch store products:", err);

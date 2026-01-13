@@ -31,8 +31,8 @@ const AddProduct = () => {
 	const [description, setDescription] = useState('');
 	const [price, setPrice] = useState('');
 	const [stock, setStock] = useState('');
-	const [discount, setDiscount] = useState('0');
-	const [deliveryTime, setDeliveryTime] = useState('0');
+	const [discount, setDiscount] = useState('');
+	const [deliveryTime, setDeliveryTime] = useState('');
 	const [rating, setRating] = useState('0');
 	const [currentColor, setCurrentColor] = useState('');
 	const [colors, setColors] = useState([]);
@@ -176,8 +176,8 @@ const AddProduct = () => {
 		setDescription('');
 		setPrice('');
 		setStock('');
-		setDiscount('0');
-		setDeliveryTime('0');
+		setDiscount('');
+		setDeliveryTime('');
 		setRating('0');
 		setCurrentColor('');
 		setColors([]);
@@ -545,11 +545,11 @@ const AddProduct = () => {
 												value={discount}
 												onChange={(e) => setDiscount(e.target.value)}
 												placeholder="0"
-												className="w-full bg-gray-50 border border-transparent focus:bg-white focus:border-[#205457]/30 rounded-2xl px-5 py-4 font-bold text-gray-900 outline-none transition-all"
+												className="w-full bg-gray-50 border border-transparent focus:bg-white focus:border-[#205457]/30 rounded-2xl px-5 py-4 font-bold text-gray-900 outline-none transition-all placeholder:text-gray-400"
 											/>
 										</div>
 
-										{discount > 0 && price > 0 && (
+										{discount && discount > 0 && price > 0 && (
 											<div className="col-span-2 p-4 bg-[#205457]/5 rounded-2xl border border-[#205457]/10">
 												<div className="flex justify-between items-center text-xs font-bold uppercase tracking-widest text-[#205457]">
 													<span>Final Selling Price:</span>
@@ -577,7 +577,7 @@ const AddProduct = () => {
 												value={deliveryTime}
 												onChange={(e) => setDeliveryTime(e.target.value)}
 												placeholder="0"
-												className="w-full bg-gray-50 border border-transparent focus:bg-white focus:border-[#205457]/30 rounded-2xl px-5 py-4 font-bold text-gray-900 outline-none transition-all"
+												className="w-full bg-gray-50 border border-transparent focus:bg-white focus:border-[#205457]/30 rounded-2xl px-5 py-4 font-bold text-gray-900 outline-none transition-all placeholder:text-gray-400"
 											/>
 										</div>
 									</div>

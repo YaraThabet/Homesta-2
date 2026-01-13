@@ -49,7 +49,7 @@ const SafeImage = ({ src, alt, type = 'product', className = '', ...props }) => 
         const Icon = config.icon;
 
         return (
-            <div className={`flex flex-col items-center justify-center w-full h-full min-h-[inherit] ${config.bgColor} ${className} border border-dashed border-gray-200 rounded-lg animate-pulse`}>
+            <div className={`flex flex-col items-center justify-center w-full h-full min-h-[inherit] ${config.bgColor} border border-dashed border-gray-200 ${className}`}>
                 <Icon className={`w-1/3 h-1/3 ${config.iconColor} mb-2`} strokeWidth={1.5} />
                 <span className={`text-[10px] font-bold uppercase tracking-widest ${config.iconColor} opacity-60`}>
                     No {config.text}

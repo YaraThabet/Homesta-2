@@ -168,10 +168,21 @@ const Products = () => {
                     const sid = myStore.storeId || myStore.id;
                     localStorage.setItem('storeId', sid.toString());
 
-                    // 3. Fetch Products
-                    const productsRes = await api.get(`/Store/${sid}/products`);
+                    // 3. Fetch Products and filter against global active list
+                    const [productsRes, globalRes] = await Promise.all([
+                        api.get(`/Store/${sid}/products`),
+                        api.get('Product/GetAllProducts')
+                    ]);
+
                     const productsList = productsRes.data?.products || (Array.isArray(productsRes.data) ? productsRes.data : []);
-                    setProducts(productsList);
+                    const globalActive = Array.isArray(globalRes.data) ? globalRes.data : [];
+
+                    // Only show products that exist in the global active catalog
+                    const filteredActive = productsList.filter(p =>
+                        globalActive.some(active => (active.productId || active.id) == (p.productId || p.id))
+                    );
+
+                    setProducts(filteredActive);
                 } else {
                     setError("No store found for your account. Please create a store first.");
                     navigate('/create-store');

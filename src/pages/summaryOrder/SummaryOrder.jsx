@@ -47,29 +47,43 @@ export default function Index() {
       console.log('🏪 Products from API:', products);
 
       if (order.items) {
-        // 2. Enrich order items with productId from products (match by product name)
+        // 2. Enrich order items with extra details from products catalog
         const enriched = order.items.map(item => {
-          // Find matching product by name (case-insensitive)
-          const matchingProduct = products.find(p =>
-            p.name?.toLowerCase().trim() === item.productName?.toLowerCase().trim()
-          );
+          // Priority 1: Use productId from item response
+          // Priority 2: Match product catalog by productId (if item has it)
+          // Priority 3: Fallback match by name (if item lacks productId)
+          const matchingProduct = item.productId
+            ? products.find(p => (p.productId || p.id) == item.productId)
+            : products.find(p => p.name?.toLowerCase().trim() === item.productName?.toLowerCase().trim());
+
+          const finalProductId = item.productId || matchingProduct?.productId;
+          const effectivePrice = item.finalUnitPrice ?? item.finalPrice ??
+            (item.subTotal && item.quantity > 0 ? item.subTotal / item.quantity : item.unitPrice);
+
+          const isDeleted = !products.some(p => (p.productId || p.id) == finalProductId);
 
           return {
             ...item,
-            // Add productId from products if not present in order
-            productId: item.productId || matchingProduct?.productId,
-            // Keep existing price logic
-            effectivePrice: item.finalUnitPrice ?? item.finalPrice ??
-              (item.subTotal && item.quantity > 0 ? item.subTotal / item.quantity : item.unitPrice),
-            maxQuantity: matchingProduct?.quantity ?? 100
+            // Normalize for components
+            name: item.name || item.productName,
+            color: item.color || item.productColor,
+            price: effectivePrice,
+            originalPrice: item.originalUnitPrice || item.unitPrice || item.price,
+            productId: finalProductId,
+            effectivePrice: effectivePrice,
+            maxQuantity: matchingProduct?.quantity ?? 100,
+            // Try to get image from catalog first if available
+            image: item.image || matchingProduct?.imagePath || matchingProduct?.image,
+            isDeleted
           };
         });
 
-        console.log('✨ Enriched order items with productIds:', enriched);
+        // 3. Keep all items, even if deleted from catalog
+        const enrichedWithImages = [...enriched];
 
-        // 3. Fetch images for items that have productId
-        for (let i = 0; i < enriched.length; i++) {
-          const item = enriched[i];
+        // 4. Fetch images for items that have productId
+        for (let i = 0; i < enrichedWithImages.length; i++) {
+          const item = enrichedWithImages[i];
           if (!item.image && item.productId) {
             try {
               console.log(`🖼️ Fetching image for: ${item.productName} (ID: ${item.productId})`);
@@ -84,7 +98,7 @@ export default function Index() {
 
               if (url) {
                 const fullUrl = url.startsWith('http') ? url : `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
-                enriched[i].image = fullUrl;
+                enrichedWithImages[i].image = fullUrl;
                 console.log(`✅ Image loaded: ${fullUrl}`);
               }
             } catch (err) {
@@ -93,7 +107,7 @@ export default function Index() {
           }
         }
 
-        setItems(enriched);
+        setItems(enrichedWithImages);
       }
     } catch (err) {
       console.error("Fetch Error:", err);
@@ -135,9 +149,8 @@ export default function Index() {
   }, 0);
 
   const originalSubtotal = items.reduce((sum, item) => {
-    // We strictly want the ORIGINAL price here. fallback to price if unitPrice missing.
-    // Do NOT fallback to finalUnitPrice as that is the discounted price.
-    const price = item.unitPrice || item.price || 0;
+    // Priority: originalUnitPrice (from new API), then unitPrice/price legacy
+    const price = item.originalUnitPrice || item.unitPrice || item.price || 0;
     // If original price is 0 or less than effective price, treat effective price as original (no discount)
     const effectivePrice = item.effectivePrice ?? item.finalPrice ?? item.unitPrice ?? 0;
     const finalOriginal = (price > effectivePrice) ? price : effectivePrice;
@@ -233,6 +246,7 @@ export default function Index() {
                         price={price}
                         originalPrice={originalPrice}
                         initialQuantity={item.quantity}
+                        isDeleted={item.isDeleted}
                         onRemove={() => handleRemove(item.orderItemId)}
                         onQuantityChange={(qty) =>
                           handleQuantityChange(item.orderItemId, qty)

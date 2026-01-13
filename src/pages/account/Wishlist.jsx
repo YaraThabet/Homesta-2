@@ -83,6 +83,12 @@ const Wishlist = () => {
             const res = await api.get(`/Product/GetProductById/${item.id}`);
             const prodData = res.data;
 
+            // If product is missing or deleted status (if any)
+            if (!prodData || res.status === 404) {
+              console.warn(`Product ${item.id} seems to be deleted. Removing from wishlist.`);
+              return null;
+            }
+
             // Extract first color if current color is default/missing
             let autoColor = item.color;
             if (!autoColor || autoColor.toLowerCase() === 'default') {
@@ -104,9 +110,18 @@ const Wishlist = () => {
             };
           } catch (e) {
             console.warn(`Could not sync item ${item.id}`, e);
+            // If it's a 404, we definitely want to remove it
+            if (e.response?.status === 404) return null;
             return item;
           }
         }));
+
+        const filteredItems = enhancedItems.filter(i => i !== null);
+
+        // Update localStorage if some were removed
+        if (filteredItems.length !== parsed.length) {
+          localStorage.setItem('wishlist', JSON.stringify(filteredItems));
+        }
 
         if (categoryFilter) {
           try {
@@ -119,7 +134,7 @@ const Wishlist = () => {
           setCategoryName("");
         }
 
-        setItems(enhancedItems);
+        setItems(filteredItems);
       } catch (err) {
         console.error('Failed to load wishlist', err);
         setItems([]);

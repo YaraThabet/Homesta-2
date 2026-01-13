@@ -38,10 +38,11 @@ const AccountSidebar = ({
       <div className="flex items-center gap-3 mb-5">
         <div className="h-12 w-12 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center overflow-hidden">
           {profileImage ? (
-            <img
-              src={`http://homefinish.runasp.net${profileImage.startsWith('/') ? '' : '/'}${profileImage}`}
+            <SafeImage
+              src={profileImage}
               alt={`${firstName} ${lastName}`}
-              className="w-full h-full object-cover"
+              type="profile"
+              className="w-full h-full object-cover rounded-full"
             />
           ) : (
             <span className="text-gray-600 font-medium text-sm">

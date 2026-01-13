@@ -424,12 +424,32 @@ const StoreOrdersList = ({ storeId }) => {
 
                     // Enrich items with images
                     const enrichedItems = await Promise.all(storeItems.map(async (item) => {
-                        const matchingProduct = products.find(p =>
-                            p.name?.toLowerCase().trim() === item.productName?.toLowerCase().trim()
-                        );
+                        // Priority 1: Use productId from item response
+                        // Priority 2: Match product catalog by productId (if item has it)
+                        // Priority 3: Fallback match by name (if item lacks productId)
+                        const currentOrderName = item.productName || item.name || "";
+
+                        // Priority 1: Match by ID
+                        let matchingProduct = item.productId
+                            ? products.find(p => (p.productId || p.id) == item.productId)
+                            : null;
+
+                        // Verify ID match with name similarity to avoid reused IDs showing wrong products
+                        if (matchingProduct && currentOrderName) {
+                            const catName = (matchingProduct.name || "").toLowerCase();
+                            const ordName = currentOrderName.toLowerCase();
+                            if (!catName.includes(ordName) && !ordName.includes(catName)) {
+                                matchingProduct = null;
+                            }
+                        }
+
+                        // Priority 2: Match by name if ID failed
+                        if (!matchingProduct && currentOrderName) {
+                            matchingProduct = products.find(p => p.name?.toLowerCase().trim() === currentOrderName.toLowerCase().trim());
+                        }
 
                         const productId = item.productId || matchingProduct?.productId;
-                        let imageUrl = item.image || item.imagePath;
+                        let imageUrl = item.image || item.imagePath || matchingProduct?.imagePath || matchingProduct?.image;
 
                         if (!imageUrl && productId) {
                             try {
@@ -444,17 +464,23 @@ const StoreOrdersList = ({ storeId }) => {
                                     imageUrl = imageUrl.startsWith('http') ? imageUrl : `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
                                 }
                             } catch (err) {
-                                console.log(`Failed to load image for ${item.productName}`);
+                                console.log(`Failed to load image for ${currentOrderName}`);
                             }
                         } else if (imageUrl && !imageUrl.startsWith('http')) {
                             imageUrl = `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
                         }
 
+                        const isDeleted = !matchingProduct;
+
                         return {
                             ...item,
+                            name: currentOrderName,
+                            productName: currentOrderName,
+                            color: item.color || item.productColor,
                             productId,
                             image: imageUrl,
-                            imagePath: imageUrl
+                            imagePath: imageUrl,
+                            isDeleted
                         };
                     }));
 
@@ -465,6 +491,7 @@ const StoreOrdersList = ({ storeId }) => {
                     return {
                         ...order,
                         items: enrichedItems,
+                        orderItems: enrichedItems,
                         displayTotal: itemsTotal > 0 ? itemsTotal : (order.orderTotal ?? order.totalPrice ?? 0)
                     };
                 }));
@@ -518,8 +545,13 @@ const StoreOrdersList = ({ storeId }) => {
                     <div className="hidden lg:block flex-1">
                         <div className="flex -space-x-3">
                             {(order.items || []).slice(0, 5).map((item, i) => (
-                                <div key={i} title={item.productName} className="w-8 h-8 rounded-full border-2 border-white bg-gray-100 overflow-hidden shadow-sm">
+                                <div key={i} title={item.productName} className={`w-8 h-8 rounded-full border-2 border-white bg-gray-100 overflow-hidden shadow-sm relative ${item.isDeleted ? 'opacity-80' : ''}`}>
                                     <SafeImage src={item.image || item.imagePath} className="w-full h-full object-cover" alt={item.productName} type="product" />
+                                    {item.isDeleted && (
+                                        <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
+                                            <span className="text-[6px] font-black text-white bg-red-600 px-0.5 rounded-sm uppercase tracking-tighter">DEL</span>
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -583,11 +615,22 @@ const AdminStoreDetails = () => {
 
                 if (foundStore) {
                     setStore(foundStore);
-                    // 2. Fetch Products
+                    // 2. Fetch Products and filter against global active list
                     console.log("Fetching products for store:", id);
-                    const prodRes = await api.get(`/Store/${id}/products`);
+                    const [prodRes, globalRes] = await Promise.all([
+                        api.get(`/Store/${id}/products`),
+                        api.get('Product/GetAllProducts')
+                    ]);
+
                     const productsList = prodRes.data?.products || (Array.isArray(prodRes.data) ? prodRes.data : []);
-                    setProducts(productsList);
+                    const globalActive = Array.isArray(globalRes.data) ? globalRes.data : [];
+
+                    // Only show products that exist in the global active catalog
+                    const filteredActive = productsList.filter(p =>
+                        globalActive.some(active => (active.productId || active.id) == (p.productId || p.id))
+                    );
+
+                    setProducts(filteredActive);
                 } else {
                     console.error("Store not found");
                 }

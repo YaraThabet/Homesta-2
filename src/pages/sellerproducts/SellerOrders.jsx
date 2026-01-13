@@ -93,9 +93,10 @@ const normalizeOrder = (o) => {
         const q = parseInt(i.quantity || i.count || i.qty || 1) || 1;
 
         // Prioritize PRODUCT id over ORDER ITEM id
-        const pid = i.productID || i.productId || i.product?.id || i.product?.productId || i.id;
+        const pid = i.productId || i.productID || i.product?.id || i.product?.productId || i.id;
 
         return {
+            ...i, // KEEP ALL ENRICHED FIELDS LIKE isDeleted
             productId: pid,
             name: i.productName || i.name || i.product?.name || "Product",
             color: i.productColor || i.color || i.product?.color || 'Standard',
@@ -119,7 +120,10 @@ const normalizeOrder = (o) => {
         id: o.orderId || o.id,
         orderDate: o.orderDate || o.createdAt,
         orderDateFormatted: o.orderDateFormatted || (o.orderDate ? new Date(o.orderDate).toLocaleString() : ""),
-        customerName: o.customerName || (o.user && o.user.userName) || "Customer",
+        customerName: o.customerName ||
+            (o.firstName && o.lastName ? `${o.firstName} ${o.lastName}` : (o.firstName || o.lastName)) ||
+            (o.user && o.user.userName) ||
+            "Customer",
         email: o.email || (o.user && o.user.email) || "",
         phone: o.phone || o.phoneNumber || (o.user && o.user.phoneNumber) || "",
         address,
@@ -243,13 +247,31 @@ const OrderDetailsModal = ({ orderId, initialData, onClose, onUpdateStatus, onIn
                         const itemsToEnrich = orderData.items || orderData.orderItems;
                         const enrichedItems = await Promise.all(
                             itemsToEnrich.map(async (item) => {
-                                const itemName = item.productName || item.name || item.product?.name || "";
-                                const matchingProduct = products.find(p =>
-                                    p.name?.toLowerCase().trim() === itemName?.toLowerCase().trim()
-                                );
+                                const currentOrderName = item.productName || item.name || item.product?.name || "";
 
-                                const productId = item.productId || matchingProduct?.productId || item.product?.id || item.productID;
-                                let imageUrl = item.image || item.imagePath || item.productImage || item.product?.image || item.product?.imageUrl;
+                                // Priority 1: Match by ID
+                                let matchingProduct = (item.productId || item.productID)
+                                    ? products.find(p => (p.productId || p.id) == (item.productId || item.productID))
+                                    : null;
+
+                                // If ID matched but name is wildly different, it might be a reused ID.
+                                // Don't trust catalog image/details if the names don't loosely match.
+                                if (matchingProduct && currentOrderName) {
+                                    const catName = (matchingProduct.name || "").toLowerCase().trim();
+                                    const ordName = currentOrderName.toLowerCase().trim();
+                                    // If names are completely different and not substrings of each other
+                                    if (!catName.includes(ordName) && !ordName.includes(catName)) {
+                                        matchingProduct = null;
+                                    }
+                                }
+
+                                // Priority 2: Match by name if ID match failed or was untrusted
+                                if (!matchingProduct && currentOrderName) {
+                                    matchingProduct = products.find(p => p.name?.toLowerCase().trim() === currentOrderName.toLowerCase().trim());
+                                }
+
+                                const productId = item.productId || item.productID || matchingProduct?.productId || item.product?.id;
+                                let imageUrl = item.image || item.imagePath || item.productImage || item.product?.image || item.product?.imageUrl || matchingProduct?.imagePath || matchingProduct?.image;
 
                                 if (!imageUrl && productId) {
                                     try {
@@ -270,11 +292,16 @@ const OrderDetailsModal = ({ orderId, initialData, onClose, onUpdateStatus, onIn
                                     imageUrl = `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
                                 }
 
+                                const isDeleted = !matchingProduct; // Only not deleted if we found a valid catalog match
+
                                 return {
                                     ...item,
+                                    name: currentOrderName, // ALWAYS use order's snapshotted name
+                                    color: item.color || item.productColor,
                                     productId,
                                     image: imageUrl,
-                                    imagePath: imageUrl
+                                    imagePath: imageUrl,
+                                    isDeleted
                                 };
                             })
                         );
@@ -282,9 +309,8 @@ const OrderDetailsModal = ({ orderId, initialData, onClose, onUpdateStatus, onIn
                         orderData.items = enrichedItems;
                         orderData.orderItems = enrichedItems;
                     }
-
                     setDetails(orderData);
-                    if (onInfoLoaded) onInfoLoaded(orderData);
+                    onInfoLoaded?.(orderData);
                 }
             } catch (err) {
                 console.error("OrderDetails fetch failed", err);
@@ -420,8 +446,11 @@ const OrderDetailsModal = ({ orderId, initialData, onClose, onUpdateStatus, onIn
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2">
-                                                    <p className="font-black text-gray-900 text-xs truncate">{item.name}</p>
-                                                    {hasDiscount && <span className="text-[9px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded">SAVE</span>}
+                                                    <p className="font-black text-gray-900 text-xs truncate">
+                                                        {item.name}
+                                                    </p>
+                                                    {item.isDeleted && <span className="text-[8px] font-black text-red-600 bg-red-50 px-1.5 py-0.5 rounded border border-red-100">DELETED</span>}
+                                                    {hasDiscount && !item.isDeleted && <span className="text-[9px] font-bold text-green-600 bg-green-50 px-1.5 py-0.5 rounded">SAVE</span>}
                                                 </div>
                                                 <p className="text-[10px] text-gray-400 font-bold mt-1">
                                                     {item.quantity}x @ ${displayPrice.toFixed(2)}
@@ -500,26 +529,41 @@ const SellerOrders = () => {
             const enrichItems = async (items) => {
                 if (!items || !Array.isArray(items)) return items;
                 return await Promise.all(items.map(async (item) => {
-                    const itemName = item.productName || item.name || item.product?.name || "";
-                    const matchingProduct = products.find(p =>
-                        p.name?.toLowerCase().trim() === itemName?.toLowerCase().trim()
-                    );
-                    const productId = item.productId || matchingProduct?.productId || item.productID || item.product?.id;
-                    let imageUrl = item.image || item.imagePath || item.productImage || item.product?.image || item.product?.imageUrl;
+                    const currentOrderName = item.productName || item.name || item.product?.name || "";
+                    const productId = item.productId || item.productID || item.product?.id;
 
-                    if (!imageUrl && productId) {
+                    let matchingProduct = productId
+                        ? products.find(p => (p.productId || p.id) == productId)
+                        : null;
+
+                    // Verify ID match with name
+                    if (matchingProduct && currentOrderName) {
+                        const catName = (matchingProduct.name || "").toLowerCase();
+                        const ordName = currentOrderName.toLowerCase();
+                        if (!catName.includes(ordName) && !ordName.includes(catName)) {
+                            matchingProduct = null;
+                        }
+                    }
+
+                    // Fallback to name match
+                    if (!matchingProduct && currentOrderName) {
+                        matchingProduct = products.find(p => p.name?.toLowerCase().trim() === currentOrderName.toLowerCase().trim());
+                    }
+
+                    const finalProductId = productId || matchingProduct?.productId || matchingProduct?.id;
+                    let imageUrl = item.image || item.imagePath || item.productImage || item.product?.image || item.product?.imageUrl || matchingProduct?.imagePath || matchingProduct?.image;
+
+                    if (!imageUrl && finalProductId) {
                         try {
-                            const imgRes = await api.get(`/ProductImages/product/${productId}`);
+                            const imgRes = await api.get(`/ProductImages/product/${finalProductId}`);
                             const foundUrl = imgRes.data?.images?.[0]?.imageUrl || imgRes.data?.[0]?.imageUrl || imgRes.data?.imageUrls?.[0];
                             if (foundUrl) imageUrl = foundUrl;
                         } catch (e) { }
                     }
 
-                    if (imageUrl && !imageUrl.startsWith('http')) {
-                        imageUrl = `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
-                    }
+                    const isDeleted = !matchingProduct;
 
-                    return { ...item, productId, image: imageUrl, imagePath: imageUrl };
+                    return { ...item, name: currentOrderName, productId: finalProductId, image: imageUrl, imagePath: imageUrl, isDeleted };
                 }));
             };
 
@@ -705,6 +749,11 @@ const SellerOrders = () => {
                                                                     className="relative w-11 h-11 rounded-xl border-2 border-white shadow-xl bg-gray-50 overflow-hidden ring-1 ring-black/5 hover:z-30 hover:scale-110 transition-all cursor-help"
                                                                 >
                                                                     <ResolvedImage src={item.image} productId={item.productId} className="w-full h-full object-cover" />
+                                                                    {item.isDeleted && (
+                                                                        <div className="absolute inset-0 bg-red-500/20 backdrop-blur-[1px] flex items-center justify-center">
+                                                                            <span className="text-[7px] font-black text-white bg-red-600 px-1 rounded-sm uppercase tracking-tighter">DEL</span>
+                                                                        </div>
+                                                                    )}
                                                                     <div className="absolute top-0 right-0 bg-[#205457] text-white text-[8px] px-1.5 py-0.5 rounded-bl-lg font-black shadow-sm">
                                                                         ×{item.quantity}
                                                                     </div>

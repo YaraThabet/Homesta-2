@@ -168,10 +168,10 @@ const ProfileForm = ({
         <div className="relative group">
           <div className="h-[100px] w-[100px] rounded-full border-4 border-white bg-gray-100 shadow-md overflow-hidden flex items-center justify-center">
             <SafeImage
-              src={profileImage ? `http://homefinish.runasp.net${profileImage.startsWith('/') ? '' : '/'}${profileImage}` : null}
+              src={profileImage}
               alt="Profile"
               type="profile"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover rounded-full"
             />
           </div>
           {isEditing && (
