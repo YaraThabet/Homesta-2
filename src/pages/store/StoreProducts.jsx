@@ -74,7 +74,7 @@ const StoreProducts = () => {
     const getImageUrl = (path) => {
         if (!path) return 'https://via.placeholder.com/300?text=No+Image';
         if (path.startsWith('http')) return path;
-        return `http://homefinish.runasp.net${path.startsWith('/') ? '' : '/'}${path}`;
+        return `${path.startsWith('/') ? '' : '/'}${path}`;
     };
 
     if (loading) return <PageLoader />;

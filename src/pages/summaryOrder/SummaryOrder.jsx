@@ -97,7 +97,7 @@ export default function Index() {
               }
 
               if (url) {
-                const fullUrl = url.startsWith('http') ? url : `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+                const fullUrl = url.startsWith('http') ? url : `${url.startsWith('/') ? '' : '/'}${url}`;
                 enrichedWithImages[i].image = fullUrl;
                 console.log(`✅ Image loaded: ${fullUrl}`);
               }
@@ -167,7 +167,7 @@ export default function Index() {
   const getImageUrl = (url) => {
     if (!url) return null;
     if (url.startsWith('http')) return url;
-    return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+    return `${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   if (loading) return <PageLoader />;

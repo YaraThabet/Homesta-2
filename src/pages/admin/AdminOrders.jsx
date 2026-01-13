@@ -14,7 +14,7 @@ const OrderDetailsModal = ({ order, onClose }) => {
     const getImageUrl = (url) => {
         if (!url || typeof url !== 'string') return null;
         if (url.startsWith('http')) return url;
-        return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+        return `${url.startsWith('/') ? '' : '/'}${url}`;
     };
 
     return createPortal(
@@ -388,13 +388,13 @@ const AdminOrders = () => {
 
                                     if (imageUrl) {
                                         // Construct full URL
-                                        imageUrl = imageUrl.startsWith('http') ? imageUrl : `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+                                        imageUrl = imageUrl.startsWith('http') ? imageUrl : `${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
                                     }
                                 } catch (err) {
                                     console.log(`Failed to load image for ${currentOrderName}`);
                                 }
                             } else if (imageUrl && !imageUrl.startsWith('http')) {
-                                imageUrl = `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+                                imageUrl = `${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
                             }
 
                             const isDeleted = !matchingProduct;

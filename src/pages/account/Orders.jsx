@@ -13,7 +13,7 @@ const OrderDetailsModal = ({ order, isOpen, onClose, loading }) => {
   const getImageUrl = (url) => {
     if (!url || typeof url !== 'string') return null;
     if (url.startsWith('http')) return url;
-    return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+    return `${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   const handlePrint = () => {
@@ -241,7 +241,7 @@ const Orders = () => {
                   }
 
                   if (imageUrl) {
-                    imageUrl = imageUrl.startsWith('http') ? imageUrl : `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+                    imageUrl = imageUrl.startsWith('http') ? imageUrl : `${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
                   }
                 } catch (err) { }
               }
@@ -280,7 +280,7 @@ const Orders = () => {
   const getImageUrl = (url) => {
     if (!url || typeof url !== 'string') return null;
     if (url.startsWith('http')) return url;
-    return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+    return `${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   useEffect(() => {
@@ -329,7 +329,7 @@ const Orders = () => {
                 }
 
                 if (imageUrl) {
-                  imageUrl = imageUrl.startsWith('http') ? imageUrl : `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+                  imageUrl = imageUrl.startsWith('http') ? imageUrl : `${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
                 }
               } catch (err) {
                 console.log(`Failed to load image for ${item.productName}`);

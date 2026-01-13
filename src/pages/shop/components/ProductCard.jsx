@@ -65,7 +65,7 @@ const ProductCard = ({ product }) => {
         }
 
         if (url && typeof url === 'string') {
-          setImageUrl(url.startsWith('http') ? url : `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`);
+          setImageUrl(url.startsWith('http') ? url : `${url.startsWith('/') ? '' : '/'}${url}`);
         }
       } catch (err) {
         // silent fail
@@ -252,8 +252,8 @@ const ProductCard = ({ product }) => {
         <button
           onClick={handleAddToCart}
           className={`absolute bottom-16 right-4 w-10 h-10 rounded-full shadow-lg flex items-center justify-center transition-all ${(product.quantity || 0) <= 0
-              ? 'bg-gray-100 text-gray-400'
-              : 'bg-white text-[#205457] hover:bg-[#205457] hover:text-white'
+            ? 'bg-gray-100 text-gray-400'
+            : 'bg-white text-[#205457] hover:bg-[#205457] hover:text-white'
             }`}
           disabled={adding}
           title={(product.quantity || 0) <= 0 ? "Out of Stock" : "Add to Cart"}

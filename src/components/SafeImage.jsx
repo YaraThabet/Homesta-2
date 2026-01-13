@@ -61,12 +61,19 @@ const SafeImage = ({ src, alt, type = 'product', className = '', ...props }) => 
     // Handle relative URLs by prepending the base URL if needed
     const getImageUrl = (url) => {
         if (!url || typeof url !== 'string') return '';
-        // If it's already a full URL or a data URL, return as is
+
+        // If it's the backend URL, strip it to make it relative (so it goes through proxy)
+        if (url.includes('homefinish.runasp.net')) {
+            return url.replace(/^https?:\/\/homefinish\.runasp\.net/, '');
+        }
+
+        // If it's a data URL or external URL (not our backend), return as is
         if (url.startsWith('http') || url.startsWith('//') || url.startsWith('blob:') || url.startsWith('data:')) {
             return url;
         }
-        // If it's a relative URL, prepend the base URL (https for stability)
-        return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+
+        // Use relative path - this is proxied by both Vite (local) and Vercel (prod)
+        return `${url.startsWith('/') ? '' : '/'}${url}`;
     };
 
     const imageUrl = getImageUrl(src);

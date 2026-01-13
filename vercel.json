@@ -1,0 +1,24 @@
+{
+    "rewrites": [
+        {
+            "source": "/api/:path*",
+            "destination": "http://homefinish.runasp.net/api/:path*"
+        },
+        {
+            "source": "/uploads/:path*",
+            "destination": "http://homefinish.runasp.net/uploads/:path*"
+        },
+        {
+            "source": "/images/:path*",
+            "destination": "http://homefinish.runasp.net/images/:path*"
+        },
+        {
+            "source": "/content/:path*",
+            "destination": "http://homefinish.runasp.net/content/:path*"
+        },
+        {
+            "source": "/product-images/:path*",
+            "destination": "http://homefinish.runasp.net/product-images/:path*"
+        }
+    ]
+}

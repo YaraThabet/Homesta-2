@@ -61,10 +61,9 @@ const AdminCategories = () => {
         // Return as is if data URI or absolute URL
         if (url.startsWith('data:') || url.startsWith('http')) return url;
 
-        // Use HTTP to avoid SSL mismatch with unconfigured backend or proxy issues
-        // Ensure only one slash between domain and path
+        // Use relative path for proxy compatibility (works in both local and prod)
         const cleanPath = url.startsWith('/') ? url.substring(1) : url;
-        return `http://homefinish.runasp.net/${cleanPath}`;
+        return `/${cleanPath}`;
     };
 
     const handleDelete = (id, type, parentId = null) => {
@@ -318,7 +317,7 @@ const CategoryModal = ({ isOpen, onClose, type, mode, initialData, parentId, ref
     const getFullImageUrl = (url) => {
         if (!url) return null;
         if (url.startsWith('data:') || url.startsWith('http')) return url;
-        return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+        return `${url.startsWith('/') ? '' : '/'}${url}`;
     };
 
     return (

@@ -15,6 +15,7 @@ import { FiYoutube } from "react-icons/fi";
 import { ImPinterest2 } from "react-icons/im";
 import { IoLogoInstagram } from "react-icons/io5";
 import { useAppContext } from "../context/AppContext";
+import SafeImage from "../components/SafeImage";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -226,9 +227,10 @@ const Navbar = () => {
                 <Link to="/account" className={`p-2 rounded-full transition-all duration-300 group ${isDarkText ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'}`} title="Profile">
                   {user.image ? (
                     <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200">
-                      <img
-                        src={`http://homefinish.runasp.net${user.image.startsWith('/') ? '' : '/'}${user.image}`}
+                      <SafeImage
+                        src={user.image}
                         alt={user.name}
+                        type="profile"
                         className="w-full h-full object-cover"
                       />
                     </div>

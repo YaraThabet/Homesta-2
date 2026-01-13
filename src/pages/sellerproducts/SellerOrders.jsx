@@ -19,7 +19,7 @@ import PageLoader from '../../components/PageLoader';
 const getImageUrl = (path) => {
     if (!path || path === 'null' || path === 'undefined') return null;
     if (path.startsWith('http')) return path;
-    return `http://homefinish.runasp.net${path.startsWith('/') ? '' : '/'}${path}`;
+    return `${path.startsWith('/') ? '' : '/'}${path}`;
 };
 
 // COMPONENT: Resolved Image for Product
@@ -283,13 +283,13 @@ const OrderDetailsModal = ({ orderId, initialData, onClose, onUpdateStatus, onIn
                                         }
 
                                         if (imageUrl) {
-                                            imageUrl = imageUrl.startsWith('http') ? imageUrl : `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+                                            imageUrl = imageUrl.startsWith('http') ? imageUrl : `${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
                                         }
                                     } catch (err) {
                                         console.log(`Failed to load image for ${item.productName}`);
                                     }
                                 } else if (imageUrl && !imageUrl.startsWith('http')) {
-                                    imageUrl = `http://homefinish.runasp.net${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+                                    imageUrl = `${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
                                 }
 
                                 const isDeleted = !matchingProduct; // Only not deleted if we found a valid catalog match

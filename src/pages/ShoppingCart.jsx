@@ -65,7 +65,7 @@ const ShoppingCart = () => {
 
             let fullUrl = null;
             if (url && typeof url === 'string') {
-              fullUrl = url.startsWith('http') ? url : `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+              fullUrl = url.startsWith('http') ? url : `${url.startsWith('/') ? '' : '/'}${url}`;
             }
 
             const stock = prodRes.data.quantity !== undefined ? prodRes.data.quantity : 100;

@@ -117,7 +117,7 @@ const ProductDetail = () => {
   const currentUserId = localStorage.getItem('userId');
 
   // Base URL for images
-  const IMG_BASE_URL = "http://homefinish.runasp.net/";
+  const IMG_BASE_URL = "/";
 
   useEffect(() => {
     const fetchProductData = async () => {

@@ -21,7 +21,7 @@ const TrackingOrder = () => {
   const getImageUrl = (url) => {
     if (!url || typeof url !== 'string') return null;
     if (url.startsWith('http')) return url;
-    return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+    return `${url.startsWith('/') ? '' : '/'}${url}`;
   };
 
   useEffect(() => {

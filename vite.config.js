@@ -17,6 +17,26 @@ export default defineConfig({
         target: 'http://localhost:4000',
         changeOrigin: true,
         secure: false
+      },
+      '/uploads': {
+        target: 'http://homefinish.runasp.net',
+        changeOrigin: true,
+        secure: false
+      },
+      '/images': {
+        target: 'http://homefinish.runasp.net',
+        changeOrigin: true,
+        secure: false
+      },
+      '/content': {
+        target: 'http://homefinish.runasp.net',
+        changeOrigin: true,
+        secure: false
+      },
+      '/product-images': {
+        target: 'http://homefinish.runasp.net',
+        changeOrigin: true,
+        secure: false
       }
     }
   }

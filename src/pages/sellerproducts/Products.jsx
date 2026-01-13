@@ -483,7 +483,7 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) 
     const getImageUrl = (url) => {
         if (!url || typeof url !== 'string') return null;
         if (url.startsWith('http')) return url;
-        return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+        return `${url.startsWith('/') ? '' : '/'}${url}`;
     };
 
     useEffect(() => {
@@ -673,7 +673,7 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) 
     );
 };
 
-const backendBase = 'http://homefinish.runasp.net';
+const backendBase = '';
 
 const ProductCard = ({ product, onEdit, onDelete, onViewDetails, categoryMap }) => {
     const [images, setImages] = useState([]);
@@ -700,7 +700,7 @@ const ProductCard = ({ product, onEdit, onDelete, onViewDetails, categoryMap }) 
     const getImageUrl = (url) => {
         if (!url || typeof url !== 'string') return null;
         if (url.startsWith('http')) return url;
-        return `http://homefinish.runasp.net${url.startsWith('/') ? '' : '/'}${url}`;
+        return `${url.startsWith('/') ? '' : '/'}${url}`;
     };
 
     const displayImage = images.length > 0 ? images[0] : product.imagePath || product.image;
