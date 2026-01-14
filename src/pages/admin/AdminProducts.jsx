@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import SafeImage from '../../components/SafeImage';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Package, Search, Plus, Filter, MoreVertical, Eye, Star, DollarSign, Tag, Image as ImageIcon, X } from 'lucide-react';
+import { Package, Search, Plus, Filter, MoreVertical, Eye, Star, DollarSign, Tag, Image as ImageIcon, X, Trash2 } from 'lucide-react';
 import ConfirmModal from '../../components/ConfirmModal';
 import api from '../../lib/axios';
 
@@ -257,9 +258,10 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap, st
 };
 
 // --- PRODUCT CARD COMPONENT ---
-const ProductCard = ({ product, handleDelete, onViewDetails, categoryMap, storeMap }) => {
+const ProductCard = ({ product, onViewDetails, categoryMap, storeMap }) => {
     const [images, setImages] = useState([]);
     const [loadingImage, setLoadingImage] = useState(true);
+    const [showActions, setShowActions] = useState(false);
 
     useEffect(() => {
         const fetchImages = async () => {
@@ -283,7 +285,8 @@ const ProductCard = ({ product, handleDelete, onViewDetails, categoryMap, storeM
             layout
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white p-5 rounded-[40px] border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-[#205457]/5 transition-all group hover:-translate-y-1 duration-500 flex flex-col h-full"
+            className="bg-white p-5 rounded-[40px] border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-[#205457]/5 transition-all group hover:-translate-y-1 duration-500 flex flex-col h-full cursor-pointer"
+            onClick={() => setShowActions(!showActions)}
         >
             <div className="relative aspect-square bg-gray-50 rounded-[30px] mb-4 overflow-hidden flex-shrink-0">
                 <SafeImage
@@ -295,13 +298,13 @@ const ProductCard = ({ product, handleDelete, onViewDetails, categoryMap, storeM
                 <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-[#205457] shadow-sm">
                     {categoryMap[product.categoryId] || 'Uncategorized'}
                 </div>
-                <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity transform translate-y-2 group-hover:translate-y-0 duration-300">
+                <div className={`absolute top-3 right-3 flex gap-2 ${showActions ? 'opacity-100' : 'opacity-0'} md:opacity-0 md:group-hover:opacity-100 transition-opacity transform md:translate-y-2 md:group-hover:translate-y-0 duration-300`}>
                     <button
-                        onClick={() => onViewDetails(product)}
-                        className="p-2 bg-white/90 backdrop-blur-md rounded-full text-[#205457] hover:bg-[#205457] hover:text-white transition-colors shadow-sm"
+                        onClick={(e) => { e.stopPropagation(); onViewDetails(product); }}
+                        className="p-3 bg-white/90 backdrop-blur-md rounded-full text-[#205457] hover:bg-[#205457] hover:text-white transition-all transform hover:scale-110 shadow-lg"
                         title="View Full Details"
                     >
-                        <Eye size={14} />
+                        <Eye size={18} />
                     </button>
                 </div>
                 {images.length > 1 && (
@@ -351,6 +354,7 @@ const ProductCard = ({ product, handleDelete, onViewDetails, categoryMap, storeM
 
 // --- MAIN PAGE COMPONENT ---
 const AdminProducts = () => {
+    const navigate = useNavigate();
     const { showAlert, formatPrice } = useAppContext();
     const [products, setProducts] = useState([]);
     const [stores, setStores] = useState([]);
@@ -415,10 +419,6 @@ const AdminProducts = () => {
 
         fetchAllData();
     }, []);
-
-    const handleDelete = (id) => {
-        // Protected for Admin View
-    };
 
     // --- DERIVED STATE FOR FILTERS ---
     const categoryNames = ['All', ...new Set(Object.values(categoryMap))];
@@ -587,7 +587,6 @@ const AdminProducts = () => {
                                         product={product}
                                         categoryMap={categoryMap}
                                         storeMap={sm}
-                                        handleDelete={handleDelete}
                                         onViewDetails={setSelectedProduct}
                                     />
                                 ));

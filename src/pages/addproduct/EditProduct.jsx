@@ -21,6 +21,7 @@ import {
     List
 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
+import ConfirmModal from '../../components/ConfirmModal';
 import api from '../../lib/axios';
 import SafeImage from '../../components/SafeImage';
 
@@ -43,6 +44,7 @@ const EditProduct = () => {
     const [serverImages, setServerImages] = useState([]); // [{productImageId, imageUrl}]
     const [newFiles, setNewFiles] = useState([]);
     const [newPreviews, setNewPreviews] = useState([]);
+    const [deleteImgId, setDeleteImgId] = useState(null);
 
     const [categories, setCategories] = useState([]);
     const [subCategories, setSubCategories] = useState([]);
@@ -214,16 +216,19 @@ const EditProduct = () => {
     };
 
     const handleDeleteServerImage = async (imgId) => {
-        if (imgId === 0) {
-            setServerImages([]);
-            return;
-        }
+        setDeleteImgId(imgId);
+    };
+
+    const confirmDeleteImage = async () => {
+        if (!deleteImgId) return;
         try {
-            await api.delete(`/ProductImages/${imgId}`);
-            setServerImages(prev => prev.filter(img => img.productImageId !== imgId));
-            showAlert("Image removed from server", "success", "Deleted");
+            await api.delete(`/ProductImages/${deleteImgId}`);
+            setServerImages(prev => prev.filter(img => img.productImageId !== deleteImgId));
+            showAlert("Image deleted", "success");
         } catch (err) {
-            showAlert("Failed to delete image", "error", "Error");
+            showAlert("Failed to delete image", "error");
+        } finally {
+            setDeleteImgId(null);
         }
     };
 
@@ -426,60 +431,22 @@ const EditProduct = () => {
                                     <AnimatePresence>
                                         {/* Server Images */}
                                         {serverImages.map((img, index) => (
-                                            <motion.div
-                                                key={`existing-${img.productImageId || index}-${img.imageUrl}`}
-                                                layout
-                                                initial={{ opacity: 0, scale: 0.9 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                exit={{ opacity: 0, scale: 0.9 }}
-                                                className="relative aspect-square rounded-[30px] overflow-hidden shadow-xl border-4 border-white group"
-                                            >
-                                                <SafeImage src={img.imageUrl} className="w-full h-full object-cover" alt="Product" />
-                                                <div className="absolute top-4 left-4">
-                                                    <span className="bg-[#205457] text-white text-[8px] font-black px-2 py-1 rounded-full uppercase tracking-widest shadow-lg">Live</span>
-                                                </div>
-                                                <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-2">
-                                                    <label className="w-full py-2 bg-white/20 backdrop-blur-md text-white rounded-xl text-[9px] font-black tracking-widest uppercase border border-white/30 text-center cursor-pointer hover:bg-white/40 transition-all">
-                                                        Change
-                                                        <input type="file" className="hidden" accept="image/*" onChange={(e) => {
-                                                            if (e.target.files[0]) handleUpdateServerImage(img.productImageId, e.target.files[0]);
-                                                        }} />
-                                                    </label>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleDeleteServerImage(img.productImageId)}
-                                                        className="w-full py-2 bg-red-500/80 backdrop-blur-md text-white rounded-xl text-[9px] font-black tracking-widest uppercase border border-transparent hover:bg-red-600 transition-all"
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </div>
-                                            </motion.div>
+                                            <ServerImageItem
+                                                key={`existing-${img.productImageId || index}`}
+                                                img={img}
+                                                handleUpdateServerImage={handleUpdateServerImage}
+                                                handleDeleteServerImage={handleDeleteServerImage}
+                                            />
                                         ))}
 
                                         {/* Newly Added Local Previews */}
                                         {newPreviews.map((preview, index) => (
-                                            <motion.div
+                                            <NewImagePreview
                                                 key={`new-${index}`}
-                                                layout
-                                                initial={{ opacity: 0, scale: 0.9 }}
-                                                animate={{ opacity: 1, scale: 1 }}
-                                                exit={{ opacity: 0, scale: 0.9 }}
-                                                className="relative aspect-square rounded-[30px] overflow-hidden shadow-xl border-4 border-dashed border-[#205457]/20 group"
-                                            >
-                                                <img src={preview} className="w-full h-full object-cover" alt="New Preview" />
-                                                <div className="absolute top-4 left-4">
-                                                    <span className="bg-amber-500 text-white text-[8px] font-black px-2 py-1 rounded-full uppercase tracking-widest shadow-lg">Pending</span>
-                                                </div>
-                                                <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex justify-center">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => removeNewImage(index)}
-                                                        className="w-full py-2 bg-white/20 backdrop-blur-md text-white rounded-xl text-[9px] font-black tracking-widest uppercase border border-white/30 hover:bg-red-500 transition-all"
-                                                    >
-                                                        Cancel
-                                                    </button>
-                                                </div>
-                                            </motion.div>
+                                                preview={preview}
+                                                index={index}
+                                                removeNewImage={removeNewImage}
+                                            />
                                         ))}
                                     </AnimatePresence>
 
@@ -857,7 +824,83 @@ const EditProduct = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
+            {/* Image Delete Confirmation */}
+            <ConfirmModal
+                isOpen={!!deleteImgId}
+                onClose={() => setDeleteImgId(null)}
+                onConfirm={confirmDeleteImage}
+                title="Delete Image"
+                message="Are you sure you want to remove this image? This action cannot be undone."
+            />
         </div>
+    );
+};
+
+// --- INTERNAL HELPERS ---
+const ServerImageItem = ({ img, handleUpdateServerImage, handleDeleteServerImage }) => {
+    const [showActions, setShowActions] = useState(false);
+
+    return (
+        <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="relative aspect-square rounded-[30px] overflow-hidden shadow-xl border-4 border-white group cursor-pointer"
+            onClick={() => setShowActions(!showActions)}
+        >
+            <SafeImage src={img.imageUrl || img.imagePath} className="w-full h-full object-cover" alt="Product" />
+            <div className="absolute top-4 left-4">
+                <span className="bg-[#205457] text-white text-[8px] font-black px-2 py-1 rounded-full uppercase tracking-widest shadow-lg">Live</span>
+            </div>
+            <div className={`absolute inset-0 bg-gradient-to-t from-black/80 to-transparent ${showActions ? 'opacity-100' : 'opacity-0'} md:opacity-0 md:group-hover:opacity-100 transition-opacity flex flex-col items-center justify-end p-3 gap-2`}>
+                <label
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full py-2 bg-white/20 backdrop-blur-md text-white rounded-xl text-[9px] font-black tracking-widest uppercase border border-white/30 text-center cursor-pointer hover:bg-white/40 transition-all"
+                >
+                    Change
+                    <input type="file" className="hidden" accept="image/*" onChange={(e) => {
+                        if (e.target.files[0]) handleUpdateServerImage(img.productImageId, e.target.files[0]);
+                    }} />
+                </label>
+                <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handleDeleteServerImage(img.productImageId); }}
+                    className="w-full py-2 bg-red-500/80 backdrop-blur-md text-white rounded-xl text-[9px] font-black tracking-widest uppercase border border-transparent hover:bg-red-600 transition-all"
+                >
+                    Delete
+                </button>
+            </div>
+        </motion.div>
+    );
+};
+
+const NewImagePreview = ({ preview, index, removeNewImage }) => {
+    const [showActions, setShowActions] = useState(false);
+
+    return (
+        <motion.div
+            layout
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="relative aspect-square rounded-[30px] overflow-hidden shadow-xl border-4 border-dashed border-[#205457]/20 group cursor-pointer"
+            onClick={() => setShowActions(!showActions)}
+        >
+            <img src={preview} className="w-full h-full object-cover" alt="New Preview" />
+            <div className="absolute top-4 left-4">
+                <span className="bg-amber-500 text-white text-[8px] font-black px-2 py-1 rounded-full uppercase tracking-widest shadow-lg">Pending</span>
+            </div>
+            <div className={`absolute inset-0 bg-gradient-to-t from-black/80 to-transparent ${showActions ? 'opacity-100' : 'opacity-0'} md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center justify-end p-3`}>
+                <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); removeNewImage(index); }}
+                    className="w-full py-2 bg-white/20 backdrop-blur-md text-white rounded-xl text-[9px] font-black tracking-widest uppercase border border-white/30 hover:bg-red-500 transition-all"
+                >
+                    Cancel
+                </button>
+            </div>
+        </motion.div>
     );
 };
 

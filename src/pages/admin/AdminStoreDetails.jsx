@@ -3,6 +3,7 @@ import { useAppContext } from '../../context/AppContext';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Store, Package, Mail, Phone, MapPin, ArrowLeft, Trash2, Search, AlertCircle, Eye, Star, X, Image as ImageIcon } from 'lucide-react';
+import ConfirmModal from '../../components/ConfirmModal';
 import api from '../../lib/axios';
 import PageLoader from '../../components/PageLoader';
 import SafeImage from '../../components/SafeImage';
@@ -269,9 +270,10 @@ const ProductDetailsModal = ({ product, onClose }) => {
 };
 
 // Separate component for each product card to handle individual image fetching
-const StoreProductCard = ({ product, onDeleteClick, onViewClick }) => {
+const StoreProductCard = ({ product, onViewClick }) => {
     const [images, setImages] = useState([]);
     const [loadingImage, setLoadingImage] = useState(true);
+    const [showActions, setShowActions] = useState(false);
 
     useEffect(() => {
         const fetchImages = async () => {
@@ -280,7 +282,6 @@ const StoreProductCard = ({ product, onDeleteClick, onViewClick }) => {
                 if (!id) return;
 
                 const res = await api.get(`/ProductImages/product/${id}`);
-                // API returns: { productId: id, images: [{ productImageId: x, imageUrl: "..." }] }
                 if (res.data && Array.isArray(res.data.images)) {
                     const urls = res.data.images.map(img => img.imageUrl).filter(Boolean);
                     setImages(urls);
@@ -295,7 +296,6 @@ const StoreProductCard = ({ product, onDeleteClick, onViewClick }) => {
         fetchImages();
     }, [product]);
 
-    // Helper to format image URL
     const getImageUrl = (url) => {
         if (!url || typeof url !== 'string') return null;
         if (url.startsWith('http')) return url;
@@ -309,15 +309,15 @@ const StoreProductCard = ({ product, onDeleteClick, onViewClick }) => {
             layout
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-[35px] border border-gray-100 overflow-hidden group hover:shadow-2xl hover:shadow-[#205457]/5 transition-all duration-500 flex flex-col"
+            className="bg-white rounded-[35px] border border-gray-100 overflow-hidden group hover:shadow-2xl hover:shadow-[#205457]/5 transition-all duration-500 flex flex-col cursor-pointer"
+            onClick={() => setShowActions(!showActions)}
         >
             <div className="relative aspect-square bg-gray-50 overflow-hidden">
                 {displayImage ? (
                     <img
                         src={getImageUrl(displayImage)}
                         alt={product.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 cursor-pointer"
-                        onClick={() => onViewClick(product)}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                         onError={(e) => {
                             e.target.style.display = 'none';
                             e.target.nextElementSibling.style.display = 'flex';
@@ -349,10 +349,10 @@ const StoreProductCard = ({ product, onDeleteClick, onViewClick }) => {
                 </div>
 
                 {/* Actions Overlay */}
-                <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+                <div className={`absolute inset-0 bg-black/40 ${showActions ? 'opacity-100' : 'opacity-0'} md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-[2px] z-10`}>
                     <button
-                        onClick={() => onViewClick(product)}
-                        className="p-3 bg-white text-[#205457] rounded-full flex items-center justify-center shadow-xl hover:bg-[#205457] hover:text-white transition-all transform -translate-y-4 group-hover:translate-y-0 duration-500"
+                        onClick={(e) => { e.stopPropagation(); onViewClick(product); }}
+                        className="p-3 bg-white text-[#205457] rounded-full flex items-center justify-center shadow-xl hover:bg-[#205457] hover:text-white transition-all transform hover:scale-110 duration-300"
                         title="View Details"
                     >
                         <Eye size={22} />
@@ -487,7 +487,6 @@ const StoreOrdersList = ({ storeId }) => {
                     const itemsTotal = enrichedItems.reduce((sum, item) => {
                         return sum + (item.total ?? ((item.finalUnitPrice ?? item.price ?? 0) * (item.quantity || 1)));
                     }, 0);
-
                     return {
                         ...order,
                         items: enrichedItems,
@@ -605,6 +604,43 @@ const AdminStoreDetails = () => {
     const [loadingReviews, setLoadingReviews] = useState(false);
     const [allProducts, setAllProducts] = useState([]);
 
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            // 1. Fetch Store Details
+            const storeRes = await api.get('/Store');
+            const allStores = Array.isArray(storeRes.data) ? storeRes.data : [storeRes.data];
+            const foundStore = allStores.find(s => (s.storeId || s.id).toString() === id);
+
+            if (foundStore) {
+                setStore(foundStore);
+                // 2. Fetch Products and filter against global active list
+                console.log("Fetching products for store:", id);
+                const [prodRes, globalRes] = await Promise.all([
+                    api.get(`/Store/${id}/products`),
+                    api.get('Product/GetAllProducts')
+                ]);
+
+                const productsList = prodRes.data?.products || (Array.isArray(prodRes.data) ? prodRes.data : []);
+                const globalActive = Array.isArray(globalRes.data) ? globalRes.data : [];
+                setAllProducts(globalActive);
+
+                // Only show products that exist in the global active catalog
+                const filteredActive = productsList.filter(p =>
+                    globalActive.some(active => (active.productId || active.id) == (p.productId || p.id))
+                );
+
+                setProducts(filteredActive);
+            } else {
+                console.error("Store not found");
+            }
+        } catch (err) {
+            console.error("Failed to fetch store details:", err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (activeTab === 'reviews' && id) {
             const fetchStoreReviews = async () => {
@@ -623,43 +659,6 @@ const AdminStoreDetails = () => {
     }, [activeTab, id]);
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                setLoading(true);
-                // 1. Fetch Store Details
-                const storeRes = await api.get('/Store');
-                const allStores = Array.isArray(storeRes.data) ? storeRes.data : [storeRes.data];
-                const foundStore = allStores.find(s => (s.storeId || s.id).toString() === id);
-
-                if (foundStore) {
-                    setStore(foundStore);
-                    // 2. Fetch Products and filter against global active list
-                    console.log("Fetching products for store:", id);
-                    const [prodRes, globalRes] = await Promise.all([
-                        api.get(`/Store/${id}/products`),
-                        api.get('Product/GetAllProducts')
-                    ]);
-
-                    const productsList = prodRes.data?.products || (Array.isArray(prodRes.data) ? prodRes.data : []);
-                    const globalActive = Array.isArray(globalRes.data) ? globalRes.data : [];
-                    setAllProducts(globalActive);
-
-                    // Only show products that exist in the global active catalog
-                    const filteredActive = productsList.filter(p =>
-                        globalActive.some(active => (active.productId || active.id) == (p.productId || p.id))
-                    );
-
-                    setProducts(filteredActive);
-                } else {
-                    console.error("Store not found");
-                }
-            } catch (err) {
-                console.error("Failed to fetch store details:", err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         if (id) fetchData();
     }, [id]);
 

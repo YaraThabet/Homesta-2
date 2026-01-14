@@ -681,6 +681,7 @@ const backendBase = '';
 const ProductCard = ({ product, onEdit, onDelete, onViewDetails, categoryMap, formatPrice, t }) => {
     const [images, setImages] = useState([]);
     const [loadingImage, setLoadingImage] = useState(true);
+    const [showActions, setShowActions] = useState(false);
 
     useEffect(() => {
         const fetchImages = async () => {
@@ -713,7 +714,8 @@ const ProductCard = ({ product, onEdit, onDelete, onViewDetails, categoryMap, fo
             layout
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="group bg-white rounded-[45px] overflow-hidden shadow-[0_15px_50px_rgba(0,0,0,0.02)] border border-gray-100 hover:shadow-2xl hover:shadow-[#205457]/5 transition-all duration-700 flex flex-col h-full"
+            className="group bg-white rounded-[45px] overflow-hidden shadow-[0_15px_50px_rgba(0,0,0,0.02)] border border-gray-100 hover:shadow-2xl hover:shadow-[#205457]/5 transition-all duration-700 flex flex-col h-full cursor-pointer"
+            onClick={() => setShowActions(!showActions)}
         >
             <div className="relative aspect-square overflow-hidden bg-gray-50">
                 {displayImage ? (
@@ -747,24 +749,24 @@ const ProductCard = ({ product, onEdit, onDelete, onViewDetails, categoryMap, fo
                     )}
                 </div>
 
-                <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center gap-3">
+                <div className={`absolute inset-0 bg-black/20 ${showActions ? 'opacity-100' : 'opacity-0'} md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-500 flex items-center justify-center gap-3`}>
                     <button
-                        onClick={() => onViewDetails(product)}
-                        className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-[#205457] hover:bg-[#205457] hover:text-white transition-all transform -translate-y-4 group-hover:translate-y-0 duration-500"
+                        onClick={(e) => { e.stopPropagation(); onViewDetails(product); }}
+                        className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-[#205457] hover:bg-[#205457] hover:text-white transition-all transform md:-translate-y-4 md:group-hover:translate-y-0 duration-500"
                         title="View Details"
                     >
                         <Eye size={20} />
                     </button>
                     <button
-                        onClick={onEdit}
-                        className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-[#205457] hover:bg-[#205457] hover:text-white transition-all transform -translate-y-4 group-hover:translate-y-0 duration-500 delay-75"
+                        onClick={(e) => { e.stopPropagation(); onEdit(); }}
+                        className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-[#205457] hover:bg-[#205457] hover:text-white transition-all transform md:-translate-y-4 md:group-hover:translate-y-0 duration-500 delay-75"
                         title={t('editProduct')}
                     >
                         <Edit3 size={20} />
                     </button>
                     <button
-                        onClick={onDelete}
-                        className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all transform translate-y-4 group-hover:translate-y-0 duration-500 delay-100"
+                        onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                        className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all transform md:translate-y-4 md:group-hover:translate-y-0 duration-500 delay-100"
                         title={t('deleteProduct')}
                     >
                         <Trash2 size={20} />
@@ -819,12 +821,16 @@ const ProductCard = ({ product, onEdit, onDelete, onViewDetails, categoryMap, fo
 
 const ProductRow = ({ product, onEdit, onDelete, onViewDetails, subCategoryMap }) => {
     const { t, formatPrice } = useAppContext();
+    const [showActions, setShowActions] = useState(false);
     const imageUrl = (product.imagePath || product.image)
         ? ((product.imagePath || product.image).startsWith('http') ? (product.imagePath || product.image) : `${backendBase}${product.imagePath || product.image}`)
         : 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80';
 
     return (
-        <tr className="hover:bg-gray-50/50 transition-colors group">
+        <tr
+            className="hover:bg-gray-50/50 transition-colors group cursor-pointer"
+            onClick={() => setShowActions(!showActions)}
+        >
             <td className="px-8 py-6">
                 <div className="flex items-center gap-6">
                     <div className="w-16 h-20 rounded-2xl overflow-hidden bg-gray-50 border-2 border-white shadow-sm flex-shrink-0">
@@ -874,23 +880,23 @@ const ProductRow = ({ product, onEdit, onDelete, onViewDetails, subCategoryMap }
                 )}
             </td>
             <td className="px-8 py-6 text-right">
-                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className={`flex items-center justify-end gap-2 ${showActions ? 'opacity-100' : 'opacity-0'} md:opacity-0 md:group-hover:opacity-100 transition-opacity`}>
                     <button
-                        onClick={() => onViewDetails(product)}
+                        onClick={(e) => { e.stopPropagation(); onViewDetails(product); }}
                         className="p-3 bg-white rounded-xl shadow-sm border border-gray-100 text-[#205457] hover:bg-[#205457] hover:text-white transition-all"
                         title={t('viewDetails') || 'View Details'}
                     >
                         <Eye size={18} />
                     </button>
                     <button
-                        onClick={onEdit}
+                        onClick={(e) => { e.stopPropagation(); onEdit(); }}
                         className="p-3 bg-white rounded-xl shadow-sm border border-gray-100 text-[#205457] hover:bg-[#205457] hover:text-white transition-all"
                         title={t('editProduct') || 'Edit Product'}
                     >
                         <Edit3 size={18} />
                     </button>
                     <button
-                        onClick={onDelete}
+                        onClick={(e) => { e.stopPropagation(); onDelete(); }}
                         className="p-3 bg-white rounded-xl shadow-sm border border-gray-100 text-red-500 hover:bg-red-500 hover:text-white transition-all"
                         title={t('deleteProduct') || 'Delete Product'}
                     >
