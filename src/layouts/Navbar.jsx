@@ -25,7 +25,7 @@ const Navbar = () => {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { language, setLanguage, currency, setCurrency } = useAppContext();
+  const { language, setLanguage, currency, setCurrency, t } = useAppContext();
 
   const handleLogout = async () => {
     try {
@@ -94,91 +94,103 @@ const Navbar = () => {
     { id: 5, icon: <IoLogoInstagram />, url: "#" },
   ]
   const navLinks = [
-    { id: 1, name: "Home", path: "/" },
-    { id: 2, name: "shop", path: "/shop" },
-    { id: 3, name: "categories", path: "/Category" },
-    { id: 4, name: "About Us", path: "/about" },
-    { id: 5, name: "Contact Us", path: "/contact" },
-    { id: 6, name: "blog", path: "/blogs" },
+    { id: 1, name: t('home'), path: "/" },
+    { id: 2, name: t('shop'), path: "/shop" },
+    { id: 3, name: t('categories'), path: "/Category" },
+    { id: 4, name: t('aboutUs'), path: "/about" },
+    { id: 5, name: t('contactUs'), path: "/contact" },
+    { id: 6, name: t('blog'), path: "/blogs" },
   ];
   return (
     <header className="w-full fixed z-50 top-0 left-0 font-display transition-all duration-300">
-      <section className={`w-full font-display bg-main transition-all duration-300 ${scrolled ? 'h-0 overflow-hidden opacity-0' : 'opacity-100'}`}>
-        <div className='w-[90%] font-display py-3 lg:w-[85%] mx-auto flex justify-between items-center'>
-          <a href="tel:+123-456-789" className='text-white text-xs lg:text-sm font-light hover:text-white/80 transition-colors'>Call Us: +123-456-789</a>
-          <p className='hidden lg:block text-white text-sm font-light tracking-wide'>
-            Sign up and Get 25% OFF for your first order. <Link to="/signup" className='underline font-medium hover:text-white/80 transition-colors ml-1'>Sign up now</Link>
-          </p>
-          <div className='flex items-center'>
-            <div className="flex items-center gap-1 border-r border-white/20 px-2 lg:px-4">
+      <section className={`w-full bg-[#205457] border-b border-white/5 transition-all duration-300 ${scrolled ? 'h-0 overflow-hidden opacity-0' : 'opacity-100'}`}>
+        <div className='max-w-[1440px] mx-auto px-4 lg:px-12 h-10 flex justify-between items-center text-white/90 font-outfit overflow-x-auto no-scrollbar'>
+          {/* Left Side: Call Us & Sign Up */}
+          <div className="flex items-center gap-4 md:gap-6 flex-shrink-0">
+            <a href="tel:+123-456-789" className='text-[10px] md:text-[13px] font-medium hover:text-white transition-colors flex items-center gap-1 md:gap-2'>
+              <span className="text-[#B19470] whitespace-nowrap">{t('Call Us')}</span>
+              <span className="hidden sm:inline">: +123-456-789</span>
+            </a>
+            <span className="w-[1px] h-3 bg-white/20"></span>
+            <div className='text-[10px] md:text-[13px] font-light tracking-wide text-white/70 flex items-center gap-1'>
+              <span className="hidden sm:inline">{t('signUpOffer')}</span>
+              <Link to="/signup" className='text-[#B19470] hover:underline transition-all font-medium whitespace-nowrap'>{t('Sign Up Now')}</Link>
+            </div>
+          </div>
+
+          {/* Right Side: Social (Desktop only) & Selectors */}
+          <div className="flex items-center gap-4 md:gap-6 ml-4">
+            {/* Social Icons - Hidden on Mobile */}
+            <div className="hidden md:flex items-center gap-3 border-r border-white/10 pr-4">
               {Links.map(link => (
-                <a href={link.url} key={link.id} className="text-secondry p-2 hidden lg:block hover:text-white transition-colors">
+                <a href={link.url} key={link.id} className="text-white/60 hover:text-[#B19470] transition-colors transform hover:scale-110">
                   {link.icon}
                 </a>
               ))}
             </div>
 
-            <div className="flex items-center h-full">
-              {/* Language Selector */}
-              <div className="flex items-center group relative pl-3 lg:pl-6 pr-2 lg:pr-4">
-                <select
-                  value={language}
-                  onChange={(e) => setLanguage(e.target.value)}
-                  className="bg-transparent text-white text-[11px] lg:text-[12px] font-semibold uppercase tracking-widest outline-none cursor-pointer appearance-none pr-3 ltr:pr-4 rtl:pl-4 transition-all hover:opacity-80"
-                >
-                  <option value="en" className="text-gray-900">EN</option>
-                  <option value="ar" className="text-gray-900">AR</option>
-                </select>
-                <div className="absolute right-1 lg:right-2 pointer-events-none opacity-60 group-hover:opacity-100 transition-opacity">
-                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
-                </div>
-              </div>
-
-              <span className='text-white/20 text-xs font-light'>|</span>
-
+            <div className="flex items-center gap-3 md:gap-4 flex-shrink-0">
               {/* Currency Selector */}
-              <div className="flex items-center group relative pl-2 lg:pl-4 pr-3 lg:pr-6">
+              <div className="relative flex items-center gap-1 group cursor-pointer">
                 <select
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
-                  className="bg-transparent text-white text-[11px] lg:text-[12px] font-semibold uppercase tracking-widest outline-none cursor-pointer appearance-none pr-3 ltr:pr-4 rtl:pl-4 transition-all hover:opacity-80"
+                  className="bg-transparent text-[10px] md:text-[12px] font-bold uppercase tracking-wider outline-none cursor-pointer appearance-none pr-3 md:pr-4 text-white/90 hover:text-white transition-colors z-10"
                 >
                   <option value="usd" className="text-gray-900">USD</option>
                   <option value="eg" className="text-gray-900">EGP</option>
                 </select>
-                <div className="absolute right-1 lg:right-2 pointer-events-none opacity-60 group-hover:opacity-100 transition-opacity">
-                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                <div className="absolute right-0 pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">
+                  <svg width="8" height="8" className="md:w-2.5 md:h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                </div>
+              </div>
+
+              <span className='w-[1px] h-3 bg-white/20'></span>
+
+              {/* Language Selector */}
+              <div className="relative flex items-center gap-1 group cursor-pointer">
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="bg-transparent text-[10px] md:text-[12px] font-bold uppercase tracking-wider outline-none cursor-pointer appearance-none pr-3 md:pr-4 text-white/90 hover:text-white transition-colors z-10"
+                >
+                  <option value="en" className="text-gray-900">EN</option>
+                  <option value="ar" className="text-gray-900">AR</option>
+                </select>
+                <div className="absolute right-0 pointer-events-none opacity-40 group-hover:opacity-100 transition-opacity">
+                  <svg width="8" height="8" className="md:w-2.5 md:h-2.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
       </section>
       <nav className={`w-full px-6 lg:px-12 transition-all duration-300 ease-in-out ${scrolled ? 'h-16 shadow-lg' : 'h-24'
         } flex justify-between relative items-center ${isDarkText ? 'bg-white border-b border-gray-100' : 'bg-transparent border-b border-white/10 backdrop-blur-md'
         }`}>
-        {/* Logo */}
-        <div className="logo scale-90 lg:scale-100 origin-left">
-          <Link to='/' className="flex gap-3 items-center group">
-            <div className={`${isDarkText ? 'bg-[#205457]/10' : 'bg-white/20'} p-2 rounded-xl group-hover:bg-[#205457]/10 transition-all duration-300`}>
-              <img src={logo} alt="logo" className="w-8 h-8 object-contain" />
+        <div className="logo flex-shrink-0 transition-all duration-500">
+          <Link to='/' className="flex gap-2 md:gap-3 items-center group">
+            <div className={`${isDarkText ? 'bg-[#205457]/10' : 'bg-white/20'} ${scrolled ? 'p-1 md:p-2' : 'p-1.5 md:p-2.5'} rounded-xl group-hover:bg-[#205457]/20 transition-all duration-500 shadow-sm`}>
+              <img
+                src={logo}
+                alt="logo"
+                className={`${scrolled ? 'w-6 h-6 md:w-9 md:h-9' : 'w-7 h-7 md:w-11 md:h-11'} object-contain group-hover:scale-110 transition-all duration-500`}
+              />
             </div>
-            <h1 className={`capitalize text-[22px] lg:text-[28px] font-bold tracking-tight transition-colors duration-300 ${isDarkText ? 'text-[#205457]' : 'text-white'
-              }`}>
+            <h1 className={`${scrolled ? 'text-[17px] md:text-[24px]' : 'text-[20px] md:text-[30px]'} font-black capitalize tracking-tighter transition-all duration-500 ${isDarkText ? 'text-[#205457]' : 'text-white'}`}>
               homesta
             </h1>
           </Link>
         </div>
 
         {/* Desktop Links */}
-        <div className="hidden lg:flex gap-10 items-center">
+        <div className="hidden lg:flex gap-4 xl:gap-8 items-center">
           {navLinks.map(link => (
             <NavLink
               key={link.id}
               to={link.path}
               className={({ isActive }) =>
-                `relative font-medium text-[15px] capitalize transition-all duration-300 py-1
+                `relative font-medium text-[13px] xl:text-[15px] capitalize transition-all duration-300 py-1
                 ${isActive ? "opacity-100 after:w-full" : "opacity-70 after:w-0"}
                 ${isDarkText ? 'text-gray-900 hover:text-[#205457]' : 'text-white hover:opacity-100'}
                 after:content-[''] after:absolute after:bottom-0 after:left-0 after:h-[2px] after:bg-[#B19470] after:transition-all after:duration-300 hover:after:w-full`
@@ -190,41 +202,67 @@ const Navbar = () => {
         </div>
 
         {/* lists of faviorites and cart */}
-        <div className="flex gap-4 lg:gap-6 items-center">
+        <div className="flex gap-2 lg:gap-4 items-center">
           <div className="flex items-center gap-1">
             <Link
               to="/wishlist"
               onClick={(e) => handleRestrictedClick(e)}
-              className={`p-2 rounded-full transition-all duration-300 group ${isDarkText ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'}`}
+              className={`p-1.5 rounded-full transition-all duration-300 group ${isDarkText ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'}`}
             >
-              <CiHeart className="text-[24px] group-hover:scale-110 transition-transform" />
+              <CiHeart className="text-[18px] md:text-[22px] group-hover:scale-110 transition-transform" />
             </Link>
             <Link
               to="/shopping-cart"
               onClick={(e) => handleRestrictedClick(e)}
-              className={`p-2 rounded-full transition-all duration-300 group relative ${isDarkText ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'}`}
+              className={`p-1.5 rounded-full transition-all duration-300 group relative ${isDarkText ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'}`}
             >
-              <PiShoppingCartThin className="text-[24px] group-hover:scale-110 transition-transform" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-[#B19470] rounded-full border border-white/20"></span>
+              <PiShoppingCartThin className="text-[18px] md:text-[22px] group-hover:scale-110 transition-transform" />
+              <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-[#B19470] rounded-full border border-white/20"></span>
             </Link>
 
             {/* User Account / Sign In */}
             {user ? (
-              <div className="hidden lg:flex items-center gap-2 ml-2">
-                {/* Seller Dashboard Link */}
-                {JSON.parse(localStorage.getItem('userRoles') || '[]').some(r =>
-                  (typeof r === 'string' ? r.toLowerCase() === 'seller' : r.roleName?.toLowerCase() === 'seller')
-                ) && (
-                    <Link
-                      to="/seller-home"
-                      className="flex items-center gap-2 px-4 py-2 bg-[#205457] text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-[#1a4345] transition-all mr-2 shadow-lg shadow-[#205457]/10"
-                    >
-                      <LayoutDashboard size={14} />
-                      <span>Seller Dashboard</span>
-                    </Link>
-                  )}
+              <div className="flex items-center gap-2 ml-2">
+                {/* Desktop: Seller, Profile, Logout */}
+                <div className="hidden lg:flex items-center gap-2">
+                  {/* Seller Dashboard Link */}
+                  {JSON.parse(localStorage.getItem('userRoles') || '[]').some(r =>
+                    (typeof r === 'string' ? r.toLowerCase() === 'seller' : r.roleName?.toLowerCase() === 'seller')
+                  ) && (
+                      <Link
+                        to="/seller-home"
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-[#205457] text-white rounded-xl text-[10px] xl:text-xs font-bold uppercase tracking-wider hover:bg-[#1a4345] transition-all mr-1 shadow-lg shadow-[#205457]/10"
+                      >
+                        <LayoutDashboard size={13} />
+                        <span>{t('sellerDashboard')}</span>
+                      </Link>
+                    )}
 
-                <Link to="/account" className={`p-2 rounded-full transition-all duration-300 group ${isDarkText ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'}`} title="Profile">
+                  <Link to="/account" className={`p-2 rounded-full transition-all duration-300 group ${isDarkText ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'}`} title={t('myAccount')}>
+                    {user.image ? (
+                      <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200">
+                        <SafeImage
+                          src={user.image}
+                          alt={user.name}
+                          type="profile"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <CiUser className="text-[24px] group-hover:scale-110 transition-transform" />
+                    )}
+                  </Link>
+                  <button
+                    onClick={() => setShowLogoutModal(true)}
+                    className={`p-2 rounded-full transition-all duration-300 group ${isDarkText ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'}`}
+                    title={t('logOut')}
+                  >
+                    <CiLogout className="text-[24px] group-hover:scale-110 transition-transform" />
+                  </button>
+                </div>
+
+                {/* Mobile: Just Profile Icon (redirects to Account) */}
+                <Link to="/account" className={`lg:hidden p-2 rounded-full transition-all duration-300 group ${isDarkText ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'}`}>
                   {user.image ? (
                     <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200">
                       <SafeImage
@@ -238,20 +276,19 @@ const Navbar = () => {
                     <CiUser className="text-[24px] group-hover:scale-110 transition-transform" />
                   )}
                 </Link>
-                <button
-                  onClick={() => setShowLogoutModal(true)}
-                  className={`p-2 rounded-full transition-all duration-300 group ${isDarkText ? 'hover:bg-gray-100 text-gray-900' : 'hover:bg-white/10 text-white'}`}
-                  title="Logout"
-                >
-                  <CiLogout className="text-[24px] group-hover:scale-110 transition-transform" />
-                </button>
               </div>
             ) : (
-              <Link to="/login" className={`hidden lg:flex items-center gap-2 p-2 px-3 rounded-xl transition-all duration-300 group ml-2 border ${isDarkText ? 'bg-transparent text-[#205457] border-[#205457] hover:bg-[#205457] hover:text-white' : 'bg-transparent text-white border-white hover:bg-white hover:text-[#205457]'
-                }`}>
-                <CiUser className="text-[20px] group-hover:rotate-12 transition-transform" />
-                <span className="text-[14px] font-semibold uppercase tracking-wider">Sign In</span>
-              </Link>
+              <>
+                <Link to="/login" className={`hidden lg:flex items-center gap-2 p-2 px-3 rounded-xl transition-all duration-300 group ml-2 border ${isDarkText ? 'bg-transparent text-[#205457] border-[#205457] hover:bg-[#205457] hover:text-white' : 'bg-transparent text-white border-white hover:bg-white hover:text-[#205457]'
+                  }`}>
+                  <CiUser className="text-[20px] group-hover:rotate-12 transition-transform" />
+                  <span className="text-[14px] font-semibold uppercase tracking-wider">{t('signIn')}</span>
+                </Link>
+                {/* Mobile Sign In Icon */}
+                <Link to="/login" className={`lg:hidden p-2 rounded-full transition-all duration-300 group ml-1 ${isDarkText ? 'text-[#205457]' : 'text-white'}`}>
+                  <CiUser className="text-[24px]" />
+                </Link>
+              </>
             )}
           </div>
 
@@ -268,7 +305,7 @@ const Navbar = () => {
         {/* Mobile Menu */}
         <div
           className={`fixed top-0 right-0 h-screen w-[85%] sm:w-[60%] lg:w-[40%] bg-white shadow-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] 
-            ${menuOpen ? "translate-x-0 z-50" : "translate-x-full"}`}
+            ${menuOpen ? "translate-x-0 z-[60]" : "translate-x-full z-[40]"}`}
         >
           <div className="flex flex-col h-full bg-white px-8 pt-24 pb-12 overflow-y-auto">
             <button
@@ -286,13 +323,46 @@ const Navbar = () => {
                   onClick={() => setMenuOpen(false)}
                   style={{ transitionDelay: `${idx * 50}ms` }}
                   className={({ isActive }) =>
-                    `block text-3xl font-bold capitalize transition-all duration-300 
+                    `block text-xl md:text-3xl font-bold capitalize transition-all duration-300 
                     ${isActive ? "text-[#205457] translate-x-3" : "text-gray-900 hover:text-[#205457] hover:translate-x-3"}`
                   }
                 >
                   {link.name}
                 </NavLink>
               ))}
+
+              {/* Account / Login Mobile Link (Keep in menu as fallback/extra) */}
+              <div className="pt-4 mt-4 border-t border-gray-100">
+                {user ? (
+                  <div className="space-y-4">
+                    <NavLink
+                      to="/account"
+                      onClick={() => setMenuOpen(false)}
+                      className={({ isActive }) =>
+                        `block text-xl md:text-3xl font-bold capitalize transition-all duration-300 
+                            ${isActive ? "text-[#205457] translate-x-3" : "text-gray-900 hover:text-[#205457] hover:translate-x-3"}`
+                      }
+                    >
+                      {t('myAccount')}
+                    </NavLink>
+                    <button
+                      onClick={() => { setMenuOpen(false); setShowLogoutModal(true); }}
+                      className="flex items-center gap-2 text-xl font-bold capitalize text-red-500 hover:text-red-700 transition-all duration-300"
+                    >
+                      <span>{t('logOut')}</span>
+                      <CiLogout className="text-xl" />
+                    </button>
+                  </div>
+                ) : (
+                  <NavLink
+                    to="/login"
+                    onClick={() => setMenuOpen(false)}
+                    className="block text-xl md:text-3xl font-bold capitalize text-gray-900 hover:text-[#205457] hover:translate-x-3 transition-all duration-300"
+                  >
+                    {t('signIn')}
+                  </NavLink>
+                )}
+              </div>
             </div>
 
             <div className="mt-auto pt-12 space-y-6 border-t border-gray-100">
@@ -376,7 +446,7 @@ const Navbar = () => {
           document.body
         )}
       </nav>
-    </header>
+    </header >
   )
 }
 

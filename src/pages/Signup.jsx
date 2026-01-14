@@ -22,7 +22,7 @@ const schema = z.object({
 
 const Signup = () => {
   const navigate = useNavigate();
-  const { showAlert } = useAppContext();
+  const { showAlert, t } = useAppContext();
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -86,18 +86,21 @@ const Signup = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left Column - Signup Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 lg:px-16 xl:px-24">
+      <div className="w-full lg:w-1/2 flex flex-col justify-center px-8 lg:px-16 xl:px-24 py-12 lg:py-20">
         <div className="max-w-md w-full mx-auto">
           {/* Logo */}
-          <div className="mb-8">
-            <Link to="/">
-              <h1 className="text-2xl font-bold text-[#205457] hover:opacity-80 transition-opacity cursor-pointer">Homesta</h1>
+          <div className="mb-6 mt-4 lg:mt-0">
+            <Link to="/" className="inline-block group">
+              <h1 className="text-3xl font-black text-[#205457] tracking-tighter hover:opacity-80 transition-all cursor-pointer">
+                HOMESTA
+              </h1>
+              <div className="h-1 w-8 bg-[#B19470] rounded-full mt-1 group-hover:w-full transition-all duration-300"></div>
             </Link>
           </div>
 
           {/* Form Title */}
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
-          <p className="text-gray-600 mb-8">Sign up to get started with Homesta</p>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Create Account</h2>
+          <p className="text-gray-600 mb-8">{t ? t('signUpOffer') : "Sign up and get 20% off your first order."}</p>
 
           {/* API Error Message */}
           {apiError && (
@@ -315,7 +318,7 @@ const Signup = () => {
 
         {/* Transparent Glassmorphism Overlay */}
         <div className="
-    absolute w-[500px] bottom-16 left-1/2 transform -translate-x-1/2
+    absolute w-[90%] max-w-[500px] bottom-16 left-1/2 transform -translate-x-1/2
     bg-white/20 backdrop-blur-xl
     border border-white/30 shadow-xl
     rounded-[22px] p-10
@@ -323,8 +326,7 @@ const Signup = () => {
   ">
           <div className="text-center text-gray-900 space-y-4">
             <p className="text-lg font-light leading-relaxed">
-              "Lorem ipsum dolor sit amet consectetur. Pulvinar sit a eu pellentesque
-              sagittis mattis. Semper ornare volutpat vitae donec at velit."
+              "Homesta has transformed how we shop for furniture. The quality is unmatched and the delivery was incredibly fast!"
             </p>
 
             <div className="space-y-1">
@@ -335,7 +337,9 @@ const Signup = () => {
         </div>
 
         {/* Skip Button */}
-        <button className="
+        <button
+          onClick={() => navigate('/')}
+          className="
     absolute top-8 right-8 px-4 py-2
     bg-white/20 backdrop-blur-sm
     text-white rounded-lg

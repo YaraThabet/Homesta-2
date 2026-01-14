@@ -80,12 +80,15 @@ const VerifyCode = () => {
 
   return (
     <div className="min-h-screen font-sans">
-      <div className="flex min-h-screen">
+      <div className="flex flex-col lg:flex-row min-h-screen">
         {/* Left Column - Verify Code Form */}
-        <div className="flex-1 flex flex-col justify-center px-16 bg-white">
-          <div className="mb-0">
-            <Link to="/">
-              <div className="text-3xl font-bold text-[#205457] mb-4 hover:opacity-80 transition-opacity cursor-pointer">Homesta</div>
+        <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 md:px-16 py-10 bg-white order-2 lg:order-1">
+          <div className="mb-6 mt-4 lg:mt-0">
+            <Link to="/" className="inline-block group">
+              <h1 className="text-3xl font-black text-[#205457] tracking-tighter hover:opacity-80 transition-all cursor-pointer">
+                HOMESTA
+              </h1>
+              <div className="h-1 w-8 bg-[#B19470] rounded-full mt-1 group-hover:w-full transition-all duration-300"></div>
             </Link>
           </div>
           <div className="mb-8">
@@ -100,9 +103,9 @@ const VerifyCode = () => {
             </div>
           )}
 
-          <form onSubmit={onSubmit} className="max-w-md">
+          <form onSubmit={onSubmit} className="max-w-md w-full mx-auto lg:mx-0">
             <div className="mb-6">
-              <div className="flex gap-3 justify-center">
+              <div className="flex gap-3 justify-center lg:justify-start">
                 {code.map((digit, index) => (
                   <input
                     key={index}
@@ -112,7 +115,7 @@ const VerifyCode = () => {
                     value={digit}
                     onChange={(e) => handleChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className="w-14 h-14 border-2 border-gray-300 rounded-full text-center text-lg font-semibold focus:outline-none focus:border-blue-500 focus:bg-blue-50 transition-colors duration-300"
+                    className="w-10 h-10 md:w-14 md:h-14 border-2 border-gray-300 rounded-full text-center text-lg font-semibold focus:outline-none focus:border-blue-500 focus:bg-blue-50 transition-colors duration-300"
                     autoComplete="off"
                   />
                 ))}
@@ -130,9 +133,9 @@ const VerifyCode = () => {
         </div>
 
         {/* Right Column - Background Image with Overlay */}
-        <div className="flex-1 relative bg-cover bg-center min-h-screen" style={{ backgroundImage: `url(${verifyCodeImg})` }}>
-          <div className="absolute inset-0 bg-gradient-to-br from-black/70 to-black/40 flex flex-col justify-between p-8">
-            <div className="absolute" style={{ width: '576px', height: '302px', top: '466px', left: '16px', gap: '32px', opacity: 1 }}>
+        <div className="hidden lg:flex w-1/2 relative bg-cover bg-center min-h-screen order-1 lg:order-2" style={{ backgroundImage: `url(${verifyCodeImg})` }}>
+          <div className="absolute inset-0 bg-gradient-to-br from-black/70 to-black/40 flex flex-col justify-end p-12">
+            <div className="w-[90%] max-w-[500px] mb-20 lg:mb-0">
               <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 border border-white/20">
                 <p className="text-white text-xl leading-relaxed mb-8 italic">
                   "Verify your account securely with the code we sent to your email. Keep your account safe and protected."
@@ -146,7 +149,7 @@ const VerifyCode = () => {
                 </div>
               </div>
             </div>
-            <button className="absolute bottom-8 right-8 py-3 px-8 bg-white/20 text-white border border-white/30 rounded-3xl cursor-pointer text-sm backdrop-blur-md transition-all duration-300 hover:bg-white/30 hover:border-white/50">
+            <button className="absolute top-8 right-8 py-3 px-8 bg-white/20 text-white border border-white/30 rounded-3xl cursor-pointer text-sm backdrop-blur-md transition-all duration-300 hover:bg-white/30 hover:border-white/50">
               Skip
             </button>
           </div>

@@ -7,6 +7,7 @@ import AdminNavbar from "./layouts/AdminNavbar.jsx";
 import Footer from "./components/Footer.jsx";
 import AIChatFloatButton from "./components/AIChatFloatButton.jsx";
 import PageLoader from "./components/PageLoader";
+import ScrollToTop from "./components/ScrollToTop";
 
 // Lazy Loaded Pages
 const Home = lazy(() => import("./pages/home/Home.jsx"));
@@ -255,6 +256,7 @@ const App = () => {
 
       {!shouldHideNavbar && !isSellerPage && <AIChatFloatButton />}
       {!shouldHideNavbar && !isSellerPage && !isAdminPage && <Footer />}
+      <ScrollToTop />
     </div>
   );
 };

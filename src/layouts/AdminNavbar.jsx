@@ -34,7 +34,7 @@ const AdminNavbar = () => {
                 {/* Logo */}
                 <div className="logo scale-90 lg:scale-100 origin-left">
                     <Link to='/admin/dashboard' className="flex gap-3 items-center group">
-                        <div className="bg-[#205457]/10 p-2 rounded-xl group-hover:bg-[#205457]/10 transition-all duration-300">
+                        <div className="hidden md:block bg-[#205457]/10 p-2 rounded-xl group-hover:bg-[#205457]/10 transition-all duration-300">
                             <img src={logo} alt="logo" className="w-8 h-8 object-contain" />
                         </div>
                         <h1 className="capitalize text-[22px] lg:text-[28px] font-bold tracking-tight text-[#205457]">
@@ -70,8 +70,9 @@ const AdminNavbar = () => {
 
                     <div className="h-8 w-[1px] bg-gray-200 hidden lg:block"></div>
 
-                    <div className="flex items-center gap-3">
-                        <div className="flex flex-col items-end mr-2 hidden lg:flex">
+                    {/* Desktop Icons Group - Hidden on Mobile */}
+                    <div className="items-center gap-3 hidden xl:flex">
+                        <div className="flex flex-col items-end mr-2">
                             <span className="text-xs font-bold text-gray-900">{userName}</span>
                             <span className="text-[10px] text-gray-400">Super Admin</span>
                         </div>
@@ -104,7 +105,13 @@ const AdminNavbar = () => {
                 {createPortal(
                     <AnimatePresence>
                         {showMobileMenu && (
-                            <div className="fixed inset-0 z-[9999] xl:hidden">
+                            <motion.div
+                                key="mobile-menu-container"
+                                className="fixed inset-0 z-[9999] xl:hidden"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                            >
                                 {/* Backdrop */}
                                 <motion.div
                                     initial={{ opacity: 0 }}
@@ -121,9 +128,15 @@ const AdminNavbar = () => {
                                     exit={{ x: "100%" }}
                                     transition={{ type: "spring", damping: 25, stiffness: 200 }}
                                     className="absolute right-0 top-0 bottom-0 w-3/4 max-w-xs bg-white shadow-2xl p-6 flex flex-col"
+                                    onClick={(e) => e.stopPropagation()}
                                 >
                                     <div className="flex justify-between items-center mb-8">
-                                        <span className="text-lg font-bold text-[#205457]">Admin Menu</span>
+                                        <div className="flex items-center gap-2">
+                                            <div className="bg-[#205457]/10 p-2 rounded-xl">
+                                                <img src={logo} alt="logo" className="w-6 h-6 object-contain" />
+                                            </div>
+                                            <span className="text-lg font-bold text-[#205457]">Admin Menu</span>
+                                        </div>
                                         <button
                                             onClick={() => setShowMobileMenu(false)}
                                             className="p-2 hover:bg-gray-100 rounded-full text-gray-500"
@@ -158,18 +171,29 @@ const AdminNavbar = () => {
                                     </div>
 
                                     <div className="mt-auto pt-6 border-t border-gray-100">
-                                        <div className="flex items-center gap-3 mb-4 px-2">
-                                            <div className="w-10 h-10 bg-gradient-to-br from-[#205457] to-[#1a4345] rounded-full flex items-center justify-center text-white shadow-lg">
-                                                <ShieldCheck size={20} />
+                                        <div className="flex items-center justify-between gap-3 mb-4 px-2">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 bg-gradient-to-br from-[#205457] to-[#1a4345] rounded-full flex items-center justify-center text-white shadow-lg">
+                                                    <ShieldCheck size={20} />
+                                                </div>
+                                                <div className="flex flex-col">
+                                                    <span className="text-sm font-bold text-gray-900">{userName}</span>
+                                                    <span className="text-xs text-gray-400">Super Admin</span>
+                                                </div>
                                             </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-bold text-gray-900">{userName}</span>
-                                                <span className="text-xs text-gray-400">Super Admin</span>
-                                            </div>
+                                            <button
+                                                onClick={() => {
+                                                    setShowMobileMenu(false);
+                                                    setShowLogoutModal(true);
+                                                }}
+                                                className="p-2 text-red-500 bg-red-50 rounded-lg hover:bg-red-100 transition-colors"
+                                            >
+                                                <CiLogout size={20} />
+                                            </button>
                                         </div>
                                     </div>
                                 </motion.div>
-                            </div>
+                            </motion.div>
                         )}
                     </AnimatePresence>,
                     document.body

@@ -87,7 +87,7 @@ const safeUnescape = (str) => {
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { showAlert } = useAppContext();
+  const { showAlert, formatPrice, t } = useAppContext();
 
   // Data State
   const [product, setProduct] = useState(null);
@@ -389,13 +389,46 @@ const ProductDetail = () => {
       setShowSuccessModal(true);
     } catch (err) {
       console.error("Add to cart error", err);
-      let msg = err.response?.data?.message || "Failed to add to cart.";
-      if (msg.includes("Only") && msg.includes("items available")) {
-        msg = "Sorry, high demand! " + msg;
-      } else if (msg.includes("Cannot add more")) {
-        msg = "You cannot add more of this item than is currently in stock.";
+
+      // Handle different error types
+      let title = "Error";
+      let msg = "Failed to add to cart.";
+
+      if (err.response?.status === 403) {
+        title = "Permission Denied";
+        msg = "Your session has expired. Please log in again.";
+      } else if (err.response?.status === 401) {
+        title = "Session Expired";
+        msg = "Your session has expired. Please log in again.";
+        // Optionally clear token and redirect to login
+        localStorage.removeItem('token');
+        setShowLoginModal(true);
+        return;
+      } else if (err.response?.data?.message) {
+        const apiMsg = err.response.data.message;
+
+        // Handle explicit "Cannot add more... available" message
+        // Example: "Cannot add more. Only 2 items available"
+        if (apiMsg.includes("Cannot add more") && apiMsg.includes("available")) {
+          title = "Cart Limit Reached";
+          // Extract the number if possible, or just give the general explanation
+          msg = "You have already reached the purchase limit for this item based on our current stock.";
+        }
+        else if (apiMsg.includes("Only") && apiMsg.includes("items available")) {
+          title = "High Demand";
+          msg = "Sorry, we have limited stock! " + apiMsg;
+        } else if (apiMsg.includes("Cannot add more") || apiMsg.includes("stock")) {
+          title = "Stock Limit";
+          msg = "You cannot add more of this item than is currently in stock.";
+        } else if (apiMsg.includes("out of stock")) {
+          title = "Out of Stock";
+          msg = "This item is currently out of stock.";
+        } else {
+          msg = apiMsg;
+        }
       }
-      showAlert(msg, "error", "Stock Limit Reached");
+
+      showAlert(msg, "error", title);
     } finally {
       setAddingToCart(false);
     }
@@ -486,40 +519,61 @@ const ProductDetail = () => {
     ? (reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length)
     : (product.rating || 0);
 
+  const handleBuyNow = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // 1. Add to cart
+    await handleAddToCart(e);
+
+    // We can assume handleAddToCart handles errors/login. 
+    // If successful (no way to check return from handleAddToCart easily without refactor, 
+    // but we can check if we are still on the page and logged in).
+    // Actually, let's just navigate if token exists.
+
+    const token = localStorage.getItem('token');
+    if (token) {
+      // Give a short delay for state update/toast
+      setTimeout(() => {
+        navigate('/checkout');
+      }, 500);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background pt-[120px]">
-      <div className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-background pt-[130px] sm:pt-[110px] md:pt-[120px]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8">
         {/* Back Button */}
 
         <button
           onClick={() => navigate('/shop')}
-          className="group inline-flex items-center gap-3 bg-white/80 backdrop-blur-md px-6 py-3 rounded-full text-[#205457] font-bold text-sm shadow-sm hover:shadow-lg hover:-translate-y-0.5 border border-white/60 transition-all mb-10"
+          className="group inline-flex items-center gap-2 sm:gap-3 bg-white/80 backdrop-blur-md px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-[#205457] font-bold text-xs sm:text-sm shadow-sm hover:shadow-lg hover:-translate-y-0.5 border border-white/60 transition-all mb-6 sm:mb-8 md:mb-10"
         >
-          <div className="bg-[#205457]/10 p-1.5 rounded-full group-hover:bg-[#205457] group-hover:text-white transition-colors">
-            <ArrowLeft className="w-4 h-4" />
+          <div className="bg-[#205457]/10 p-1 sm:p-1.5 rounded-full group-hover:bg-[#205457] group-hover:text-white transition-colors">
+            <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </div>
-          Back to Shop
+          {t('backToShop') || 'Back to Shop'}
         </button>
 
         {/* Product Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12 animate-fade-in-up">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-12 mb-8 sm:mb-12 animate-fade-in-up">
           {/* Image Gallery */}
           <div>
-            <div className="mb-6 bg-white/40 backdrop-blur-md rounded-[30px] p-8 flex items-center justify-center border border-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.04)] group">
+            <div className="mb-4 sm:mb-6 bg-white/40 backdrop-blur-md rounded-[20px] sm:rounded-[30px] p-4 sm:p-6 md:p-8 flex items-center justify-center border border-white/60 shadow-[0_8px_30px_rgba(0,0,0,0.04)] group">
               <SafeImage
                 src={images[selectedImageIndex]}
                 alt={product.name}
                 type="product"
-                className="w-full h-[400px] object-contain mix-blend-multiply"
+                className="w-full h-[250px] sm:h-[350px] md:h-[400px] object-contain mix-blend-multiply"
               />
             </div>
             {images.length > 1 && (
-              <div className="flex gap-3 overflow-x-auto py-2">
+              <div className="flex gap-2 sm:gap-3 overflow-x-auto py-2 scrollbar-hide">
                 {images.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setSelectedImageIndex(index)}
-                    className={`w-20 h-20 flex-shrink-0 border-2 rounded-lg overflow-hidden bg-muted/30 ${selectedImageIndex === index ? 'border-[#205457]' : 'border-border'
+                    className={`w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 border-2 rounded-lg overflow-hidden bg-muted/30 ${selectedImageIndex === index ? 'border-[#205457]' : 'border-border'
                       }`}
                   >
                     <SafeImage
@@ -535,55 +589,55 @@ const ProductDetail = () => {
           </div>
 
           {/* Product Info */}
-          <div className="bg-white/60 backdrop-blur-xl rounded-[30px] p-8 lg:p-10 border border-white shadow-xl shadow-[#205457]/5 flex flex-col items-stretch">
-            <div className="flex justify-between items-start mb-2">
-              <h1 className="text-3xl font-bold text-foreground">{product.name}</h1>
+          <div className="bg-white/60 backdrop-blur-xl rounded-[20px] sm:rounded-[30px] p-5 sm:p-6 md:p-8 lg:p-10 border border-white shadow-xl shadow-[#205457]/5 flex flex-col items-stretch">
+            <div className="flex justify-between items-start mb-2 gap-2">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground flex-1 min-w-0">{product.name}</h1>
               <button
                 onClick={handleWishlistClick}
-                className="p-2 hover:bg-muted rounded-full transition-colors"
+                className="p-1.5 sm:p-2 hover:bg-muted rounded-full transition-colors flex-shrink-0"
               >
                 <Heart
-                  className={`w-6 h-6 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`}
+                  className={`w-5 h-5 sm:w-6 sm:h-6 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-muted-foreground'}`}
                 />
               </button>
             </div>
 
-            <div className="flex items-center gap-3 mb-4">
-              <p className="text-2xl font-bold text-[#205457]">
-                ${(product.finalPrice || (product.discount ? product.price * (1 - product.discount / 100) : product.price))?.toFixed(2)}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+              <p className="text-xl sm:text-2xl font-bold text-[#205457]">
+                {formatPrice(product.finalPrice || (product.discount ? product.price * (1 - product.discount / 100) : product.price))}
               </p>
               {(product.discount > 0 || (product.finalPrice && product.finalPrice < product.price)) && (
-                <p className="text-lg text-muted-foreground line-through">
-                  ${product.price?.toFixed(2)}
+                <p className="text-base sm:text-lg text-muted-foreground line-through">
+                  {formatPrice(product.price)}
                 </p>
               )}
               {product.discount > 0 && (
-                <span className="bg-red-100 text-red-600 text-xs font-bold px-2 py-1 rounded">
+                <span className="bg-red-100 text-red-600 text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded">
                   -{product.discount}%
                 </span>
               )}
             </div>
 
             {/* Rating (Dynamic) */}
-            <div className="flex items-center gap-2 mb-6">
+            <div className="flex flex-wrap items-center gap-2 mb-4 sm:mb-6">
               <div className="flex text-yellow-400">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
-                    className={`w-4 h-4 ${i < Math.round(averageRating) ? 'fill-current' : 'text-gray-300'}`}
+                    className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${i < Math.round(averageRating) ? 'fill-current' : 'text-gray-300'}`}
                   />
                 ))}
               </div>
-              <span className="text-sm text-foreground font-bold">{averageRating.toFixed(1)}</span>
-              <span className="text-sm text-muted-foreground underline decoration-dotted cursor-pointer hover:text-[#205457]" onClick={() => document.getElementById('reviews-tab')?.click() || setActiveTab('review')}>
-                ({reviews.length} reviews)
+              <span className="text-xs sm:text-sm text-foreground font-bold">{averageRating.toFixed(1)}</span>
+              <span className="text-xs sm:text-sm text-muted-foreground underline decoration-dotted cursor-pointer hover:text-[#205457]" onClick={() => document.getElementById('reviews-tab')?.click() || setActiveTab('review')}>
+                ({reviews.length} {t('reviews')})
               </span>
             </div>
 
-            <div className="mb-6">
-              <h3 className="text-sm font-medium text-foreground mb-2">Description</h3>
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-xs sm:text-sm font-medium text-foreground mb-1.5 sm:mb-2">{t('description') || 'Description'}</h3>
               <div
-                className="text-muted-foreground text-sm leading-relaxed prose prose-sm max-w-none"
+                className="text-muted-foreground text-xs sm:text-sm leading-relaxed prose prose-sm max-w-none"
                 dangerouslySetInnerHTML={{ __html: safeUnescape(product.description || "No description available for this product.") }}
               />
             </div>
@@ -592,8 +646,8 @@ const ProductDetail = () => {
             {availableColors.length > 0 && (
               <div className="mb-6">
                 <p className="text-sm text-foreground mb-3">
-                  <span className="font-medium">Selected Color: </span>
-                  <span className="text-[#205457] font-bold uppercase tracking-wide">{getColorName(selectedColor) || "None"}</span>
+                  <span className="font-medium">{t('selectedColor') || 'Selected Color'}: </span>
+                  <span className="text-[#205457] font-bold uppercase tracking-wide">{getColorName(selectedColor) || t('none')}</span>
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {availableColors.map((colorVal, index) => {
@@ -622,57 +676,64 @@ const ProductDetail = () => {
             )}
 
             {/* Quantity */}
-            <div className="mb-8">
-              <label className="text-sm font-medium text-foreground mb-2 block">Quantity</label>
-              <div className="inline-flex items-center border border-border rounded-lg bg-white">
-                <button
-                  onClick={decreaseQuantity}
-                  className="p-3 hover:bg-gray-50 transition-colors"
-                >
-                  <Minus className="w-4 h-4 text-gray-600" />
-                </button>
-                <span className="px-4 py-2 text-foreground font-medium text-base w-12 text-center">{quantity}</span>
-                <button
-                  onClick={increaseQuantity}
-                  className="p-3 hover:bg-gray-50 transition-colors"
-                >
-                  <Plus className="w-4 h-4 text-gray-600" />
-                </button>
+            <div className="mb-8 flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex items-center gap-4">
+                <label className="text-sm font-medium text-foreground block sm:hidden">{t('quantity')}</label>
+                <div className="inline-flex items-center border border-border rounded-lg bg-white">
+                  <button
+                    onClick={decreaseQuantity}
+                    className="p-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <Minus className="w-4 h-4 text-gray-600" />
+                  </button>
+                  <span className="px-4 py-2 text-foreground font-medium text-base w-12 text-center">{quantity}</span>
+                  <button
+                    onClick={increaseQuantity}
+                    className="p-3 hover:bg-gray-50 transition-colors"
+                  >
+                    <Plus className="w-4 h-4 text-gray-600" />
+                  </button>
+                </div>
               </div>
+
               {(product.stock || product.quantity) <= 0 ? (
-                <span className="ml-4 text-red-500 font-medium text-sm">Out of Stock</span>
+                <span className="text-red-500 font-medium text-sm sm:ml-4">{t('outOfStock') || 'Out of Stock'}</span>
               ) : (
-                <span className="ml-4 text-green-600 font-medium text-sm">In Stock ({product.stock || product.quantity} available)</span>
+                <span className="text-green-600 font-medium text-sm sm:ml-4 flex items-center gap-1">
+                  <Check size={16} />
+                  {t('inStock') || 'In Stock'} ({product.stock || product.quantity} {t('available')})
+                </span>
               )}
             </div>
 
             {/* Actions */}
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button
                 onClick={handleAddToCart}
                 disabled={(product.stock || product.quantity) <= 0 || addingToCart}
-                className={`flex-1 ${addingToCart ? 'bg-[#205457]/80' : 'bg-[#205457]'} text-white py-3.5 rounded-xl font-semibold hover:bg-[#1a4345] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#205457]/20 flex items-center justify-center gap-2 group`}
+                className={`flex-1 ${addingToCart ? 'bg-[#205457]/80' : 'bg-[#205457]'} text-white py-3 sm:py-3.5 rounded-xl font-semibold hover:bg-[#1a4345] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[#205457]/20 flex items-center justify-center gap-2 group text-sm sm:text-base`}
               >
-                <ShoppingCart className={`w-5 h-5 ${addingToCart ? 'text-yellow-400 fill-yellow-400 animate-bounce' : 'text-white transition-colors duration-300 group-active:text-yellow-400 group-active:fill-yellow-400'}`} />
-                {addingToCart ? 'Adding...' : 'Add to Cart'}
+                <ShoppingCart className={`w-4 h-4 sm:w-5 sm:h-5 ${addingToCart ? 'text-yellow-400 fill-yellow-400 animate-bounce' : 'text-white transition-colors duration-300 group-active:text-yellow-400 group-active:fill-yellow-400'}`} />
+                {addingToCart ? (t('adding') || 'Adding...') : (t('addToCart') || 'Add to Cart')}
               </button>
               <button
+                onClick={handleBuyNow}
                 disabled={(product.stock || product.quantity) <= 0}
-                className="flex-1 bg-white border-2 border-[#205457] text-[#205457] py-3.5 rounded-xl font-semibold hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 bg-white border-2 border-[#205457] text-[#205457] py-3 sm:py-3.5 rounded-xl font-semibold hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
               >
-                Buy Now
+                {t('buyNow') || 'Buy Now'}
               </button>
             </div>
           </div>
         </div>
 
         {/* Tabs Section (Description, Reviews) */}
-        <div className="mb-16">
+        <div className="mb-10 sm:mb-16">
           {/* Centered Tabs */}
-          <div className="flex gap-8 border-b border-gray-200 mb-8 overflow-x-auto justify-center">
+          <div className="flex gap-4 sm:gap-8 border-b border-gray-200 mb-6 sm:mb-8 overflow-x-auto justify-center scrollbar-hide">
             <button
               onClick={() => setActiveTab('description')}
-              className={`pb-4 text-base font-medium transition-colors whitespace-nowrap ${activeTab === 'description'
+              className={`pb-3 sm:pb-4 text-sm sm:text-base font-medium transition-colors whitespace-nowrap ${activeTab === 'description'
                 ? 'text-[#205457] border-b-2 border-[#205457]'
                 : 'text-gray-500 hover:text-gray-800'
                 }`}
@@ -681,7 +742,7 @@ const ProductDetail = () => {
             </button>
             <button
               onClick={() => setActiveTab('review')}
-              className={`pb-4 text-base font-medium transition-colors whitespace-nowrap ${activeTab === 'review'
+              className={`pb-3 sm:pb-4 text-sm sm:text-base font-medium transition-colors whitespace-nowrap ${activeTab === 'review'
                 ? 'text-[#205457] border-b-2 border-[#205457]'
                 : 'text-gray-500 hover:text-gray-800'
                 }`}

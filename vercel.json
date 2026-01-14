@@ -5,6 +5,10 @@
             "destination": "http://homefinish.runasp.net/api/:path*"
         },
         {
+            "source": "/ai-chat",
+            "destination": "https://tasabehahmed-chatbot-bert.hf.space/chat"
+        },
+        {
             "source": "/uploads/:path*",
             "destination": "http://homefinish.runasp.net/uploads/:path*"
         },

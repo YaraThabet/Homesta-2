@@ -63,8 +63,10 @@ const SafeImage = ({ src, alt, type = 'product', className = '', ...props }) => 
         if (!url || typeof url !== 'string') return '';
 
         // If it's the backend URL, strip it to make it relative (so it goes through proxy)
-        if (url.includes('homefinish.runasp.net')) {
-            return url.replace(/^https?:\/\/homefinish\.runasp\.net/, '');
+        // If it's the backend URL, strip it to make it relative (so it goes through proxy)
+        const backendRegex = /^https?:\/\/homefinish\.runasp\.net/i;
+        if (backendRegex.test(url)) {
+            return url.replace(backendRegex, '');
         }
 
         // If it's a data URL or external URL (not our backend), return as is

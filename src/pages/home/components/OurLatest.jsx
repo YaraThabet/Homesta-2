@@ -10,7 +10,7 @@ const OurLatest = () => {
       date: "15 April 2025",
       title: "Homesta Trends 2024: What's Hot and What's Not",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
+        "Explore the latest interior design trends for 2024, from sustainable materials to bold color palettes that redefine modern living.",
     },
     {
       id: 2,
@@ -18,7 +18,7 @@ const OurLatest = () => {
       date: "10 March 2025",
       title: "Modern Interior Ideas for Your Living Space",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
+        "Transform your home with these modern interior ideas. Simple, elegant, and functional designs for every room.",
     },
     {
       id: 3,
@@ -26,7 +26,7 @@ const OurLatest = () => {
       date: "02 February 2025",
       title: "Top Furniture Styles Dominating This Year",
       description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor",
+        "Discover the top furniture styles of the year, focusing on minimalism, comfort, and versatile pieces for any home.",
     },
   ];
 

@@ -18,6 +18,12 @@ export default defineConfig({
         changeOrigin: true,
         secure: false
       },
+      '/ai-chat': {
+        target: 'https://tasabehahmed-chatbot-bert.hf.space',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/ai-chat/, '/chat')
+      },
       '/uploads': {
         target: 'http://homefinish.runasp.net',
         changeOrigin: true,

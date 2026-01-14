@@ -88,7 +88,7 @@ export default function FaqsTabs() {
       </Tabs>
       <TabPanel value={value} index={0}>
         <div>
-          <Accordion sx={{marginBottom:'20px'}}>
+          <Accordion sx={{ marginBottom: '20px' }}>
             <AccordionSummary
               expandIcon={<AddIcon />}
               aria-controls="panel1-content"
@@ -117,10 +117,6 @@ export default function FaqsTabs() {
                 fontFamily: "Outfit",
               }}
             >
-              <Typography component="p">
-                What payment methods do you accept?{" "}
-                <RemoveIcon sx={{ float: "right" }} />
-              </Typography>
               <Typography
                 component="p"
                 sx={{
@@ -131,14 +127,12 @@ export default function FaqsTabs() {
                   fontSize: "16px",
                 }}
               >
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua
-                eiusmod
+                Simply browse our products, add items to your cart, and proceed to checkout. Follow the on-screen instructions to enter your shipping and payment details.
               </Typography>
             </AccordionDetails>
           </Accordion>
 
-          <Accordion sx={{marginBottom:'20px'}}>
+          <Accordion sx={{ marginBottom: '20px' }}>
             <AccordionSummary
               expandIcon={<AddIcon />}
               aria-controls="panel1-content"
@@ -167,10 +161,6 @@ export default function FaqsTabs() {
                 fontFamily: "Outfit",
               }}
             >
-              <Typography component="p">
-                What payment methods do you accept?{" "}
-                <RemoveIcon sx={{ float: "right" }} />
-              </Typography>
               <Typography
                 component="p"
                 sx={{
@@ -181,14 +171,12 @@ export default function FaqsTabs() {
                   fontSize: "16px",
                 }}
               >
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua
-                eiusmod
+                Yes, you can track your order by navigating to 'My Orders' in your account dashboard. You will see the real-time status of your shipment there.
               </Typography>
             </AccordionDetails>
           </Accordion>
 
-          <Accordion sx={{marginBottom:'20px'}}>
+          <Accordion sx={{ marginBottom: '20px' }}>
             <AccordionSummary
               expandIcon={<AddIcon />}
               aria-controls="panel1-content"
@@ -238,7 +226,7 @@ export default function FaqsTabs() {
             </AccordionDetails>
           </Accordion>
 
-          <Accordion sx={{marginBottom:'20px'}}>
+          <Accordion sx={{ marginBottom: '20px' }}>
             <AccordionSummary
               expandIcon={<AddIcon />}
               aria-controls="panel1-content"
@@ -288,7 +276,7 @@ export default function FaqsTabs() {
             </AccordionDetails>
           </Accordion>
 
-          <Accordion sx={{marginBottom:'20px'}}>
+          <Accordion sx={{ marginBottom: '20px' }}>
             <AccordionSummary
               expandIcon={<AddIcon />}
               aria-controls="panel1-content"
@@ -317,10 +305,6 @@ export default function FaqsTabs() {
                 fontFamily: "Outfit",
               }}
             >
-              <Typography component="p">
-                What payment methods do you accept?{" "}
-                <RemoveIcon sx={{ float: "right" }} />
-              </Typography>
               <Typography
                 component="p"
                 sx={{
@@ -331,9 +315,7 @@ export default function FaqsTabs() {
                   fontSize: "16px",
                 }}
               >
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua
-                eiusmod
+                Click on the Sign Up button at the top right of the page. Fill in your details including name, email, and password to create your account instantly.
               </Typography>
             </AccordionDetails>
           </Accordion>

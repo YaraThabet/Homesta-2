@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useAppContext } from "../context/AppContext";
-import { Package, CreditCard, Headphones } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import FooterBenefits from "./shop/components/FooterBenefits";
 
 const TrackOrder = () => {
   const { showAlert } = useAppContext();
@@ -17,24 +17,6 @@ const TrackOrder = () => {
     }
   };
 
-  const features = [
-    {
-      icon: <Package className="w-8 h-8" />,
-      title: "Free Shipping",
-      description: "Free shipping for order above $180",
-    },
-    {
-      icon: <CreditCard className="w-8 h-8" />,
-      title: "Flexible Payment",
-      description: "Multiple secure payment options",
-    },
-    {
-      icon: <Headphones className="w-8 h-8" />,
-      title: "24x7 Support",
-      description: "We support online all days.",
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-white pt-[120px]">
       {/* Main Content */}
@@ -44,7 +26,9 @@ const TrackOrder = () => {
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
             Track Your Order
           </h1>
-          <p className="text-gray-600">Home / Track Your Order</p>
+          <p className="text-gray-600">
+            <Link to="/" className="hover:text-teal-700 transition-colors">Home</Link> / Track Your Order
+          </p>
         </div>
 
         {/* Track Order Form */}
@@ -90,29 +74,8 @@ const TrackOrder = () => {
             </button>
           </div>
         </div>
-
-        {/* Features */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {features.map((feature, index) => (
-            <div
-              key={index}
-              className="flex items-start gap-4 p-6 bg-gray-50 rounded-lg hover:shadow-lg transition-all duration-300"
-            >
-              <div className="flex-shrink-0 w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center text-amber-600">
-                {feature.icon}
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">
-                  {feature.title}
-                </h3>
-                <p className="text-gray-600 text-sm leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
-            </div>
-          ))}
-        </div>
       </div>
+      <FooterBenefits />
     </div>
   );
 };

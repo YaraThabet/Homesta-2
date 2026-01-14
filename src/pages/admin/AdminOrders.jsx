@@ -18,42 +18,42 @@ const OrderDetailsModal = ({ order, onClose }) => {
     };
 
     return createPortal(
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md print:p-0 print:bg-white print:static">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-md print:p-0 print:bg-white print:static">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white w-full max-w-3xl rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh] print:max-h-none print:shadow-none print:w-full print:max-w-none print:rounded-none"
+                className="bg-white w-full max-w-3xl rounded-[20px] sm:rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh] print:max-h-none print:shadow-none print:w-full print:max-w-none print:rounded-none"
             >
                 {/* Header */}
-                <div className="flex justify-between items-center p-8 bg-gradient-to-r from-[#205457] to-[#1a4345] text-white print:bg-white print:text-black print:border-b print:border-gray-200">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center text-white shadow-inner border border-white/10 backdrop-blur-sm print:hidden">
-                            <ShoppingBag size={24} />
+                <div className="flex justify-between items-center p-4 sm:p-8 bg-gradient-to-r from-[#205457] to-[#1a4345] text-white print:bg-white print:text-black print:border-b print:border-gray-200">
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 pr-2">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-inner border border-white/10 backdrop-blur-sm print:hidden flex-shrink-0">
+                            <ShoppingBag size={20} className="sm:w-6 sm:h-6" />
                         </div>
-                        <div>
-                            <h2 className="text-2xl font-bold text-white tracking-tight print:text-black">Order Details</h2>
-                            <p className="text-white/60 text-sm font-medium print:text-gray-500">#{order.orderId || order.id}</p>
+                        <div className="min-w-0 flex-1">
+                            <h2 className="text-lg sm:text-2xl font-bold text-white tracking-tight print:text-black truncate">Order Details</h2>
+                            <p className="text-white/60 text-xs sm:text-sm font-medium print:text-gray-500 truncate">#{order.orderId || order.id}</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2 print:hidden">
+                    <div className="flex items-center gap-1.5 sm:gap-2 print:hidden flex-shrink-0">
                         <button
                             onClick={() => window.print()}
-                            className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-full hover:bg-white/20 text-white transition-all backdrop-blur-sm border border-white/10 group"
+                            className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-white/10 rounded-full hover:bg-white/20 text-white transition-all backdrop-blur-sm border border-white/10 group"
                             title="Print Invoice"
                         >
-                            <Printer size={20} className="group-hover:scale-110 transition-transform duration-300" />
+                            <Printer size={16} className="sm:w-5 sm:h-5 group-hover:scale-110 transition-transform duration-300" />
                         </button>
                         <button
                             onClick={onClose}
-                            className="w-10 h-10 flex items-center justify-center bg-white/10 rounded-full hover:bg-white/20 text-white transition-all backdrop-blur-sm border border-white/10 group"
+                            className="w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center bg-white/10 rounded-full hover:bg-white/20 text-white transition-all backdrop-blur-sm border border-white/10 group"
                         >
-                            <X size={20} className="group-hover:rotate-90 transition-transform duration-300" />
+                            <X size={16} className="sm:w-5 sm:h-5 group-hover:rotate-90 transition-transform duration-300" />
                         </button>
                     </div>
                 </div>
 
-                <div className="overflow-y-auto p-8 custom-scrollbar bg-[#FDFCFB] print:overflow-visible print:bg-white print:p-8">
+                <div className="overflow-y-auto p-4 sm:p-8 custom-scrollbar bg-[#FDFCFB] print:overflow-visible print:bg-white print:p-8">
 
                     {/* --- PRINT ONLY: INVOICE LAYOUT --- */}
                     <div className="hidden print:block space-y-8 font-sans text-gray-900">
@@ -166,18 +166,18 @@ const OrderDetailsModal = ({ order, onClose }) => {
 
                     {/* --- SCREEN ONLY: EXISTING LAYOUT --- */}
                     {/* Summary Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8 print:hidden">
-                        <div className="bg-white p-5 rounded-[25px] border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-                            <div className="flex items-center gap-2 mb-3">
-                                <div className="w-8 h-8 rounded-full bg-orange-50 flex items-center justify-center text-orange-500">
-                                    <User size={14} />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8 print:hidden">
+                        <div className="bg-white p-4 sm:p-5 rounded-[20px] sm:rounded-[25px] border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex items-center gap-2 mb-2 sm:mb-3">
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-orange-50 flex items-center justify-center text-orange-500 flex-shrink-0">
+                                    <User size={12} className="sm:w-3.5 sm:h-3.5" />
                                 </div>
-                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-400">Customer</span>
+                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-400">Customer</span>
                             </div>
-                            <div className="flex flex-col gap-1 pl-1">
-                                <p className="font-bold text-gray-900 line-clamp-1">{order.firstName ? `${order.firstName} ${order.lastName}` : (order.userName || 'Guest')}</p>
-                                <p className="text-xs text-gray-400 font-medium truncate" title={order.email}>{order.email}</p>
-                                <p className="text-xs text-gray-400 font-medium">{order.phone}</p>
+                            <div className="flex flex-col gap-1 pl-0 sm:pl-1">
+                                <p className="font-bold text-gray-900 text-sm sm:text-base line-clamp-1">{order.firstName ? `${order.firstName} ${order.lastName}` : (order.userName || 'Guest')}</p>
+                                <p className="text-[11px] sm:text-xs text-gray-400 font-medium truncate" title={order.email}>{order.email}</p>
+                                <p className="text-[11px] sm:text-xs text-gray-400 font-medium">{order.phone}</p>
                             </div>
                         </div>
                         <div className="bg-white p-5 rounded-[25px] border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
@@ -236,8 +236,8 @@ const OrderDetailsModal = ({ order, onClose }) => {
                                 const hasDiscount = finalPrice < unitPrice;
 
                                 return (
-                                    <div key={idx} className="flex items-center gap-5 p-4 bg-white border border-gray-100/80 rounded-[25px] hover:shadow-lg hover:shadow-gray-100/50 hover:border-gray-200 hover:-translate-y-0.5 transition-all duration-300 group">
-                                        <div className="w-20 h-20 rounded-2xl overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100 relative">
+                                    <div key={idx} className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-5 p-3 sm:p-4 bg-white border border-gray-100/80 rounded-[20px] sm:rounded-[25px] hover:shadow-lg hover:shadow-gray-100/50 hover:border-gray-200 hover:-translate-y-0.5 transition-all duration-300 group">
+                                        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl sm:rounded-2xl overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100 relative">
                                             <SafeImage
                                                 src={item.image || item.imagePath}
                                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
@@ -245,46 +245,46 @@ const OrderDetailsModal = ({ order, onClose }) => {
                                                 type="product"
                                             />
                                             {hasDiscount && (
-                                                <div className="absolute top-0 right-0 z-20 bg-red-500 text-white text-[9px] font-black px-1.5 py-0.5 rounded-bl-lg">
+                                                <div className="absolute top-0 right-0 z-20 bg-red-500 text-white text-[8px] sm:text-[9px] font-black px-1 sm:px-1.5 py-0.5 rounded-bl-lg">
                                                     SALE
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <h4 className="font-bold text-gray-900 text-sm truncate" title={item.productName}>
+                                        <div className="flex-1 min-w-0 w-full">
+                                            <div className="flex items-start gap-2 mb-1">
+                                                <h4 className="font-bold text-gray-900 text-sm sm:text-base flex-1 line-clamp-2" title={item.productName}>
                                                     {item.productName}
                                                     {item.isDeleted && (
-                                                        <span className="ml-2 text-[8px] bg-red-50 text-red-500 px-1.5 py-0.5 rounded uppercase font-black tracking-widest leading-none align-middle border border-red-100">
-                                                            Product Deleted
+                                                        <span className="ml-2 text-[7px] sm:text-[8px] bg-red-50 text-red-500 px-1 sm:px-1.5 py-0.5 rounded uppercase font-black tracking-widest leading-none align-middle border border-red-100">
+                                                            Deleted
                                                         </span>
                                                     )}
                                                 </h4>
                                                 {item.productColor && (
-                                                    <span className="hidden sm:inline-block w-3 h-3 rounded-full border border-gray-200" style={{ backgroundColor: item.productColor }}></span>
+                                                    <span className="hidden sm:inline-block w-3 h-3 rounded-full border border-gray-200 flex-shrink-0" style={{ backgroundColor: item.productColor }}></span>
                                                 )}
                                             </div>
-                                            <p className="text-xs text-gray-400 font-medium mb-2 flex items-center gap-2">
-                                                <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] font-bold">Qty: {item.quantity}</span>
-                                                <span>@ ${finalPrice.toLocaleString()} / unit</span>
-                                            </p>
+                                            <div className="flex flex-wrap items-center gap-2 mb-2">
+                                                <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold">Qty: {item.quantity}</span>
+                                                <span className="text-[10px] sm:text-xs text-gray-400 font-medium">@ ${finalPrice.toLocaleString()} / unit</span>
+                                            </div>
 
                                             {hasDiscount && (
-                                                <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] bg-green-50 text-green-700 px-2 py-0.5 rounded-md font-bold">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <span className="text-[9px] sm:text-[10px] bg-green-50 text-green-700 px-1.5 sm:px-2 py-0.5 rounded-md font-bold">
                                                         Saved: ${((unitPrice - finalPrice) * item.quantity).toLocaleString()}
                                                     </span>
-                                                    <span className="text-[10px] line-through text-gray-300">
-                                                        Original: ${(unitPrice * item.quantity).toLocaleString()}
+                                                    <span className="text-[9px] sm:text-[10px] line-through text-gray-300">
+                                                        Was: ${(unitPrice * item.quantity).toLocaleString()}
                                                     </span>
                                                 </div>
                                             )}
                                         </div>
-                                        <div className="text-right pl-4 border-l border-gray-50">
-                                            <p className="font-black text-[#205457] text-lg">
+                                        <div className="text-left sm:text-right w-full sm:w-auto sm:pl-4 sm:border-l border-t sm:border-t-0 border-gray-50 pt-3 sm:pt-0">
+                                            <p className="font-black text-[#205457] text-base sm:text-lg">
                                                 ${(item.total ?? (finalPrice * (item.quantity || 0))).toLocaleString()}
                                             </p>
-                                            <p className="text-[9px] font-bold text-gray-300 uppercase tracking-widest mt-1 truncate max-w-[100px]">{item.storeName || 'Store Item'}</p>
+                                            <p className="text-[8px] sm:text-[9px] font-bold text-gray-300 uppercase tracking-widest mt-1 truncate max-w-full sm:max-w-[100px]">{item.storeName || 'Store Item'}</p>
                                         </div>
                                     </div>
                                 );
@@ -293,11 +293,11 @@ const OrderDetailsModal = ({ order, onClose }) => {
                     </div>
 
                     {/* Totals */}
-                    <div className="bg-[#205457] p-8 rounded-[35px] text-white flex justify-between items-center shadow-2xl shadow-[#205457]/20 relative overflow-hidden print:hidden">
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
-                        <div className="relative z-10">
-                            <p className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60 mb-2 text-white">Grand Total</p>
-                            <h3 className="text-4xl font-black tracking-tight">
+                    <div className="bg-[#205457] p-5 sm:p-8 rounded-[25px] sm:rounded-[35px] text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0 shadow-2xl shadow-[#205457]/20 relative overflow-hidden print:hidden">
+                        <div className="absolute top-0 right-0 w-40 h-40 sm:w-64 sm:h-64 bg-white/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                        <div className="relative z-10 w-full sm:w-auto">
+                            <p className="text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] sm:tracking-[0.3em] opacity-60 mb-2 text-white">Grand Total</p>
+                            <h3 className="text-2xl sm:text-4xl font-black tracking-tight">
                                 ${(
                                     order.orderTotal ??
                                     order.totalPrice ??
@@ -307,10 +307,10 @@ const OrderDetailsModal = ({ order, onClose }) => {
                                     }, 0)
                                 ).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </h3>
-                            <p className="text-xs font-bold opacity-60 italic whitespace-nowrap mt-2">Tax and shipping included</p>
-                            <div className="flex items-center gap-2 mt-2 bg-white/10 px-3 py-1.5 rounded-xl border border-white/10 w-fit">
-                                <Calendar size={14} />
-                                <span className="text-xs font-bold">{new Date(order.orderDate).toLocaleDateString()}</span>
+                            <p className="text-[10px] sm:text-xs font-bold opacity-60 italic mt-2">Tax and shipping included</p>
+                            <div className="flex items-center gap-2 mt-2 sm:mt-3 bg-white/10 px-2.5 sm:px-3 py-1.5 rounded-lg sm:rounded-xl border border-white/10 w-fit">
+                                <Calendar size={12} className="sm:w-3.5 sm:h-3.5" />
+                                <span className="text-[10px] sm:text-xs font-bold">{new Date(order.orderDate).toLocaleDateString()}</span>
                             </div>
                         </div>
                     </div>
@@ -452,84 +452,89 @@ const AdminOrders = () => {
     if (loading) return <PageLoader />;
 
     return (
-        <div className="min-h-screen bg-[#FDFCFB] pt-[110px] px-6 md:px-12 xl:px-16 pb-24 font-outfit">
+        <div className="min-h-screen bg-[#FDFCFB] pt-[90px] sm:pt-[110px] px-4 sm:px-6 md:px-12 xl:px-16 pb-16 sm:pb-24 font-outfit">
             <div className="max-w-[1440px] mx-auto">
                 {/* Header Section */}
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-12">
+                <div className="flex flex-col gap-4 sm:gap-6 mb-8 sm:mb-12">
                     <div>
-                        <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight">
                             Global <span className="text-[#205457]">Orders</span>
                         </h1>
-                        <p className="text-gray-400 mt-2 text-lg font-light">
+                        <p className="text-gray-400 mt-1 sm:mt-2 text-sm sm:text-base md:text-lg font-light">
                             Monitor and manage transactions across all stores.
                         </p>
                     </div>
                 </div>
 
                 {/* Enhanced Filtering Suite */}
-                <div className="bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm mb-10 space-y-6">
+                <div className="bg-white p-4 sm:p-6 md:p-8 rounded-[25px] sm:rounded-[40px] border border-gray-100 shadow-sm mb-6 sm:mb-10 space-y-4 sm:space-y-6">
                     <div className="relative group">
-                        <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#205457] transition-colors" size={22} />
+                        <Search className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-[#205457] transition-colors" size={18} />
                         <input
                             type="text"
-                            placeholder="Quick search by ID or customer name..."
+                            placeholder="Search by ID or name..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-16 pr-6 py-4 bg-gray-50/50 rounded-2xl border-none focus:ring-2 focus:ring-[#205457]/10 outline-none transition-all text-gray-700 font-medium"
+                            className="w-full pl-11 sm:pl-16 pr-4 sm:pr-6 py-3 sm:py-4 bg-gray-50/50 rounded-xl sm:rounded-2xl border-none focus:ring-2 focus:ring-[#205457]/10 outline-none transition-all text-gray-700 font-medium text-sm sm:text-base"
                         />
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-6">
+                    <div className="flex flex-col gap-4 sm:gap-6">
                         {/* Status Tabs */}
-                        <div className="flex flex-wrap items-center gap-2">
-                            <span className="text-[10px] font-black uppercase text-gray-300 mr-2 tracking-widest">Status</span>
-                            {['All', 'Pending', 'Accepted', 'Delivered', 'Cancelled'].map(status => (
-                                <button
-                                    key={status}
-                                    onClick={() => setFilterStatus(status)}
-                                    className={`px-5 py-2 rounded-xl text-xs font-bold transition-all ${filterStatus === status ? 'bg-[#205457] text-white shadow-lg shadow-[#205457]/20' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                            <span className="text-[9px] sm:text-[10px] font-black uppercase text-gray-300 tracking-widest">Status</span>
+                            <div className="flex flex-wrap items-center gap-2">
+                                {['All', 'Pending', 'Accepted', 'Delivered', 'Cancelled'].map(status => (
+                                    <button
+                                        key={status}
+                                        onClick={() => setFilterStatus(status)}
+                                        className={`px-3 sm:px-5 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-bold transition-all ${filterStatus === status ? 'bg-[#205457] text-white shadow-lg shadow-[#205457]/20' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
+                                    >
+                                        {status}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="h-[1px] w-full bg-gray-100 sm:hidden" />
+
+                        {/* Store & Price Filters */}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6">
+                            {/* Store Selection */}
+                            <div className="flex items-center gap-3">
+                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-300 whitespace-nowrap">Seller</span>
+                                <select
+                                    value={filterStore}
+                                    onChange={(e) => setFilterStore(e.target.value)}
+                                    className="bg-gray-50 text-gray-600 text-[11px] sm:text-xs font-bold py-2 px-3 sm:px-4 rounded-lg sm:rounded-xl border-none outline-none focus:ring-2 focus:ring-[#205457]/10 flex-1 sm:flex-initial"
                                 >
-                                    {status}
-                                </button>
-                            ))}
-                        </div>
+                                    <option value="All">All Stores</option>
+                                    {stores.map(s => <option key={s.storeId || s.id} value={s.name}>{s.name}</option>)}
+                                </select>
+                            </div>
 
-                        <div className="h-8 w-[1px] bg-gray-100 hidden lg:block" />
+                            <div className="h-6 w-[1px] bg-gray-100 hidden lg:block" />
 
-                        {/* Store Selection */}
-                        <div className="flex items-center gap-3">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-300">Seller</span>
-                            <select
-                                value={filterStore}
-                                onChange={(e) => setFilterStore(e.target.value)}
-                                className="bg-gray-50 text-gray-600 text-xs font-bold py-2 px-4 rounded-xl border-none outline-none focus:ring-2 focus:ring-[#205457]/10"
-                            >
-                                <option value="All">All Stores</option>
-                                {stores.map(s => <option key={s.storeId || s.id} value={s.name}>{s.name}</option>)}
-                            </select>
-                        </div>
-
-                        <div className="h-8 w-[1px] bg-gray-100 hidden lg:block" />
-
-                        {/* Price Filter */}
-                        <div className="flex items-center gap-3">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-gray-300">Budget</span>
-                            <div className="flex items-center bg-gray-50 px-3 py-1.5 rounded-xl">
-                                <input
-                                    type="number"
-                                    placeholder="Min"
-                                    value={minPrice}
-                                    onChange={(e) => setMinPrice(e.target.value)}
-                                    className="w-16 bg-transparent text-[11px] font-bold text-center border-none outline-none focus:ring-0"
-                                />
-                                <span className="text-gray-300 mx-1">-</span>
-                                <input
-                                    type="number"
-                                    placeholder="Max"
-                                    value={maxPrice}
-                                    onChange={(e) => setMaxPrice(e.target.value)}
-                                    className="w-16 bg-transparent text-[11px] font-bold text-center border-none outline-none focus:ring-0"
-                                />
+                            {/* Price Filter */}
+                            <div className="flex items-center gap-3">
+                                <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest text-gray-300 whitespace-nowrap">Budget</span>
+                                <div className="flex items-center bg-gray-50 px-2 sm:px-3 py-1.5 rounded-lg sm:rounded-xl flex-1 sm:flex-initial">
+                                    <input
+                                        type="number"
+                                        placeholder="Min"
+                                        value={minPrice}
+                                        onChange={(e) => setMinPrice(e.target.value)}
+                                        className="w-12 sm:w-16 bg-transparent text-[10px] sm:text-[11px] font-bold text-center border-none outline-none focus:ring-0"
+                                    />
+                                    <span className="text-gray-300 mx-1">-</span>
+                                    <input
+                                        type="number"
+                                        placeholder="Max"
+                                        value={maxPrice}
+                                        onChange={(e) => setMaxPrice(e.target.value)}
+                                        className="w-12 sm:w-16 bg-transparent text-[10px] sm:text-[11px] font-bold text-center border-none outline-none focus:ring-0"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -544,77 +549,77 @@ const AdminOrders = () => {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: idx * 0.05 }}
-                                className="bg-white p-6 md:p-8 rounded-[35px] border border-gray-100 shadow-[0_10px_40px_rgba(0,0,0,0.02)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.04)] transition-all group"
+                                className="bg-white p-4 sm:p-6 md:p-8 rounded-[25px] sm:rounded-[35px] border border-gray-100 shadow-[0_10px_40px_rgba(0,0,0,0.02)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.04)] transition-all group"
                             >
-                                <div className="flex flex-col md:flex-row items-center gap-6">
-                                    {/* ID & Date */}
-                                    <div className="flex items-center gap-5 md:min-w-[200px]">
-                                        <div className="w-14 h-14 bg-[#205457]/10 rounded-2xl flex items-center justify-center text-[#205457]">
-                                            <ShoppingBag size={24} />
+                                <div className="flex flex-col gap-4">
+                                    {/* Mobile: Order ID & Status Row */}
+                                    <div className="flex items-center justify-between gap-3">
+                                        <div className="flex items-center gap-3 sm:gap-5 flex-1 min-w-0">
+                                            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#205457]/10 rounded-xl sm:rounded-2xl flex items-center justify-center text-[#205457] flex-shrink-0">
+                                                <ShoppingBag size={20} className="sm:w-6 sm:h-6" />
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5 sm:mb-1">Order ID</p>
+                                                <p className="font-bold text-gray-900 text-sm sm:text-base truncate">#{order.orderId || order.id}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Order ID</p>
-                                            <p className="font-bold text-gray-900">#{order.orderId || order.id}</p>
+                                        <div className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest whitespace-nowrap flex-shrink-0 ${order.status === 'Delivered' ? 'bg-green-50 text-green-600' :
+                                            order.status === 'Cancelled' ? 'bg-red-50 text-red-600' :
+                                                order.status === 'Shipped' ? 'bg-indigo-50 text-indigo-600' :
+                                                    order.status === 'Processing' ? 'bg-blue-50 text-blue-600' :
+                                                        'bg-amber-50 text-amber-600'
+                                            }`}>
+                                            {order.status || 'Accepted'}
                                         </div>
                                     </div>
 
-                                    {/* Customer */}
-                                    <div className="flex items-center gap-4 flex-1">
-                                        <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400">
-                                            <User size={18} />
+                                    {/* Customer & Amount Row */}
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                                            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 flex-shrink-0">
+                                                <User size={16} className="sm:w-[18px] sm:h-[18px]" />
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Customer</p>
+                                                <p className="font-bold text-gray-700 text-sm sm:text-base truncate">
+                                                    {order.firstName && order.lastName
+                                                        ? `${order.firstName} ${order.lastName}`
+                                                        : (order.firstName || order.userName || 'Guest User')}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Customer</p>
-                                            <p className="font-bold text-gray-700">
-                                                {order.firstName && order.lastName
-                                                    ? `${order.firstName} ${order.lastName}`
-                                                    : (order.firstName || order.userName || 'Guest User')}
+                                        <div className="text-right flex-shrink-0">
+                                            <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5 sm:mb-1">Total</p>
+                                            <p className="text-base sm:text-xl font-black text-[#205457] tracking-tighter">
+                                                ${(order.displayTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                             </p>
                                         </div>
                                     </div>
 
-                                    {/* Items Preview */}
-                                    <div className="hidden lg:flex items-center gap-4 flex-1">
-                                        <div className="flex -space-x-4">
-                                            {(order.orderItems || order.items || []).slice(0, 3).map((item, i) => (
-                                                <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-gray-100 overflow-hidden shadow-sm">
-                                                    <SafeImage src={item.image || item.imagePath} alt="" className="w-full h-full object-cover" type="product" />
-                                                </div>
-                                            ))}
-                                            {(order.orderItems || order.items || []).length > 3 && (
-                                                <div className="w-10 h-10 rounded-full border-2 border-white bg-[#B19470] text-white flex items-center justify-center text-[10px] font-black">
-                                                    +{(order.orderItems || order.items || []).length - 3}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <span className="text-xs font-bold text-gray-400">
-                                            {(order.orderItems || order.items || []).length} items
-                                        </span>
-                                    </div>
-
-                                    {/* Amount */}
-                                    <div className="text-center md:text-right md:min-w-[120px]">
-                                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Total Amount</p>
-                                        <p className="text-xl font-black text-[#205457] tracking-tighter">
-                                            ${(order.displayTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                        </p>
-                                    </div>
-
-                                    {/* Status */}
-                                    <div className="flex items-center gap-6">
-                                        <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${order.status === 'Delivered' ? 'bg-green-50 text-green-600' :
-                                            order.status === 'Cancelled' ? 'bg-red-50 text-red-600' :
-                                                order.status === 'Shipped' ? 'bg-indigo-50 text-indigo-600' :
-                                                    order.status === 'Processing' ? 'bg-blue-50 text-blue-600' :
-                                                        'bg-amber-50 text-amber-600' // Pending
-                                            }`}>
-                                            {order.status || 'Accepted'}
+                                    {/* Items Preview & View Button */}
+                                    <div className="flex items-center justify-between gap-4 pt-3 border-t border-gray-50">
+                                        <div className="flex items-center gap-3 flex-1">
+                                            <div className="flex -space-x-3">
+                                                {(order.orderItems || order.items || []).slice(0, 3).map((item, i) => (
+                                                    <div key={i} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white bg-gray-100 overflow-hidden shadow-sm">
+                                                        <SafeImage src={item.image || item.imagePath} alt="" className="w-full h-full object-cover" type="product" />
+                                                    </div>
+                                                ))}
+                                                {(order.orderItems || order.items || []).length > 3 && (
+                                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white bg-[#B19470] text-white flex items-center justify-center text-[9px] sm:text-[10px] font-black">
+                                                        +{(order.orderItems || order.items || []).length - 3}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <span className="text-[10px] sm:text-xs font-bold text-gray-400">
+                                                {(order.orderItems || order.items || []).length} items
+                                            </span>
                                         </div>
                                         <button
                                             onClick={() => setSelectedOrder(order)}
-                                            className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400 hover:bg-[#205457] hover:text-white transition-all shadow-sm group/btn"
+                                            className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-xl sm:rounded-2xl flex items-center justify-center text-gray-400 hover:bg-[#205457] hover:text-white transition-all shadow-sm group/btn flex-shrink-0"
                                         >
-                                            <ChevronRight size={20} className="group-hover/btn:translate-x-0.5 transition-transform" />
+                                            <ChevronRight size={18} className="sm:w-5 sm:h-5 group-hover/btn:translate-x-0.5 transition-transform" />
                                         </button>
                                     </div>
                                 </div>

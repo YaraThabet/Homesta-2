@@ -21,14 +21,14 @@ const AIChatFloatButton = () => {
             </div>
 
             {/* The Button Icon */}
-            <div className="w-16 h-16 bg-[#205457] rounded-full flex items-center justify-center shadow-2xl shadow-[#205457]/30 border-4 border-white/10 hover:scale-110 active:scale-95 transition-all duration-300 relative">
+            <div className="w-12 h-12 md:w-16 md:h-16 bg-[#205457] rounded-full flex items-center justify-center shadow-2xl shadow-[#205457]/30 border-4 border-white/10 hover:scale-110 active:scale-95 transition-all duration-300 relative">
                 {/* Animated Glow Effect */}
                 <div className="absolute inset-0 bg-[#205457] rounded-full animate-ping opacity-20 group-hover:opacity-30"></div>
 
-                <MessageSquareText className="text-white w-8 h-8 relative z-10" />
+                <MessageSquareText className="text-white w-6 h-6 md:w-8 md:h-8 relative z-10" />
 
                 {/* Online Indicator Badge */}
-                <div className="absolute top-1 right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+                <div className="absolute top-1 right-1 w-3 h-3 md:w-4 md:h-4 bg-green-500 rounded-full border-2 border-white"></div>
             </div>
         </button>
     );

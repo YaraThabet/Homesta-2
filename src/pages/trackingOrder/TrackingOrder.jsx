@@ -115,6 +115,8 @@ const TrackingOrder = () => {
         setOrder(null);
       } finally {
         setLoading(false);
+        // Ensure page resets to top when data is loaded/changed
+        window.scrollTo({ top: 0, behavior: 'instant' });
       }
     };
 
@@ -134,49 +136,47 @@ const TrackingOrder = () => {
     <div className="bg-white min-h-screen pb-10 font-outfit">
       <TrackingHeader />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 sm:mt-12">
         {/* Order Info Header */}
         <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div className="flex-1">
-            <h2 className="text-2xl font-bold text-gray-800">Order Status</h2>
-            <p className="text-gray-400 font-bold mt-1 uppercase tracking-widest text-[10px]">Reference: #{id || 'N/A'}</p>
+          <div className="flex-1 text-center md:text-left">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight">Order Status</h2>
+            <p className="text-gray-400 font-bold mt-1.5 uppercase tracking-[0.2em] text-[10px] sm:text-[11px]">Reference: <span className="text-[#205457]">#{id || 'N/A'}</span></p>
           </div>
 
           {/* Quick Search */}
-          <div className="flex-1 max-w-sm">
+          <div className="flex-1 max-w-sm w-full mx-auto md:mx-0 order-3 md:order-2">
             <form onSubmit={handleSearch} className="relative group">
               <input
                 type="text"
                 placeholder="Track another ID..."
-                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#205457]/10 focus:border-[#205457] transition-all text-sm font-medium placeholder:text-gray-400"
+                className="w-full pl-11 pr-4 py-3.5 bg-gray-50/50 border border-gray-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#205457]/5 focus:border-[#205457] transition-all text-sm font-bold placeholder:text-gray-300"
                 value={searchId}
                 onChange={(e) => setSearchId(e.target.value)}
               />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-[#205457] transition-colors" size={18} />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-200 group-focus-within:text-[#205457] transition-colors" size={18} />
               <button type="submit" className="hidden">Search</button>
             </form>
           </div>
 
           {order && (
-            <div className="text-right flex flex-col items-end gap-3">
-              <div>
-                <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-1">Estimated Delivery</p>
-                <p className="text-sm font-bold text-[#205457]">3-5 Business Days</p>
-              </div>
+            <div className="text-center md:text-right flex flex-col items-center md:items-end gap-1 order-2 md:order-3">
+              <p className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-0.5">Estimated Arrival</p>
+              <p className="text-sm font-bold text-[#205457] bg-[#205457]/5 px-3 py-1 rounded-full inline-block">3-5 Business Days</p>
             </div>
           )}
         </div>
 
         {error ? (
-          <div className="text-center py-20 bg-red-50/30 rounded-[40px] border border-dashed border-red-200">
+          <div className="text-center py-16 sm:py-24 bg-red-50/30 rounded-[30px] sm:rounded-[40px] border border-dashed border-red-200 px-6">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
               <AlertCircle size={32} />
             </div>
             <h3 className="text-xl font-bold text-gray-800 mb-2">Tracking Error</h3>
-            <p className="text-gray-500 font-medium max-w-md mx-auto">{error}</p>
+            <p className="text-gray-500 font-medium max-w-md mx-auto text-sm sm:text-base">{error}</p>
             <button
               onClick={() => { setOrder(null); setError(null); setSearchId(""); }}
-              className="mt-8 text-sm font-bold text-[#205457] hover:underline"
+              className="mt-8 text-sm font-bold text-[#205457] hover:underline bg-[#205457]/5 px-5 py-2 rounded-full transition-all"
             >
               Clear and search again
             </button>
@@ -186,12 +186,17 @@ const TrackingOrder = () => {
             <OrderStatus status={order.status} />
 
             {/* Product List Section */}
-            <div className="border border-gray-100 rounded-[30px] p-8 shadow-sm bg-white mt-12">
-              <div className="flex items-center justify-between mb-8 border-b border-gray-50 pb-6">
-                <h2 className="text-xl font-bold text-gray-800">Order Items</h2>
-                <span className="bg-[#205457]/5 text-[#205457] px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest">
-                  {(order.items || order.orderItems)?.length || 0} Products
-                </span>
+            <div className="border border-gray-100 rounded-[24px] sm:rounded-[30px] p-5 sm:p-8 sm:p-10 shadow-sm bg-white mt-8 sm:mt-12 overflow-hidden">
+              <div className="flex flex-col sm:flex-row items-center justify-between mb-8 border-b border-gray-50 pb-6 gap-4">
+                <h2 className="text-xl font-bold text-gray-900">Order Summary</h2>
+                <div className="flex items-center gap-3">
+                  <span className="bg-gray-50 text-gray-400 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-gray-100">
+                    ID: {order.orderId}
+                  </span>
+                  <span className="bg-[#205457]/5 text-[#205457] px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border border-[#205457]/10">
+                    {(order.items || order.orderItems)?.length || 0} Products
+                  </span>
+                </div>
               </div>
 
               <div className="space-y-6">
@@ -208,35 +213,42 @@ const TrackingOrder = () => {
                 ))}
               </div>
 
-              <div className="mt-10 pt-8 border-t border-gray-50 flex justify-between items-center">
-                <span className="text-sm font-bold text-gray-400 uppercase tracking-widest">Total Value</span>
-                <span className="text-3xl font-black text-[#205457]">
-                  ${(order.totalPrice || (order.items || order.orderItems)?.reduce((sum, item) => {
-                    const price = item.finalUnitPrice ?? item.unitPrice ?? item.price ?? 0;
-                    return sum + (Number(price) * (item.quantity || 1));
-                  }, 0))?.toLocaleString()}
-                </span>
+              <div className="mt-10 pt-8 border-t border-gray-50 flex flex-col sm:flex-row justify-between items-center gap-4 text-center sm:text-right">
+                <div className="flex flex-col items-center sm:items-start">
+                  <span className="text-xs font-bold text-gray-300 uppercase tracking-[0.2em] mb-1">Total Order Value</span>
+                  <p className="text-[10px] text-gray-400 font-medium">Includes taxes and shipping</p>
+                </div>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-sm font-bold text-gray-400">$</span>
+                  <span className="text-4xl sm:text-5xl font-black text-[#205457] tracking-tighter">
+                    {(order.totalPrice || (order.items || order.orderItems)?.reduce((sum, item) => {
+                      const price = item.finalUnitPrice ?? item.unitPrice ?? item.price ?? 0;
+                      return sum + (Number(price) * (item.quantity || 1));
+                    }, 0))?.toLocaleString()}
+                  </span>
+                  <span className="text-sm font-bold text-[#205457] tracking-widest opacity-40">USD</span>
+                </div>
               </div>
             </div>
           </>
         ) : (
-          <div className="text-center py-24 bg-gray-50/50 rounded-[40px] border border-dashed border-gray-200">
-            <div className="w-20 h-20 bg-white rounded-3xl shadow-sm border border-gray-100 flex items-center justify-center mx-auto mb-8">
-              <Search className="text-gray-200" size={40} />
+          <div className="text-center py-16 sm:py-24 bg-gray-50/30 rounded-[30px] sm:rounded-[40px] border border-dashed border-gray-200 px-6">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-[24px] sm:rounded-[30px] shadow-sm border border-gray-100 flex items-center justify-center mx-auto mb-8 animate-pulse text-[#205457]/20">
+              <Search size={40} className="sm:size-48" />
             </div>
-            <h3 className="text-2xl font-bold text-gray-800 mb-3">Ready to track?</h3>
-            <p className="text-gray-400 font-medium max-w-sm mx-auto mb-10">Enter your order reference ID in the search box above to see your package's progress.</p>
+            <h3 className="text-2xl sm:text-3xl font-black text-gray-900 mb-4 tracking-tight">Ready to track?</h3>
+            <p className="text-gray-400 font-medium max-w-sm mx-auto mb-10 text-sm sm:text-base">Enter your order reference ID in the search box above to see your package's progress.</p>
 
             <div className="max-w-md mx-auto">
-              <form onSubmit={handleSearch} className="flex gap-2">
+              <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
                 <input
                   type="text"
-                  placeholder="Enter Order Reference (e.g. 1045)"
-                  className="flex-1 px-6 py-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#205457]/10 focus:border-[#205457] transition-all text-sm font-medium shadow-sm placeholder:text-gray-400"
+                  placeholder="Enter Reference (e.g. 1045)"
+                  className="flex-1 px-6 py-4 bg-white border border-gray-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-[#205457]/5 focus:border-[#205457] transition-all text-sm font-bold shadow-sm placeholder:text-gray-300"
                   value={searchId}
                   onChange={(e) => setSearchId(e.target.value)}
                 />
-                <button type="submit" className="px-8 py-4 bg-[#205457] text-white rounded-2xl font-bold text-sm shadow-lg shadow-[#205457]/20 hover:bg-[#1a4345] transition-all">
+                <button type="submit" className="px-8 py-4 bg-[#205457] text-white rounded-2xl font-black text-sm shadow-xl shadow-[#205457]/20 hover:bg-[#1a4345] hover:-translate-y-1 transition-all active:translate-y-0">
                   Track Now
                 </button>
               </form>

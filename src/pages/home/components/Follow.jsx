@@ -1,5 +1,4 @@
-import React from 'react'
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Follow = () => {
 
@@ -15,47 +14,69 @@ const Follow = () => {
     "/img/item3.png",
   ];
 
-  const imagesPerSlide = 3;
+  const [imagesPerSlide, setImagesPerSlide] = useState(3);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setImagesPerSlide(1);
+      } else if (window.innerWidth < 1024) {
+        setImagesPerSlide(2);
+      } else {
+        setImagesPerSlide(3);
+      }
+    };
+
+    handleResize(); // Init
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const slides = [];
   for (let i = 0; i < images.length; i += imagesPerSlide) {
     slides.push(images.slice(i, i + imagesPerSlide));
   }
 
-  return (
-    <div className='w-full min-h-screen py-8 md:py-15 flex items-center justify-center px-4'>
-      <div className='flex w-full max-w-[1208px] min-h-[600px] md:h-[789px] rounded-2xl bg-[#F1EFEF] shadow-2xl items-center justify-center'>
-        <div className='flex flex-col w-full max-w-[1000px] px-4 md:px-0 my-auto gap-6 md:gap-[48px] py-8'>
+  // Reset current slide if it becomes invalid after resize
+  useEffect(() => {
+    if (currentSlide >= slides.length) {
+      setCurrentSlide(0);
+    }
+  }, [slides.length, currentSlide]);
 
-          <div className='w-full max-w-[427px] mx-auto'>
-            <p className="font-outfit font-medium text-[30px] text-center">
+  return (
+    <div className='w-full py-16 md:py-24 flex items-center justify-center px-4'>
+      <div className='flex w-full max-w-[1208px] rounded-2xl bg-[#F1EFEF] shadow-xl items-center justify-center'>
+        <div className='flex flex-col w-full px-6 py-12 gap-8 md:gap-12'>
+
+          <div className='w-full text-center'>
+            <p className="font-outfit font-medium text-2xl md:text-3xl text-center">
               Follow <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" className='text-[#205457] hover:underline cursor-pointer'>us on Instagram</a>
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-4 md:gap-6 justify-center items-center">
-            {slides[currentSlide].map((img, index) => (
+          <div className="flex justify-center items-center gap-4 md:gap-6 min-h-[300px]">
+            {slides[currentSlide]?.map((img, index) => (
               <div
                 key={index}
-                className="w-full sm:w-[200px] md:w-[260px] h-[250px] md:h-[300px]  rounded-3xl overflow-hidden relative cursor-pointer"
+                className="w-full sm:w-[260px] h-[300px] rounded-3xl overflow-hidden relative cursor-pointer shadow-md"
               >
                 <img
                   src={img}
                   alt="img"
-                  className="w-full h-full object-cover hover:scale-105 hover: transition-transform duration-300"
+                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                 />
-
               </div>
             ))}
           </div>
 
-          <div className="flex gap-3 md:gap-4 justify-center">
+          <div className="flex gap-3 justify-center">
             {slides.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentSlide(index)}
-                className={`w-3 h-3 md:w-4 md:h-4 rounded-full transition-colors duration-300 ${currentSlide === index ? "bg-[#205457]" : "bg-gray-400"
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${currentSlide === index ? "bg-[#205457] w-6" : "bg-gray-300"
                   }`}
               />
             ))}

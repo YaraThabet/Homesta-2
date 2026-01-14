@@ -48,7 +48,7 @@ const AdminDashboard = () => {
                 });
                 setRecentOrders(
                     orders
-                        .sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate))
+                        .sort((a, b) => new Date(b.orderDate || b.datePlaced || 0) - new Date(a.orderDate || a.datePlaced || 0))
                         .slice(0, 5)
                 );
             } catch (err) {

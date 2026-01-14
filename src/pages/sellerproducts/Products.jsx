@@ -95,7 +95,7 @@ const getColorName = (colorVal) => {
 };
 const Products = () => {
     const navigate = useNavigate();
-    const { showAlert } = useAppContext();
+    const { showAlert, formatPrice, t } = useAppContext();
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -268,19 +268,19 @@ const Products = () => {
                     <div>
                         <div className="flex items-center gap-3 mb-3">
                             <span className="h-[1px] w-8 bg-[#205457]"></span>
-                            <span className="text-[12px] font-bold uppercase tracking-[0.2em] text-[#205457]/60">Inventory</span>
+                            <span className="text-[12px] font-bold uppercase tracking-[0.2em] text-[#205457]/60">{t('inventory')}</span>
                         </div>
                         <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 tracking-tight">
-                            My <span className="text-[#205457]">Products</span>
+                            {t('myProducts')}
                         </h1>
                         <p className="text-gray-400 mt-3 text-lg font-light">
-                            Manage your showroom pieces and keep your inventory up to date.
+                            {t('manageShowroom')}
                         </p>
                     </div>
 
                     <Link to="/addproduct" className="bg-[#205457] text-white px-8 py-4 rounded-2xl font-bold flex items-center gap-3 hover:shadow-2xl hover:shadow-[#205457]/20 transition-all active:scale-95 shadow-xl">
                         <Plus className="w-5 h-5" />
-                        <span>Add New Product</span>
+                        <span>{t('addNewProduct')}</span>
                     </Link>
                 </div>
 
@@ -291,7 +291,7 @@ const Products = () => {
                             <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-300 transition-colors group-focus-within:text-[#205457]" size={20} />
                             <input
                                 type="text"
-                                placeholder="Search your inventory..."
+                                placeholder={t('searchInventory')}
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full pl-14 pr-6 py-4 bg-gray-50 rounded-2xl border border-transparent focus:border-[#205457]/10 focus:bg-white outline-none transition-all font-medium text-gray-700"
@@ -337,7 +337,7 @@ const Products = () => {
                         {/* SubCategory List - Only if Category Selected */}
                         {selectedCategory !== 'All' && availableSubCategories.length > 0 && (
                             <div className="flex gap-2 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm overflow-x-auto max-w-full md:max-w-xl no-scrollbar items-center">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-300 px-2 flex-shrink-0">Subcategory:</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-gray-300 px-2 flex-shrink-0">{t('subcategory')}:</span>
                                 <button
                                     onClick={() => setSelectedSubCategory('All')}
                                     className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all border ${selectedSubCategory === 'All'
@@ -345,7 +345,7 @@ const Products = () => {
                                         : 'bg-white text-gray-400 border-gray-200 hover:border-gray-300'
                                         }`}
                                 >
-                                    All
+                                    {t('all')}
                                 </button>
                                 {availableSubCategories.map(sub => (
                                     <button
@@ -370,7 +370,7 @@ const Products = () => {
                         <div className="w-24 h-24 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-8 text-red-500">
                             <AlertCircle size={40} />
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-4">Error Loading Products</h3>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('errorLoading')}</h3>
                         <p className="text-red-600 max-w-2xl mx-auto mb-10 leading-relaxed font-mono text-sm bg-white p-4 rounded-xl">
                             {error}
                         </p>
@@ -378,7 +378,7 @@ const Products = () => {
                             onClick={() => window.location.reload()}
                             className="inline-flex items-center gap-3 bg-[#205457] text-white px-10 py-5 rounded-[22px] font-bold hover:shadow-2xl hover:shadow-[#205457]/20 transition-all active:scale-95 shadow-xl"
                         >
-                            Retry
+                            {t('retry')}
                         </button>
                     </motion.div>
                 ) : loading ? (
@@ -391,7 +391,7 @@ const Products = () => {
                         <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-8 text-gray-300">
                             <Package size={40} />
                         </div>
-                        <h3 className="text-2xl font-bold text-gray-900 mb-4">No products found</h3>
+                        <h3 className="text-2xl font-bold text-gray-900 mb-4">{t('noProductsFound')}</h3>
                         <p className="text-gray-400 max-w-sm mx-auto mb-10 leading-relaxed">
                             {selectedCategory !== 'All'
                                 ? `Try changing filters or add a new piece to ${selectedCategory}.`
@@ -399,7 +399,7 @@ const Products = () => {
                         </p>
                         <Link to="/addproduct" className="inline-flex items-center gap-3 bg-[#205457] text-white px-10 py-5 rounded-[22px] font-bold hover:shadow-2xl hover:shadow-[#205457]/20 transition-all active:scale-95 shadow-xl">
                             <Plus size={20} />
-                            <span>Create Product</span>
+                            <span>{t('createProduct')}</span>
                         </Link>
                     </motion.div>
                 ) : viewMode === 'grid' ? (
@@ -413,6 +413,8 @@ const Products = () => {
                                 onEdit={() => navigate(`/edit-product/${product.productId || product.id}`)}
                                 onDelete={() => setDeleteId(product.productId || product.id)}
                                 onViewDetails={setSelectedProduct}
+                                formatPrice={formatPrice}
+                                t={t}
                             />
                         ))}
                     </div>
@@ -421,11 +423,11 @@ const Products = () => {
                         <table className="w-full text-left">
                             <thead>
                                 <tr className="bg-gray-50/50 border-b border-gray-100">
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Product</th>
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Price</th>
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Stock</th>
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">Status</th>
-                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">Actions</th>
+                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">{t('product')}</th>
+                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">{t('price')}</th>
+                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">{t('stock')}</th>
+                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400">{t('status')}</th>
+                                    <th className="px-8 py-6 text-[10px] font-black uppercase tracking-widest text-gray-400 text-right">{t('actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
@@ -463,10 +465,10 @@ const Products = () => {
                 isOpen={!!deleteId}
                 onClose={() => setDeleteId(null)}
                 onConfirm={handleDelete}
-                title="Delete Product?"
-                message="This action cannot be undone. This piece will be permanently removed from your showroom."
-                confirmText={isDeleting ? "Deleting..." : "Delete Piece"}
-                cancelText="Cancel"
+                title={t('deleteConfirmTitle')}
+                message={t('deleteConfirmMsg')}
+                confirmText={isDeleting ? t('deleting') : t('delete')}
+                cancelText={t('cancel')}
                 type="danger"
             />
         </div>
@@ -475,6 +477,7 @@ const Products = () => {
 
 // --- MODAL COMPONENT ---
 const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) => {
+    const { t, formatPrice } = useAppContext();
     const [images, setImages] = useState([]);
     const [reviews, setReviews] = useState([]);
     const [loadingImages, setLoadingImages] = useState(true);
@@ -518,23 +521,23 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) 
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white w-full max-w-5xl rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                className="bg-white w-full max-w-5xl rounded-[30px] md:rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
             >
-                <div className="flex justify-between items-center p-8 border-b border-gray-100 bg-gray-50/50">
+                <div className="flex justify-between items-center p-6 md:p-8 border-b border-gray-100 bg-gray-50/50">
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900">Product Analysis</h2>
-                        <p className="text-gray-500 text-sm">Reviewing your showroom piece: #{product.productId || product.id}</p>
+                        <h2 className="text-xl md:text-2xl font-bold text-gray-900">{t('productAnalysis')}</h2>
+                        <p className="text-gray-500 text-xs md:text-sm">#{product.productId || product.id}</p>
                     </div>
                     <button onClick={onClose} className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors shadow-sm text-gray-400 hover:text-gray-600">
-                        <X size={24} />
+                        <X size={20} className="md:w-6 md:h-6" />
                     </button>
                 </div>
 
-                <div className="overflow-y-auto p-8">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-12">
+                <div className="overflow-y-auto p-6 md:p-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 mb-12">
                         {/* Left: Images */}
                         <div className="space-y-4">
-                            <div className="aspect-square bg-gray-50 rounded-3xl overflow-hidden relative shadow-inner border border-gray-100 flex items-center justify-center">
+                            <div className="aspect-square bg-gray-50 rounded-2xl md:rounded-3xl overflow-hidden relative shadow-inner border border-gray-100 flex items-center justify-center">
                                 {images.length > 0 ? (
                                     <img
                                         src={getImageUrl(images[selectedImageIndex])}
@@ -543,7 +546,7 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) 
                                     />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-gray-300">
-                                        <Package size={64} />
+                                        <Package size={48} className="md:w-16 md:h-16" />
                                     </div>
                                 )}
                             </div>
@@ -566,21 +569,21 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) 
                         </div>
 
                         {/* Right: Detailed Info */}
-                        <div className="space-y-8">
+                        <div className="space-y-6 md:space-y-8">
                             <div>
-                                <h3 className="text-4xl font-black text-gray-900 leading-tight mb-4">{product.name}</h3>
+                                <h3 className="text-2xl md:text-3xl lg:text-4xl font-black text-gray-900 leading-tight mb-4">{product.name}</h3>
                                 <div className="flex flex-wrap gap-2 mb-6">
-                                    <span className="px-4 py-1.5 bg-[#205457]/10 text-[#205457] rounded-xl text-xs font-black uppercase tracking-widest border border-[#205457]/10">
+                                    <span className="px-3 py-1 md:px-4 md:py-1.5 bg-[#205457]/10 text-[#205457] rounded-lg md:rounded-xl text-[10px] md:text-xs font-black uppercase tracking-widest border border-[#205457]/10">
                                         {categoryMap[product.categoryId] || 'Unknown Category'}
                                     </span>
                                     {product.subCategoryId && (
-                                        <span className="px-4 py-1.5 bg-gray-50 text-gray-400 rounded-xl text-xs font-bold uppercase tracking-wider border border-gray-100">
+                                        <span className="px-3 py-1 md:px-4 md:py-1.5 bg-gray-50 text-gray-400 rounded-lg md:rounded-xl text-[10px] md:text-xs font-bold uppercase tracking-wider border border-gray-100">
                                             {subCategoryMap[product.subCategoryId] || 'Standard Edition'}
                                         </span>
                                     )}
                                 </div>
                                 <div
-                                    className="text-gray-500 leading-relaxed text-sm bg-gray-50/50 p-6 rounded-3xl border border-gray-100/50 font-light italic prose prose-sm max-w-none"
+                                    className="text-gray-500 leading-relaxed text-sm bg-gray-50/50 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-100/50 font-light italic prose prose-sm max-w-none"
                                     dangerouslySetInnerHTML={{
                                         __html: (() => {
                                             let raw = product.description || "";
@@ -596,41 +599,41 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) 
                                 />
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-5 bg-white rounded-3xl border border-gray-100 shadow-sm">
-                                    <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">Market Price</span>
-                                    <div className="flex items-center gap-2">
-                                        <div className="text-3xl font-black text-[#205457] tabular-nums">
-                                            ${product.discount > 0 ? (product.price * (1 - product.discount / 100)).toFixed(2) : product.price}
+                            <div className="grid grid-cols-2 gap-3 md:gap-4">
+                                <div className="p-4 md:p-5 bg-white rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm">
+                                    <span className="text-[9px] md:text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">{t('marketPrice')}</span>
+                                    <div className="flex flex-col sm:flex-row sm:items-center gap-1 md:gap-2">
+                                        <div className="text-xl md:text-3xl font-black text-[#205457] tabular-nums leading-none">
+                                            {formatPrice(product.discount > 0 ? (product.price * (1 - product.discount / 100)) : product.price)}
                                         </div>
                                         {product.discount > 0 && (
-                                            <span className="text-sm text-gray-400 line-through font-bold">${product.price}</span>
+                                            <span className="text-xs md:text-sm text-gray-400 line-through font-bold">{formatPrice(product.price)}</span>
                                         )}
                                     </div>
                                 </div>
-                                <div className="p-5 bg-white rounded-3xl border border-gray-100 shadow-sm">
-                                    <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">Stock Available</span>
-                                    <div className="text-3xl font-black text-gray-900 tabular-nums">{product.quantity || 0}</div>
+                                <div className="p-4 md:p-5 bg-white rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm">
+                                    <span className="text-[9px] md:text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">{t('stockAvailable')}</span>
+                                    <div className="text-xl md:text-3xl font-black text-gray-900 tabular-nums leading-none">{product.quantity || 0}</div>
                                 </div>
-                                <div className="p-5 bg-white rounded-3xl border border-gray-100 shadow-sm">
-                                    <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">Rating</span>
+                                <div className="p-4 md:p-5 bg-white rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm">
+                                    <span className="text-[9px] md:text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">{t('rating')}</span>
                                     <div className="flex items-center gap-2 mt-1">
-                                        <Star size={24} className="fill-[#F59E0B] text-[#F59E0B]" />
-                                        <span className="text-2xl font-black text-gray-900">{product.rating || 0}</span>
+                                        <Star size={18} className="md:w-6 md:h-6 fill-[#F59E0B] text-[#F59E0B]" />
+                                        <span className="text-xl md:text-2xl font-black text-gray-900 leading-none">{product.rating || 0}</span>
                                     </div>
                                 </div>
-                                <div className="p-5 bg-white rounded-3xl border border-gray-100 shadow-sm">
-                                    <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">Active Discount</span>
-                                    <div className="text-3xl font-black text-red-500 tabular-nums">{product.discount || 0}%</div>
+                                <div className="p-4 md:p-5 bg-white rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm">
+                                    <span className="text-[9px] md:text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">{t('activeDiscount')}</span>
+                                    <div className="text-xl md:text-3xl font-black text-red-500 tabular-nums leading-none">{product.discount || 0}%</div>
                                 </div>
                             </div>
 
                             {product.colors && (
                                 <div>
-                                    <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest mb-3 block">Color Variations</span>
+                                    <span className="text-[9px] md:text-[10px] font-black text-gray-300 uppercase tracking-widest mb-3 block">{t('colorVariations')}</span>
                                     <div className="flex flex-wrap gap-2">
                                         {(Array.isArray(product.colors) ? product.colors : product.colors.split(',')).map((c, i) => (
-                                            <span key={i} className="px-4 py-2 bg-gray-50 border border-gray-100 rounded-xl text-[10px] font-black text-gray-700 uppercase tracking-widest">{getColorName(c.trim())}</span>
+                                            <span key={i} className="px-3 py-1.5 md:px-4 md:py-2 bg-gray-50 border border-gray-100 rounded-lg md:rounded-xl text-[9px] md:text-[10px] font-black text-gray-700 uppercase tracking-widest">{getColorName(c.trim())}</span>
                                         ))}
                                     </div>
                                 </div>
@@ -639,31 +642,31 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) 
                     </div>
 
                     {/* Bottom: Reviews Summary */}
-                    <div className="mt-8 pt-8 border-t border-gray-100">
-                        <div className="flex items-center gap-3 mb-8">
-                            <div className="w-10 h-10 rounded-xl bg-[#B19470]/10 flex items-center justify-center text-[#B19470]">
-                                <Eye size={20} />
+                    <div className="mt-8 pt-6 md:pt-8 border-t border-gray-100">
+                        <div className="flex items-center gap-2 md:gap-3 mb-6 md:mb-8">
+                            <div className="w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[#B19470]/10 flex items-center justify-center text-[#B19470]">
+                                <Eye size={16} className="md:w-5 md:h-5" />
                             </div>
-                            <h4 className="text-xl font-bold text-gray-900">Customer Feedback ({reviews.length})</h4>
+                            <h4 className="text-lg md:text-xl font-bold text-gray-900">{t('customerFeedback')} ({reviews.length})</h4>
                         </div>
 
                         {reviews.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
                                 {reviews.map((rev, idx) => (
-                                    <div key={rev.reviewId || idx} className="p-6 bg-gray-50/50 rounded-3xl border border-gray-100/50">
-                                        <div className="flex justify-between items-center mb-3">
-                                            <span className="font-bold text-gray-900 text-sm">{rev.userName || 'Customer'}</span>
+                                    <div key={rev.reviewId || idx} className="p-4 md:p-6 bg-gray-50/50 rounded-2xl md:rounded-3xl border border-gray-100/50">
+                                        <div className="flex justify-between items-center mb-2 md:mb-3">
+                                            <span className="font-bold text-gray-900 text-xs md:text-sm">{rev.userName || 'Customer'}</span>
                                             <div className="flex gap-0.5">
                                                 {[1, 2, 3, 4, 5].map(s => <Star key={s} size={10} className={s <= rev.rating ? "fill-[#F59E0B] text-[#F59E0B]" : "text-gray-200"} />)}
                                             </div>
                                         </div>
-                                        <p className="text-gray-500 text-xs leading-relaxed line-clamp-2">"{rev.comment}"</p>
+                                        <p className="text-gray-500 text-[10px] md:text-xs leading-relaxed line-clamp-2">"{rev.comment}"</p>
                                     </div>
                                 ))}
                             </div>
                         ) : (
-                            <div className="text-center py-10 bg-gray-50/30 rounded-3xl border-2 border-dashed border-gray-100">
-                                <p className="text-gray-400 font-medium italic text-sm">No customer reviews yet for this piece.</p>
+                            <div className="text-center py-8 md:py-10 bg-gray-50/30 rounded-2xl md:rounded-3xl border-2 border-dashed border-gray-100">
+                                <p className="text-gray-400 font-medium italic text-xs md:text-sm">No customer reviews yet for this piece.</p>
                             </div>
                         )}
                     </div>
@@ -675,7 +678,7 @@ const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) 
 
 const backendBase = '';
 
-const ProductCard = ({ product, onEdit, onDelete, onViewDetails, categoryMap }) => {
+const ProductCard = ({ product, onEdit, onDelete, onViewDetails, categoryMap, formatPrice, t }) => {
     const [images, setImages] = useState([]);
     const [loadingImage, setLoadingImage] = useState(true);
 
@@ -730,16 +733,16 @@ const ProductCard = ({ product, onEdit, onDelete, onViewDetails, categoryMap }) 
                     </div>
                 )}
 
-                <div className="absolute top-6 left-6 flex flex-col gap-2">
+                <div className="absolute top-4 left-4 md:top-6 md:left-6 flex flex-col gap-2">
                     {product.quantity <= 5 && (
-                        <span className={`px-4 py-2 text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-lg ${product.quantity === 0 ? 'bg-red-500' : 'bg-amber-500'
+                        <span className={`px-2 py-1 md:px-4 md:py-2 text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-xl md:rounded-2xl shadow-lg ${product.quantity === 0 ? 'bg-red-500' : 'bg-amber-500'
                             }`}>
-                            {product.quantity === 0 ? "Out of Stock" : `Low Stock: ${product.quantity}`}
+                            {product.quantity === 0 ? t('outOfStock') : `${t('lowStock')}: ${product.quantity}`}
                         </span>
                     )}
                     {product.discount > 0 && (
-                        <span className="px-4 py-2 bg-[#205457] text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-lg">
-                            -{product.discount}% OFF
+                        <span className="px-2 py-1 md:px-4 md:py-2 bg-[#205457] text-white text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-xl md:rounded-2xl shadow-lg">
+                            -{product.discount}% {t('off')}
                         </span>
                     )}
                 </div>
@@ -755,14 +758,14 @@ const ProductCard = ({ product, onEdit, onDelete, onViewDetails, categoryMap }) 
                     <button
                         onClick={onEdit}
                         className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-[#205457] hover:bg-[#205457] hover:text-white transition-all transform -translate-y-4 group-hover:translate-y-0 duration-500 delay-75"
-                        title="Edit Product"
+                        title={t('editProduct')}
                     >
                         <Edit3 size={20} />
                     </button>
                     <button
                         onClick={onDelete}
                         className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all transform translate-y-4 group-hover:translate-y-0 duration-500 delay-100"
-                        title="Delete Product"
+                        title={t('deleteProduct')}
                     >
                         <Trash2 size={20} />
                     </button>
@@ -794,10 +797,10 @@ const ProductCard = ({ product, onEdit, onDelete, onViewDetails, categoryMap }) 
 
                 <div className="mt-6 pt-6 border-t border-gray-50 flex items-center justify-between">
                     <div>
-                        <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">Price</span>
+                        <span className="text-[10px] font-black text-gray-300 uppercase tracking-widest block mb-1">{t('price')}</span>
                         <div className="flex items-center gap-2">
                             <p className="text-2xl font-black text-[#205457] tabular-nums">
-                                ${product.discount > 0 ? (product.price * (1 - product.discount / 100)).toFixed(2) : product.price}
+                                {formatPrice(product.discount > 0 ? (product.price * (1 - product.discount / 100)) : product.price)}
                             </p>
                             {product.discount > 0 && (
                                 <span className="text-sm text-gray-400 line-through font-medium">${product.price}</span>
@@ -815,6 +818,7 @@ const ProductCard = ({ product, onEdit, onDelete, onViewDetails, categoryMap }) 
 };
 
 const ProductRow = ({ product, onEdit, onDelete, onViewDetails, subCategoryMap }) => {
+    const { t, formatPrice } = useAppContext();
     const imageUrl = (product.imagePath || product.image)
         ? ((product.imagePath || product.image).startsWith('http') ? (product.imagePath || product.image) : `${backendBase}${product.imagePath || product.image}`)
         : 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&q=80';
@@ -840,10 +844,10 @@ const ProductRow = ({ product, onEdit, onDelete, onViewDetails, subCategoryMap }
             <td className="px-8 py-6">
                 <div className="flex flex-col">
                     <p className="font-black text-gray-900 tabular-nums">
-                        ${product.discount > 0 ? (product.price * (1 - product.discount / 100)).toFixed(2) : product.price}
+                        {formatPrice(product.discount > 0 ? (product.price * (1 - product.discount / 100)) : product.price)}
                     </p>
                     {product.discount > 0 && (
-                        <span className="text-[10px] text-gray-400 line-through font-bold">${product.price}</span>
+                        <span className="text-[10px] text-gray-400 line-through font-bold">{formatPrice(product.price)}</span>
                     )}
                 </div>
             </td>
@@ -861,11 +865,11 @@ const ProductRow = ({ product, onEdit, onDelete, onViewDetails, subCategoryMap }
             <td className="px-8 py-6">
                 {product.quantity > 0 ? (
                     <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-green-500 bg-green-50 px-3 py-1 rounded-full">
-                        <Check size={12} /> Active
+                        <Check size={12} /> {t('active') || 'Active'}
                     </span>
                 ) : (
                     <span className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-red-500 bg-red-50 px-3 py-1 rounded-full">
-                        <X size={12} /> Sold Out
+                        <X size={12} /> {t('soldOut') || 'Sold Out'}
                     </span>
                 )}
             </td>
@@ -874,21 +878,21 @@ const ProductRow = ({ product, onEdit, onDelete, onViewDetails, subCategoryMap }
                     <button
                         onClick={() => onViewDetails(product)}
                         className="p-3 bg-white rounded-xl shadow-sm border border-gray-100 text-[#205457] hover:bg-[#205457] hover:text-white transition-all"
-                        title="View Details"
+                        title={t('viewDetails') || 'View Details'}
                     >
                         <Eye size={18} />
                     </button>
                     <button
                         onClick={onEdit}
                         className="p-3 bg-white rounded-xl shadow-sm border border-gray-100 text-[#205457] hover:bg-[#205457] hover:text-white transition-all"
-                        title="Edit Product"
+                        title={t('editProduct') || 'Edit Product'}
                     >
                         <Edit3 size={18} />
                     </button>
                     <button
                         onClick={onDelete}
                         className="p-3 bg-white rounded-xl shadow-sm border border-gray-100 text-red-500 hover:bg-red-500 hover:text-white transition-all"
-                        title="Delete Product"
+                        title={t('deleteProduct') || 'Delete Product'}
                     >
                         <Trash2 size={18} />
                     </button>

@@ -114,45 +114,45 @@ const ProductDetailsModal = ({ product, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-md">
             <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="bg-white w-full max-w-4xl rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+                className="bg-white w-full max-w-4xl rounded-[20px] sm:rounded-[40px] shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh]"
             >
-                <div className="flex justify-between items-center p-8 border-b border-gray-100 bg-gray-50/50">
-                    <div>
-                        <h2 className="text-2xl font-bold text-gray-900">{product.name}</h2>
-                        <p className="text-gray-500 text-sm">Product ID: #{product.productId || product.id}</p>
+                <div className="flex justify-between items-center p-4 sm:p-8 border-b border-gray-100 bg-gray-50/50">
+                    <div className="flex-1 min-w-0 pr-2">
+                        <h2 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">{product.name}</h2>
+                        <p className="text-gray-500 text-xs sm:text-sm">Product ID: #{product.productId || product.id}</p>
                     </div>
-                    <button onClick={onClose} className="p-3 bg-white rounded-2xl hover:bg-gray-100 transition-colors shadow-sm text-gray-400">
-                        <X size={24} />
+                    <button onClick={onClose} className="p-2 sm:p-3 bg-white rounded-xl sm:rounded-2xl hover:bg-gray-100 transition-colors shadow-sm text-gray-400 flex-shrink-0">
+                        <X size={20} className="sm:w-6 sm:h-6" />
                     </button>
                 </div>
 
-                <div className="overflow-y-auto p-8 grid grid-cols-1 lg:grid-cols-2 gap-10">
-                    <div className="space-y-4">
-                        <div className="aspect-square bg-gray-50 rounded-[30px] overflow-hidden relative border border-gray-100 flex items-center justify-center">
+                <div className="overflow-y-auto p-4 sm:p-8 grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-10">
+                    <div className="space-y-3 sm:space-y-4">
+                        <div className="aspect-square bg-gray-50 rounded-[20px] sm:rounded-[30px] overflow-hidden relative border border-gray-100 flex items-center justify-center">
                             {images.length > 0 ? (
                                 <img
                                     src={getImageUrl(images[selectedImageIndex])}
                                     alt="Main"
-                                    className="w-full h-full object-contain p-4"
+                                    className="w-full h-full object-contain p-2 sm:p-4"
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-gray-200">
-                                    {loadingImages ? <div className="w-10 h-10 border-4 border-[#205457]/10 border-t-[#205457] rounded-full animate-spin" /> : <Package size={64} />}
+                                    {loadingImages ? <div className="w-8 h-8 sm:w-10 sm:h-10 border-4 border-[#205457]/10 border-t-[#205457] rounded-full animate-spin" /> : <Package size={48} className="sm:w-16 sm:h-16" />}
                                 </div>
                             )}
                         </div>
                         {images.length > 1 && (
-                            <div className="grid grid-cols-5 gap-2">
+                            <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
                                 {images.map((img, idx) => (
                                     <button
                                         key={idx}
                                         onClick={() => setSelectedImageIndex(idx)}
-                                        className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${selectedImageIndex === idx ? 'border-[#205457]' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                                        className={`aspect-square rounded-lg sm:rounded-xl overflow-hidden border-2 transition-all ${selectedImageIndex === idx ? 'border-[#205457]' : 'border-transparent opacity-60 hover:opacity-100'}`}
                                     >
                                         <img src={getImageUrl(img)} className="w-full h-full object-cover" alt="" />
                                     </button>
@@ -188,22 +188,22 @@ const ProductDetailsModal = ({ product, onClose }) => {
                                 }}
                             />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Price</span>
-                                <div className="text-3xl font-black text-[#205457]">${product.price}</div>
+                        <div className="grid grid-cols-2 gap-2 sm:gap-4">
+                            <div className="bg-gray-50 p-3 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100">
+                                <span className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Price</span>
+                                <div className="text-xl sm:text-3xl font-black text-[#205457]">${product.price}</div>
                             </div>
-                            <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Stock</span>
-                                <div className="text-3xl font-black text-gray-900">{product.quantity}</div>
+                            <div className="bg-gray-50 p-3 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100">
+                                <span className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Stock</span>
+                                <div className="text-xl sm:text-3xl font-black text-gray-900">{product.quantity}</div>
                             </div>
-                            <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Discount</span>
-                                <div className="text-3xl font-black text-red-500">{product.discount || 0}%</div>
+                            <div className="bg-gray-50 p-3 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100">
+                                <span className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Discount</span>
+                                <div className="text-xl sm:text-3xl font-black text-red-500">{product.discount || 0}%</div>
                             </div>
-                            <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
-                                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Status</span>
-                                <div className={`text-sm font-bold mt-1 ${product.quantity > 0 ? 'text-green-500' : 'text-red-500'}`}>
+                            <div className="bg-gray-50 p-3 sm:p-6 rounded-2xl sm:rounded-3xl border border-gray-100">
+                                <span className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest block mb-1">Status</span>
+                                <div className={`text-xs sm:text-sm font-bold mt-1 ${product.quantity > 0 ? 'text-green-500' : 'text-red-500'}`}>
                                     {product.quantity > 0 ? 'Active' : 'Out of Stock'}
                                 </div>
                             </div>
@@ -516,57 +516,74 @@ const StoreOrdersList = ({ storeId }) => {
     );
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
             {orders.map((order, idx) => (
-                <div key={idx} className="bg-white p-6 rounded-[30px] border border-gray-100 flex flex-col md:flex-row items-center gap-6 shadow-sm hover:shadow-md transition-all">
-                    <div className="flex items-center gap-4 min-w-[150px]">
-                        <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-400">
-                            <Package size={20} />
+                <div key={idx} className="bg-white p-4 sm:p-6 rounded-[20px] sm:rounded-[30px] border border-gray-100 shadow-sm hover:shadow-md transition-all">
+                    {/* Mobile Layout */}
+                    <div className="flex flex-col gap-4">
+                        {/* Header Row - Order ID & Status */}
+                        <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-xl sm:rounded-2xl flex items-center justify-center text-gray-400 flex-shrink-0">
+                                    <Package size={18} className="sm:w-5 sm:h-5" />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Order ID</p>
+                                    <p className="font-bold text-gray-900 text-sm sm:text-base leading-none truncate">#{order.orderId || order.id}</p>
+                                </div>
+                            </div>
+                            <div className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest whitespace-nowrap flex-shrink-0 ${order.status === 'Delivered' ? 'bg-green-50 text-green-600' :
+                                order.status === 'Cancelled' ? 'bg-red-50 text-red-600' :
+                                    order.status === 'Shipped' ? 'bg-indigo-50 text-indigo-600' :
+                                        order.status === 'Processing' ? 'bg-blue-50 text-blue-600' :
+                                            'bg-amber-50 text-amber-600'
+                                }`}>
+                                {order.status || 'Accepted'}
+                            </div>
                         </div>
-                        <div>
-                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Order ID</p>
-                            <p className="font-bold text-gray-900 leading-none pb-1">#{order.orderId || order.id}</p>
-                        </div>
-                    </div>
-                    {/* Customer Info */}
-                    <div className="flex-1">
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Customer</p>
-                        <p className="font-bold text-gray-700 text-sm">
-                            {order.firstName && order.lastName
-                                ? `${order.firstName} ${order.lastName}`
-                                : (order.firstName || order.userName || 'Guest User')}
-                        </p>
-                        <p className="text-[10px] text-gray-400 font-medium mt-0.5">
-                            {new Date(order.orderDate).toLocaleDateString()}
-                        </p>
-                    </div>
 
-                    {/* Items Preview */}
-                    <div className="hidden lg:block flex-1">
-                        <div className="flex -space-x-3">
-                            {(order.items || []).slice(0, 5).map((item, i) => (
-                                <div key={i} title={item.productName} className={`w-8 h-8 rounded-full border-2 border-white bg-gray-100 overflow-hidden shadow-sm relative ${item.isDeleted ? 'opacity-80' : ''}`}>
-                                    <SafeImage src={item.image || item.imagePath} className="w-full h-full object-cover" alt={item.productName} type="product" />
-                                    {item.isDeleted && (
-                                        <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
-                                            <span className="text-[6px] font-black text-white bg-red-600 px-0.5 rounded-sm uppercase tracking-tighter">DEL</span>
+                        {/* Customer & Date Row */}
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                                <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Customer</p>
+                                <p className="font-bold text-gray-700 text-sm sm:text-base truncate">
+                                    {order.firstName && order.lastName
+                                        ? `${order.firstName} ${order.lastName}`
+                                        : (order.firstName || order.userName || 'Guest User')}
+                                </p>
+                                <p className="text-[10px] sm:text-xs text-gray-400 font-medium mt-1">
+                                    {new Date(order.orderDate).toLocaleDateString()}
+                                </p>
+                            </div>
+                            <div className="text-right flex-shrink-0">
+                                <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Amount</p>
+                                <p className="text-base sm:text-lg font-black text-[#205457]">${(order.displayTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                            </div>
+                        </div>
+
+                        {/* Items Preview - Show on all screens but smaller on mobile */}
+                        {(order.items || []).length > 0 && (
+                            <div className="pt-3 border-t border-gray-50">
+                                <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Items ({order.items.length})</p>
+                                <div className="flex flex-wrap gap-2">
+                                    {(order.items || []).slice(0, 5).map((item, i) => (
+                                        <div key={i} title={item.productName} className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl border-2 border-white bg-gray-100 overflow-hidden shadow-sm relative ${item.isDeleted ? 'opacity-80' : ''}`}>
+                                            <SafeImage src={item.image || item.imagePath} className="w-full h-full object-cover" alt={item.productName} type="product" />
+                                            {item.isDeleted && (
+                                                <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center">
+                                                    <span className="text-[6px] font-black text-white bg-red-600 px-0.5 rounded-sm uppercase tracking-tighter">DEL</span>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                    {(order.items || []).length > 5 && (
+                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gray-100 flex items-center justify-center text-[10px] font-bold text-gray-400">
+                                            +{(order.items || []).length - 5}
                                         </div>
                                     )}
                                 </div>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="text-right px-4">
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Amount</p>
-                        <p className="text-lg font-black text-[#205457]">${(order.displayTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
-                    </div>
-                    <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${order.status === 'Delivered' ? 'bg-green-50 text-green-600' :
-                        order.status === 'Cancelled' ? 'bg-red-50 text-red-600' :
-                            order.status === 'Shipped' ? 'bg-indigo-50 text-indigo-600' :
-                                order.status === 'Processing' ? 'bg-blue-50 text-blue-600' :
-                                    'bg-amber-50 text-amber-600'
-                        }`}>
-                        {order.status || 'Accepted'}
+                            </div>
+                        )}
                     </div>
                 </div>
             ))}
@@ -586,6 +603,7 @@ const AdminStoreDetails = () => {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [storeReviews, setStoreReviews] = useState([]);
     const [loadingReviews, setLoadingReviews] = useState(false);
+    const [allProducts, setAllProducts] = useState([]);
 
     useEffect(() => {
         if (activeTab === 'reviews' && id) {
@@ -624,6 +642,7 @@ const AdminStoreDetails = () => {
 
                     const productsList = prodRes.data?.products || (Array.isArray(prodRes.data) ? prodRes.data : []);
                     const globalActive = Array.isArray(globalRes.data) ? globalRes.data : [];
+                    setAllProducts(globalActive);
 
                     // Only show products that exist in the global active catalog
                     const filteredActive = productsList.filter(p =>
@@ -645,11 +664,11 @@ const AdminStoreDetails = () => {
     }, [id]);
 
     const handleViewProductById = (productId) => {
-        const product = products.find(p => (p.productId || p.id).toString() === productId?.toString());
+        const product = allProducts.find(p => (p.productId || p.id).toString() === productId?.toString());
         if (product) {
             setSelectedProduct(product);
         } else {
-            showAlert("Product details not found in this store's inventory.", "info", "Product Info");
+            showAlert("This product is no longer available in the active catalog.", "info", "Product Info");
         }
     };
 
@@ -661,57 +680,57 @@ const AdminStoreDetails = () => {
     if (!store) return <div className="pt-[120px] text-center">Store not found</div>;
 
     return (
-        <div className="min-h-screen bg-[#FDFCFB] pt-[110px] px-6 md:px-12 xl:px-16 pb-24 font-outfit">
+        <div className="min-h-screen bg-[#FDFCFB] pt-[90px] sm:pt-[110px] px-4 sm:px-6 md:px-12 xl:px-16 pb-16 sm:pb-24 font-outfit">
             <div className="max-w-[1440px] mx-auto">
                 <button
                     onClick={() => navigate('/admin/stores')}
-                    className="flex items-center gap-2 text-gray-400 hover:text-[#205457] mb-8 font-medium transition-colors group"
+                    className="flex items-center gap-2 text-gray-400 hover:text-[#205457] mb-6 sm:mb-8 font-medium transition-colors group text-sm sm:text-base"
                 >
-                    <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                    <ArrowLeft size={18} className="sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" />
                     Back to Stores
                 </button>
 
                 {/* Store Header Card */}
-                <div className="bg-white p-8 md:p-10 rounded-[40px] shadow-sm border border-gray-100 mb-10 overflow-hidden relative">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#205457]/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                <div className="bg-white p-5 sm:p-8 md:p-10 rounded-[25px] sm:rounded-[40px] shadow-sm border border-gray-100 mb-6 sm:mb-10 overflow-hidden relative">
+                    <div className="absolute top-0 right-0 w-40 h-40 sm:w-64 sm:h-64 bg-[#205457]/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
 
-                    <div className="flex flex-col md:flex-row gap-8 items-start relative z-10">
-                        <div className="w-24 h-24 bg-[#205457] rounded-3xl flex items-center justify-center text-white shadow-xl shadow-[#205457]/20">
-                            <Store size={40} />
-                        </div>
-                        <div className="flex-1">
-                            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">{store.name}</h1>
-                            <div className="flex flex-wrap gap-6 text-gray-500 mt-4">
-                                <div className="flex items-center gap-2">
-                                    <Mail size={16} className="text-[#205457]" />
-                                    <span>{store.email}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Phone size={16} className="text-[#205457]" />
-                                    <span>{store.phone}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <MapPin size={16} className="text-[#205457]" />
-                                    <span>{store.address}</span>
+                    <div className="flex flex-col gap-5 sm:gap-8 items-start relative z-10">
+                        <div className="flex items-start gap-4 sm:gap-6 w-full">
+                            <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 bg-[#205457] rounded-2xl sm:rounded-3xl flex items-center justify-center text-white shadow-xl shadow-[#205457]/20 flex-shrink-0">
+                                <Store size={28} className="sm:w-8 sm:h-8 md:w-10 md:h-10" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2 sm:mb-3 break-words">{store.name}</h1>
+                                <div className="bg-gray-50 p-3 sm:p-4 rounded-xl sm:rounded-2xl inline-block">
+                                    <span className="block text-[10px] sm:text-xs uppercase font-bold text-gray-400 mb-1">Total Products</span>
+                                    <span className="text-xl sm:text-2xl font-bold text-[#205457]">{products.length}</span>
                                 </div>
                             </div>
                         </div>
-                        <div className="flex flex-col gap-2 min-w-[150px]">
-                            <div className="bg-gray-50 p-4 rounded-2xl text-center">
-                                <span className="block text-xs uppercase font-bold text-gray-400 mb-1">Total Products</span>
-                                <span className="text-2xl font-bold text-[#205457]">{products.length}</span>
+                        <div className="flex flex-col gap-3 sm:gap-4 text-gray-500 w-full text-sm sm:text-base">
+                            <div className="flex items-center gap-2 min-w-0">
+                                <Mail size={14} className="sm:w-4 sm:h-4 text-[#205457] flex-shrink-0" />
+                                <span className="truncate">{store.email}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Phone size={14} className="sm:w-4 sm:h-4 text-[#205457] flex-shrink-0" />
+                                <span>{store.phone}</span>
+                            </div>
+                            <div className="flex items-start gap-2">
+                                <MapPin size={14} className="sm:w-4 sm:h-4 text-[#205457] flex-shrink-0 mt-0.5" />
+                                <span className="break-words">{store.address}</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Tabs Navigation */}
-                <div className="flex items-center gap-2 mb-8 border-b border-gray-100 overflow-x-auto no-scrollbar">
+                <div className="flex items-center gap-1 sm:gap-2 mb-6 sm:mb-8 border-b border-gray-100 overflow-x-auto scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
                     {['inventory', 'orders', 'reviews', 'sales'].map((tab) => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-6 py-3 font-bold text-sm capitalize transition-all border-b-2 whitespace-nowrap ${activeTab === tab
+                            className={`px-4 sm:px-6 py-2.5 sm:py-3 font-bold text-xs sm:text-sm capitalize transition-all border-b-2 whitespace-nowrap flex-shrink-0 ${activeTab === tab
                                 ? 'text-[#205457] border-[#205457]'
                                 : 'text-gray-400 border-transparent hover:text-gray-600'
                                 }`}
@@ -731,24 +750,24 @@ const AdminStoreDetails = () => {
                             exit={{ opacity: 0, y: -10 }}
                         >
                             {/* Products Search & Grid */}
-                            <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
+                            <div className="flex flex-col gap-4 mb-6 sm:mb-8">
                                 <div>
-                                    <h2 className="text-2xl font-bold text-gray-900">Store Inventory</h2>
-                                    <p className="text-gray-400 text-sm mt-1">Manage products listed by this store.</p>
+                                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Store Inventory</h2>
+                                    <p className="text-gray-400 text-xs sm:text-sm mt-1">Manage products listed by this store.</p>
                                 </div>
-                                <div className="relative w-full md:w-80">
-                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                                <div className="relative w-full">
+                                    <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                                     <input
                                         type="text"
                                         placeholder="Search products..."
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full pl-12 pr-4 py-3 bg-white border border-gray-100 rounded-xl focus:ring-2 focus:ring-[#205457]/20 outline-none transition-all"
+                                        className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 bg-white border border-gray-100 rounded-xl text-sm sm:text-base focus:ring-2 focus:ring-[#205457]/20 outline-none transition-all"
                                     />
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
                                 {filteredProducts.map((product) => (
                                     <StoreProductCard
                                         key={product.productId || product.id}
@@ -758,10 +777,10 @@ const AdminStoreDetails = () => {
                                 ))}
                             </div>
                             {filteredProducts.length === 0 && (
-                                <div className="text-center py-20 bg-white rounded-[30px] border border-dashed border-gray-200">
-                                    <Package size={40} className="mx-auto text-gray-300 mb-4" />
-                                    <h3 className="text-gray-900 font-bold">No Products Found</h3>
-                                    <p className="text-gray-400 text-sm">This store hasn't listed anything yet or no matches found.</p>
+                                <div className="text-center py-12 sm:py-20 bg-white rounded-[20px] sm:rounded-[30px] border border-dashed border-gray-200">
+                                    <Package size={32} className="sm:w-10 sm:h-10 mx-auto text-gray-300 mb-3 sm:mb-4" />
+                                    <h3 className="text-gray-900 font-bold text-base sm:text-lg">No Products Found</h3>
+                                    <p className="text-gray-400 text-xs sm:text-sm mt-1">This store hasn't listed anything yet or no matches found.</p>
                                 </div>
                             )}
                         </motion.div>
@@ -787,19 +806,19 @@ const AdminStoreDetails = () => {
                             exit={{ opacity: 0, y: -10 }}
                             className="space-y-6"
                         >
-                            <div className="flex justify-between items-center mb-6">
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                                 <div>
-                                    <h2 className="text-2xl font-bold text-gray-900">Customer Feedback</h2>
-                                    <p className="text-gray-400 text-sm mt-1">What buyers are saying about this store.</p>
+                                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Customer Feedback</h2>
+                                    <p className="text-gray-400 text-xs sm:text-sm mt-1">What buyers are saying about this store.</p>
                                 </div>
-                                <div className="bg-amber-50 px-4 py-2 rounded-2xl flex items-center gap-2 border border-amber-100">
-                                    <Star className="fill-amber-400 text-amber-400" size={20} />
-                                    <span className="text-xl font-bold text-amber-900">
+                                <div className="bg-amber-50 px-3 sm:px-4 py-2 rounded-xl sm:rounded-2xl flex items-center gap-2 border border-amber-100">
+                                    <Star className="fill-amber-400 text-amber-400" size={16} />
+                                    <span className="text-lg sm:text-xl font-bold text-amber-900">
                                         {storeReviews.length > 0
                                             ? (storeReviews.reduce((acc, r) => acc + r.rating, 0) / storeReviews.length).toFixed(1)
                                             : '0.0'}
                                     </span>
-                                    <span className="text-amber-400 text-sm">/ 5.0</span>
+                                    <span className="text-amber-400 text-xs sm:text-sm">/ 5.0</span>
                                 </div>
                             </div>
 
@@ -811,40 +830,58 @@ const AdminStoreDetails = () => {
                                     </div>
                                 </div>
                             ) : storeReviews.length > 0 ? (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                                     {storeReviews.map((rev, i) => (
-                                        <div key={i} className="bg-white rounded-[35px] p-8 border border-gray-100 hover:shadow-xl transition-all group">
-                                            <div className="flex justify-between items-start mb-6">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center text-[#205457] font-bold text-lg">
+                                        <div key={i} className="bg-white rounded-[20px] sm:rounded-[35px] p-5 sm:p-8 border border-gray-100 hover:shadow-xl transition-all group">
+                                            <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-0 mb-4 sm:mb-6">
+                                                <div className="flex items-center gap-3 sm:gap-4">
+                                                    <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-xl sm:rounded-2xl flex items-center justify-center text-[#205457] font-bold text-base sm:text-lg flex-shrink-0">
                                                         {rev.userName?.charAt(0) || 'C'}
                                                     </div>
                                                     <div>
-                                                        <h4 className="font-bold text-gray-900">{rev.userName || 'Customer'}</h4>
+                                                        <h4 className="font-bold text-gray-900 text-sm sm:text-base">{rev.userName || 'Customer'}</h4>
                                                         <div className="flex gap-1 mt-1">
                                                             {[1, 2, 3, 4, 5].map(s => (
-                                                                <Star key={s} size={12} className={s <= rev.rating ? "fill-amber-400 text-amber-400" : "text-gray-200"} />
+                                                                <Star key={s} size={10} className={`sm:w-3 sm:h-3 ${s <= rev.rating ? "fill-amber-400 text-amber-400" : "text-gray-200"}`} />
                                                             ))}
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest bg-gray-50 px-3 py-1 rounded-full">
-                                                    Verified Purchase
+                                                <span className="text-[9px] sm:text-[10px] font-bold text-gray-300 uppercase tracking-widest bg-gray-50 px-2 sm:px-3 py-1 rounded-full whitespace-nowrap">
+                                                    Verified
                                                 </span>
                                             </div>
-                                            <p className="text-gray-600 leading-relaxed italic mb-6">"{rev.comment}"</p>
-                                            <div className="pt-6 border-t border-gray-50 flex items-center justify-between">
-                                                <div className="flex items-center gap-2">
-                                                    <div className="w-8 h-8 rounded-lg bg-[#FDFCFB] border border-gray-100 overflow-hidden">
-                                                        {/* Product thumbnail could go here if rev has productId */}
-                                                        <Package size={14} className="m-auto text-gray-300 mt-2" />
-                                                    </div>
-                                                    <span
-                                                        onClick={() => handleViewProductById(rev.productId)}
-                                                        className="text-xs font-bold text-[#205457] hover:underline cursor-pointer"
-                                                    >
-                                                        Review for Product #{rev.productId}
-                                                    </span>
+                                            <p className="text-gray-600 text-sm sm:text-base leading-relaxed italic mb-4 sm:mb-6">"{rev.comment}"</p>
+                                            <div className="pt-4 sm:pt-6 border-t border-gray-50 flex items-center justify-between">
+                                                <div className="flex items-center gap-2 max-w-full min-w-0">
+                                                    {(() => {
+                                                        const linkedProduct = allProducts.find(p => (p.productId || p.id) == rev.productId);
+                                                        return (
+                                                            <>
+                                                                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-[#FDFCFB] border border-gray-100 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                                                                    {linkedProduct ? (
+                                                                        <SafeImage
+                                                                            src={linkedProduct.imagePath || linkedProduct.image}
+                                                                            productId={rev.productId}
+                                                                            className="w-full h-full object-cover"
+                                                                            type="product"
+                                                                        />
+                                                                    ) : (
+                                                                        <Package size={14} className="text-gray-300" />
+                                                                    )}
+                                                                </div>
+                                                                <div className="min-w-0 flex-1">
+                                                                    <p className="text-[8px] font-black text-gray-300 uppercase tracking-widest mb-0.5">Reviewed Product</p>
+                                                                    <span
+                                                                        onClick={() => handleViewProductById(rev.productId)}
+                                                                        className="text-[10px] sm:text-xs font-black text-[#205457] hover:underline cursor-pointer truncate block"
+                                                                    >
+                                                                        {linkedProduct?.name || rev.productName || `Product #${rev.productId}`}
+                                                                    </span>
+                                                                </div>
+                                                            </>
+                                                        );
+                                                    })()}
                                                 </div>
                                             </div>
                                         </div>

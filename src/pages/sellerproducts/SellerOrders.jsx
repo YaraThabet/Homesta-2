@@ -220,7 +220,6 @@ const generateInvoice = (order) => {
 const OrderDetailsModal = ({ orderId, initialData, onClose, onUpdateStatus, onInfoLoaded }) => {
     const [details, setDetails] = useState(null);
     const [loading, setLoading] = useState(!initialData);
-    const [showRaw, setShowRaw] = useState(false);
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -337,12 +336,6 @@ const OrderDetailsModal = ({ orderId, initialData, onClose, onUpdateStatus, onIn
                         <h2 className="text-2xl font-black text-gray-900">Order #{displayData.id}</h2>
                         <div className="flex items-center gap-3 mt-1">
                             <p className="text-gray-400 text-[10px] font-black uppercase tracking-[0.2em]">{displayData.orderDateFormatted}</p>
-                            <button
-                                onClick={() => setShowRaw(!showRaw)}
-                                className="text-[9px] font-black text-[#205457] uppercase bg-[#205457]/5 px-2 py-0.5 rounded border border-[#205457]/10 hover:bg-[#205457]/10 transition-all active:scale-95"
-                            >
-                                {showRaw ? 'Hide Raw Details' : 'Debug Raw JSON'}
-                            </button>
                         </div>
                     </div>
                     <div className="flex gap-2">
@@ -359,13 +352,6 @@ const OrderDetailsModal = ({ orderId, initialData, onClose, onUpdateStatus, onIn
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-8 space-y-8">
-                    {showRaw && (
-                        <div className="bg-gray-900 rounded-[20px] p-5 overflow-x-auto shadow-inner border border-gray-800">
-                            <pre className="text-[10px] text-emerald-400 font-mono leading-relaxed">
-                                {JSON.stringify(details || initialData, null, 2)}
-                            </pre>
-                        </div>
-                    )}
 
                     {/* Status Update Quick Bar */}
                     <div className="bg-gray-900 p-6 rounded-[24px] shadow-xl shadow-gray-200">
@@ -715,9 +701,11 @@ const SellerOrders = () => {
                     ))}
                 </div>
 
-                {/* Orders Table */}
+                {/* Orders Content: Table for Desktop, Cards for Mobile */}
                 <div className="bg-white rounded-[40px] border border-gray-100 shadow-2xl shadow-gray-200/40 overflow-hidden">
-                    <div className="overflow-x-auto">
+
+                    {/* Desktop Table View */}
+                    <div className="hidden md:block overflow-x-auto">
                         <table className="w-full text-left">
                             <thead className="bg-gray-50/50 border-b border-gray-100">
                                 <tr className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
@@ -739,7 +727,6 @@ const SellerOrders = () => {
                                                 </div>
                                                 <div>
                                                     <p className="font-black text-gray-900 text-sm">#{order.id}</p>
-                                                    {/* Premium Product Peek */}
                                                     {order.items && order.items.length > 0 ? (
                                                         <div className="flex -space-x-3 hover:space-x-1 mt-3 transition-all duration-500 ease-out group/peek">
                                                             {order.items.slice(0, 3).map((item, idx) => (
@@ -793,7 +780,7 @@ const SellerOrders = () => {
                                                     order.status === 'Cancelled' ? 'bg-red-50 text-red-700 border-red-100' :
                                                         order.status === 'Shipped' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
                                                             order.status === 'Processing' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                                                                'bg-amber-50 text-amber-900 border-amber-100' // Pending/Default
+                                                                'bg-amber-50 text-amber-900 border-amber-100' // Pending
                                                     }`}
                                                 style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundSize: '1rem' }}
                                             >
@@ -828,6 +815,74 @@ const SellerOrders = () => {
                                 )}
                             </tbody>
                         </table>
+                    </div>
+
+                    {/* Mobile Card View */}
+                    <div className="md:hidden flex flex-col divide-y divide-gray-100">
+                        {filtered.length > 0 ? filtered.map((order) => (
+                            <div key={order.id} className="p-5 flex flex-col gap-4">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">
+                                            <Package size={20} />
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <p className="font-black text-gray-900 text-sm">#{order.id}</p>
+                                                <span className="text-[10px] text-gray-400 font-medium">{order.orderDateFormatted?.split(',')[0]}</span>
+                                            </div>
+                                            <p className="text-xs text-gray-500 font-bold">{order.customerName}</p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        onClick={() => setSelectedOrderId(order.id)}
+                                        className="w-8 h-8 bg-gray-50 rounded-lg flex items-center justify-center text-gray-400 hover:bg-[#205457] hover:text-white transition-all"
+                                    >
+                                        <ChevronRight size={16} />
+                                    </button>
+                                </div>
+
+                                {/* Items Preview Mobile */}
+                                {order.items && order.items.length > 0 && (
+                                    <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                                        {order.items.map((item, idx) => (
+                                            <div key={idx} className="relative w-12 h-12 rounded-lg border border-gray-100 bg-gray-50 overflow-hidden flex-shrink-0">
+                                                <ResolvedImage src={item.image} productId={item.productId} className="w-full h-full object-cover" />
+                                                <div className="absolute bottom-0 right-0 bg-[#205457] text-white text-[8px] px-1 rounded-tl-md font-bold">
+                                                    ×{item.quantity}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <div className="flex items-center justify-between mt-1">
+                                    <select
+                                        value={order.status}
+                                        onChange={(e) => updateOrderStatus(order.id, e.target.value)}
+                                        className={`py-1.5 pl-3 pr-8 rounded-lg text-[10px] font-black uppercase tracking-wider border outline-none appearance-none bg-no-repeat bg-[right_0.5rem_center] ${order.status === 'Delivered' ? 'bg-green-50 text-green-700 border-green-100' :
+                                            order.status === 'Cancelled' ? 'bg-red-50 text-red-700 border-red-100' :
+                                                order.status === 'Shipped' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' :
+                                                    order.status === 'Processing' ? 'bg-blue-50 text-blue-700 border-blue-100' :
+                                                        'bg-amber-50 text-amber-900 border-amber-100'
+                                            }`}
+                                        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='currentColor'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundSize: '0.8rem' }}
+                                    >
+                                        {['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'].map(s => (
+                                            <option key={s} value={s}>{s}</option>
+                                        ))}
+                                    </select>
+                                    <span className="text-xl font-black text-[#205457]">
+                                        ${(order.totalPrice || 0).toFixed(2)}
+                                    </span>
+                                </div>
+                            </div>
+                        )) : (
+                            <div className="py-20 text-center opacity-30">
+                                <Package size={48} className="mb-4 text-gray-400 mx-auto" />
+                                <p className="font-black uppercase tracking-[0.3em] text-xs">No orders found</p>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

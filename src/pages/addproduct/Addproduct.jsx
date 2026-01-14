@@ -573,9 +573,14 @@ const AddProduct = () => {
 										<div className="space-y-2">
 											<label className="text-xs font-bold text-gray-500 uppercase tracking-wider">Delivery (Days)</label>
 											<input
+												required
 												type="number"
+												min="0"
 												value={deliveryTime}
-												onChange={(e) => setDeliveryTime(e.target.value)}
+												onKeyDown={(e) => {
+													if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault();
+												}}
+												onChange={(e) => setDeliveryTime(e.target.value.replace(/\D/g, ''))}
 												placeholder="0"
 												className="w-full bg-gray-50 border border-transparent focus:bg-white focus:border-[#205457]/30 rounded-2xl px-5 py-4 font-bold text-gray-900 outline-none transition-all placeholder:text-gray-400"
 											/>

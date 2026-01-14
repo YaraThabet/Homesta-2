@@ -2,7 +2,17 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { CiUser, CiLogout } from "react-icons/ci";
-import { X } from "lucide-react";
+import {
+    LayoutDashboard,
+    Package,
+    ShoppingBag,
+    PlusCircle,
+    Star,
+    BarChart3,
+    Store,
+    X,
+    Bell
+} from 'lucide-react';
 import { logo } from "../assets/index";
 import { createPortal } from "react-dom";
 
@@ -29,7 +39,7 @@ const SellerNavbar = () => {
                 {/* Logo */}
                 <div className="logo scale-90 lg:scale-100 origin-left">
                     <Link to='/seller-home' className="flex gap-3 items-center group">
-                        <div className="bg-[#205457]/10 p-2 rounded-xl group-hover:bg-[#205457]/10 transition-all duration-300">
+                        <div className="hidden md:block bg-[#205457]/10 p-2 rounded-xl group-hover:bg-[#205457]/10 transition-all duration-300">
                             <img src={logo} alt="logo" className="w-8 h-8 object-contain" />
                         </div>
                         <h1 className="capitalize text-[22px] lg:text-[28px] font-bold tracking-tight text-[#205457]">
@@ -44,20 +54,22 @@ const SellerNavbar = () => {
                 {/* Center Navigation - Desktop */}
                 <div className="hidden xl:flex items-center gap-8">
                     {[
-                        { name: 'Dashboard', to: '/seller-home' },
-                        { name: 'Product Feed', to: '/seller-products' },
-                        { name: 'Add Product', to: '/addproduct' },
-                        { name: 'Orders', to: '/seller-orders' },
-                        { name: 'Reviews', to: '/seller-reviews' },
-                        { name: 'Analytics', to: '/analytics' },
+                        { name: 'Dashboard', to: '/seller-home', icon: LayoutDashboard },
+                        { name: 'Product Feed', to: '/seller-products', icon: Package },
+                        { name: 'Add Product', to: '/addproduct', icon: PlusCircle },
+                        { name: 'Orders', to: '/seller-orders', icon: ShoppingBag },
+                        { name: 'Reviews', to: '/seller-reviews', icon: Star },
+                        { name: 'Analytics', to: '/analytics', icon: BarChart3 },
 
                     ].map((item) => (
                         <Link
                             key={item.to}
                             to={item.to}
-                            className={`text-sm font-bold tracking-wide transition-all hover:text-[#205457] ${location.pathname === item.to ? 'text-[#205457] border-b-2 border-[#205457] pb-1' : 'text-gray-400'
+                            className={`flex items-center gap-2 text-sm font-bold tracking-wide transition-all hover:text-[#205457] ${location.pathname === item.to ? 'text-[#205457] border-b-2 border-[#205457] pb-1' : 'text-gray-400'
                                 }`}
                         >
+                            {/* Render icon if imported, or just text */}
+                            {item.icon && <item.icon size={18} />}
                             {item.name}
                         </Link>
                     ))}
@@ -127,23 +139,24 @@ const SellerNavbar = () => {
 
                                     <div className="flex flex-col gap-2">
                                         {[
-                                            { name: 'Dashboard', to: '/seller-home' },
-                                            { name: 'Product Feed', to: '/seller-products' },
-                                            { name: 'Add Piece', to: '/addproduct' },
-                                            { name: 'Orders', to: '/seller-orders' },
-                                            { name: 'Reviews', to: '/seller-reviews' },
-                                            { name: 'Analytics', to: '/analytics' },
-                                            { name: 'My Store', to: '/store-settings' },
+                                            { name: 'Dashboard', to: '/seller-home', icon: LayoutDashboard },
+                                            { name: 'Product Feed', to: '/seller-products', icon: Package },
+                                            { name: 'Add Piece', to: '/addproduct', icon: PlusCircle },
+                                            { name: 'Orders', to: '/seller-orders', icon: ShoppingBag },
+                                            { name: 'Reviews', to: '/seller-reviews', icon: Star },
+                                            { name: 'Analytics', to: '/analytics', icon: BarChart3 },
+                                            { name: 'My Store', to: '/store-settings', icon: Store },
                                         ].map((item) => (
                                             <Link
                                                 key={item.to}
                                                 to={item.to}
                                                 onClick={() => setShowMobileMenu(false)}
-                                                className={`px-4 py-3 rounded-xl text-sm font-bold transition-all ${location.pathname === item.to
+                                                className={`px-4 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-3 ${location.pathname === item.to
                                                     ? 'bg-[#205457]/10 text-[#205457]'
                                                     : 'text-gray-500 hover:bg-gray-50'
                                                     }`}
                                             >
+                                                {item.icon && <item.icon size={18} />}
                                                 {item.name}
                                             </Link>
                                         ))}

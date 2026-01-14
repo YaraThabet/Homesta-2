@@ -112,9 +112,7 @@ const Privacy = () => {
                                 secondary transactions facilitated through our marketplace.
                             </p>
                             <p className="bg-gray-50 p-6 rounded-2xl italic border-l-4 border-[#205457]">
-                                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                                incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                                exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
+                                "Homesta serves as an intermediary marketplace. We verify all sellers to ensure quality, but the final transaction and product satisfaction are our shared priority. Please review product dimensions carefully."
                             </p>
                             <p>
                                 We prioritize the accuracy of product descriptions and imagery; however, slight

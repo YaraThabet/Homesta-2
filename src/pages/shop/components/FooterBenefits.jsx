@@ -1,24 +1,27 @@
 import { Truck, CreditCard, Headphones } from "lucide-react";
-
-const benefits = [
-  {
-    icon: Truck,
-    title: "Free Shipping",
-    description: "Free shipping for order above $180",
-  },
-  {
-    icon: CreditCard,
-    title: "Flexible Payment",
-    description: "Multiple secure payment options",
-  },
-  {
-    icon: Headphones,
-    title: "24×7 Support",
-    description: "We support online all days.",
-  },
-];
+import { useAppContext } from "../../../context/AppContext";
 
 const FooterBenefits = () => {
+  const { t } = useAppContext();
+
+  const benefits = [
+    {
+      icon: Truck,
+      title: t('freeShipping'),
+      description: t('freeShippingDesc'),
+    },
+    {
+      icon: CreditCard,
+      title: t('flexiblePayment'),
+      description: t('flexiblePaymentDesc'),
+    },
+    {
+      icon: Headphones,
+      title: t('support24x7'),
+      description: t('supportDesc'),
+    },
+  ];
+
   return (
     <footer className="border-t border-gray-200 bg-white py-8 px-8  mt-16">
       <div className="container px-4 ">
@@ -30,7 +33,7 @@ const FooterBenefits = () => {
                 {/* <div className="flex-shrink-0 w-5 h-5  bg-[#FEBB36] rounded-full flex items-center justify-center">
                  </div> */}
               </div>
-              <div> 
+              <div>
                 <h3 className="text-sm font-semibold text-gray-900">{benefit.title}</h3>
                 <p className="text-xs text-gray-500">{benefit.description}</p>
               </div>

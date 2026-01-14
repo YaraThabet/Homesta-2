@@ -76,10 +76,10 @@ const EditProduct = () => {
 
     // Sync state to DOM
     useEffect(() => {
-        if (descriptionRef.current && document.activeElement !== descriptionRef.current && descriptionRef.current.innerHTML !== description) {
+        if (!loading && descriptionRef.current && document.activeElement !== descriptionRef.current && descriptionRef.current.innerHTML !== description) {
             descriptionRef.current.innerHTML = description;
         }
-    }, [description]);
+    }, [description, loading]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -109,10 +109,29 @@ const EditProduct = () => {
 
                 // Populate form with product data
                 const product = prodRes.data;
-                setName(product.name || '');
-                setCategory(product.categoryId?.toString() || '');
-                setSubCategoryId(product.subCategoryId?.toString() || '');
-                setDescription(product.description || '');
+                console.log("Fetched product:", product);
+
+                setName(product.name || product.Name || '');
+                setCategory(product.categoryId?.toString() || product.CategoryId?.toString() || '');
+                setSubCategoryId(product.subCategoryId?.toString() || product.SubCategoryId?.toString() || '');
+
+                // Helper to unescape potentially multi-encoded HTML from backend
+                const unescapeHtml = (str) => {
+                    if (!str) return '';
+                    return str
+                        .replace(/&amp;/g, '&')
+                        .replace(/&lt;/g, '<')
+                        .replace(/&gt;/g, '>')
+                        .replace(/&nbsp;/g, ' ')
+                        .replace(/&quot;/g, '"');
+                };
+
+                // Decode description (triple unescape to match viewer logic if backend over-encodes)
+                let rawDesc = product.description || product.Description || '';
+                // Try unescaping multiple times to be safe based on viewer implementation
+                const decodedDesc = unescapeHtml(unescapeHtml(unescapeHtml(rawDesc)));
+
+                setDescription(decodedDesc);
                 setPrice(product.price?.toString() || '');
                 setStock(product.quantity?.toString() || '');
                 setDiscount(product.discount?.toString() || '0');
@@ -659,10 +678,14 @@ const EditProduct = () => {
                                         <div className="space-y-3">
                                             <label className="text-[10px] font-bold uppercase tracking-widest text-gray-500 ml-1">Delivery Time (Days)</label>
                                             <input
+                                                required
                                                 type="number"
                                                 min="0"
                                                 value={deliveryTime}
-                                                onChange={(e) => setDeliveryTime(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (['e', 'E', '+', '-', '.'].includes(e.key)) e.preventDefault();
+                                                }}
+                                                onChange={(e) => setDeliveryTime(e.target.value.replace(/\D/g, ''))}
                                                 className="w-full rounded-2xl px-6 py-4 bg-gray-50/50 border-2 border-transparent focus:border-[#205457]/10 focus:bg-white outline-none transition-all font-bold"
                                             />
                                         </div>

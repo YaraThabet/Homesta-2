@@ -203,7 +203,7 @@ const Account = () => {
     location.pathname === "/account/";
 
   return (
-    <div className="min-h-screen bg-gray-100 pt-24 md:pt-32">
+    <div className="min-h-screen bg-gray-100 pt-32 md:pt-32">
       <div className="px-4 md:px-8 py-8">
         {/* Mobile Menu Button */}
         <div className="lg:hidden mb-4">
@@ -229,7 +229,7 @@ const Account = () => {
 
           {/* Mobile Sidebar */}
           <div
-            className={`fixed inset-0 z-50 flex lg:hidden ${sidebarOpen ? "block" : "hidden"
+            className={`fixed inset-0 z-[60] flex lg:hidden ${sidebarOpen ? "block" : "hidden"
               }`}
           >
             {/* Overlay */}

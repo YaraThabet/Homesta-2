@@ -19,6 +19,7 @@ const MyReviews = () => {
         try {
             setLoading(true);
             const res = await api.get(`/Review/user/${userId}`);
+            console.log("Reviews Response:", res.data); // DEBUG: Check image field
             setReviews(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error("Failed to fetch user reviews", err);
@@ -91,162 +92,176 @@ const MyReviews = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#FDFCFB]/50 pt-[120px] pb-20 font-outfit">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="max-w-4xl mx-auto">
-                    {/* Header Section */}
-                    <div className="bg-gradient-to-br from-[#205457] to-[#1a4447] rounded-[40px] p-10 mb-10 text-white shadow-2xl shadow-[#205457]/20 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-white/10 rounded-full blur-3xl transition-transform duration-700 group-hover:scale-110" />
-                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-                            <div className="text-center md:text-left">
-                                <motion.h1
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    className="text-4xl md:text-5xl font-black mb-4"
-                                >
-                                    My Feedbacks
-                                </motion.h1>
-                                <motion.p
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: 0.1 }}
-                                    className="text-white/80 text-lg max-w-md leading-relaxed"
-                                >
-                                    Your voice matters. Shared {reviews.length} reviews contributing to our growing community.
-                                </motion.p>
-                            </div>
-                            <motion.div
-                                initial={{ scale: 0.8, opacity: 0 }}
-                                animate={{ scale: 1, opacity: 1 }}
-                                className="bg-white/20 backdrop-blur-xl p-6 rounded-[30px] border border-white/30"
+        <div className="font-outfit w-full">
+            <div className="max-w-4xl mx-auto">
+                {/* Header Section */}
+                <div className="bg-gradient-to-br from-[#205457] to-[#1a4447] rounded-[24px] md:rounded-[40px] p-6 md:p-10 mb-6 md:mb-10 text-white shadow-2xl shadow-[#205457]/20 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-white/10 rounded-full blur-3xl transition-transform duration-700 group-hover:scale-110" />
+                    <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                        <div className="text-center md:text-left">
+                            <motion.h1
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="text-3xl md:text-5xl font-black mb-4"
                             >
-                                <MessageSquare size={48} className="text-white" />
-                            </motion.div>
+                                My Feedbacks
+                            </motion.h1>
+                            <motion.p
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: 0.1 }}
+                                className="text-white/80 text-base md:text-lg max-w-md leading-relaxed"
+                            >
+                                Your voice matters. Shared {reviews.length} reviews contributing to our growing community.
+                            </motion.p>
                         </div>
-                    </div>
-
-                    {loading ? (
-                        <div className="flex flex-col items-center justify-center py-40 gap-6">
-                            <div className="relative w-20 h-20">
-                                <div className="absolute inset-0 border-4 border-[#205457]/10 rounded-full"></div>
-                                <div className="absolute inset-0 border-4 border-[#205457] border-t-transparent rounded-full animate-spin"></div>
-                            </div>
-                            <p className="text-[#205457] font-bold text-xl animate-pulse">Loading your stories...</p>
-                        </div>
-                    ) : reviews.length === 0 ? (
                         <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="text-center py-24 bg-white/60 backdrop-blur-md rounded-[50px] border border-white shadow-xl shadow-gray-200/50"
+                            initial={{ scale: 0.8, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            className="bg-white/20 backdrop-blur-xl p-6 rounded-[30px] border border-white/30"
                         >
-                            <div className="w-24 h-24 bg-[#205457]/5 rounded-full flex items-center justify-center mx-auto mb-8">
-                                <Star size={48} className="text-[#205457]/20" />
-                            </div>
-                            <h3 className="text-3xl font-black text-gray-900 mb-4">Silence is Golden, But Reviews are Better</h3>
-                            <p className="text-gray-500 mb-10 max-w-sm mx-auto text-lg leading-relaxed">
-                                Share your first experience and help our community discover the best home finishes.
-                            </p>
-                            <button className="bg-[#205457] text-white px-10 py-4 rounded-2xl font-black text-lg hover:shadow-2xl hover:shadow-[#205457]/30 transition-all hover:-translate-y-1">
-                                Discover Products
-                            </button>
+                            <MessageSquare size={48} className="text-white" />
                         </motion.div>
-                    ) : (
-                        <motion.div
-                            variants={containerVariants}
-                            initial="hidden"
-                            animate="visible"
-                            className="grid grid-cols-1 gap-8"
-                        >
-                            <AnimatePresence mode="popLayout">
-                                {reviews.map((review) => (
-                                    <motion.div
-                                        key={review.reviewId || review.id}
-                                        variants={itemVariants}
-                                        layout
-                                        className="group bg-white/70 backdrop-blur-lg rounded-[40px] border border-white p-8 hover:shadow-2xl hover:shadow-[#205457]/10 transition-all duration-500 relative overflow-hidden"
-                                    >
-                                        <div className="flex flex-col lg:flex-row gap-8 items-start">
-                                            {/* Product Identity */}
-                                            <div className="relative flex-shrink-0">
-                                                <div className="w-[140px] h-[140px] bg-white rounded-[35px] shadow-lg border border-gray-100 overflow-hidden group-hover:scale-105 transition-transform duration-500">
-                                                    <SafeImage
-                                                        src={review.productImage || review.imageUrl}
-                                                        alt={review.productName}
-                                                        type="product"
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                </div>
-                                                <div className="absolute -bottom-3 -right-3 bg-[#205457] text-white w-10 h-10 rounded-2xl flex items-center justify-center shadow-lg border-2 border-white">
-                                                    <Package size={18} />
-                                                </div>
-                                            </div>
+                    </div>
+                </div>
 
-                                            {/* Review Content */}
-                                            <div className="flex-1 w-full">
-                                                <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                                                    <div>
-                                                        <h4 className="font-black text-gray-900 text-2xl mb-1 group-hover:text-[#205457] transition-colors line-clamp-1">
-                                                            {review.productName || "Product Review"}
-                                                        </h4>
-                                                        <div className="flex items-center gap-4 text-sm font-bold text-gray-400">
-                                                            <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 rounded-lg">
-                                                                <Store size={14} className="text-[#205457]" />
-                                                                {review.storeName || "Veritas Studio"}
-                                                            </div>
-                                                            <div className="flex items-center gap-1.5 px-2 py-1 bg-gray-50 rounded-lg">
-                                                                <Calendar size={14} />
-                                                                {new Date(review.reviewDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Rating Display */}
-                                                    <div className="flex items-center bg-amber-50 px-4 py-2 rounded-2xl border border-amber-100/50">
-                                                        <div className="flex gap-1">
-                                                            {[1, 2, 3, 4, 5].map((s) => (
-                                                                <Star
-                                                                    key={s}
-                                                                    size={16}
-                                                                    className={`${s <= review.rating ? "fill-amber-400 text-amber-400" : "text-amber-100"} transition-all duration-300`}
-                                                                />
-                                                            ))}
-                                                        </div>
-                                                        <span className="ml-3 font-black text-amber-600 text-lg">{review.rating.toFixed(1)}</span>
-                                                    </div>
-                                                </div>
-
-                                                <div className="relative mb-8 mt-2 p-6 bg-[#205457]/5 rounded-[30px] border-l-4 border-[#205457]">
-                                                    <Quote className="absolute -top-4 -left-2 text-[#205457]/10 w-12 h-12 rotate-12" />
-                                                    <p className="text-gray-700 text-lg italic leading-relaxed font-medium relative z-10">
-                                                        "{review.comment}"
-                                                    </p>
-                                                </div>
-
-                                                <div className="flex gap-3 justify-end items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                                    <button
-                                                        onClick={() => setEditingReview({ ...review })}
-                                                        className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-gray-100 text-[#205457] font-black text-sm hover:bg-[#205457] hover:text-white transition-all shadow-sm active:scale-95"
-                                                    >
-                                                        <Edit3 size={16} />
-                                                        Edit Feedback
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(review.reviewId || review.id)}
-                                                        className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white border border-gray-100 text-red-500 font-black text-sm hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95"
-                                                    >
-                                                        <Trash2 size={16} />
-                                                        Remove
-                                                    </button>
-                                                </div>
+                {loading ? (
+                    <div className="flex flex-col items-center justify-center py-40 gap-6">
+                        <div className="relative w-20 h-20">
+                            <div className="absolute inset-0 border-4 border-[#205457]/10 rounded-full"></div>
+                            <div className="absolute inset-0 border-4 border-[#205457] border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+                        <p className="text-[#205457] font-bold text-xl animate-pulse">Loading your stories...</p>
+                    </div>
+                ) : reviews.length === 0 ? (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-center py-12 md:py-24 bg-white/60 backdrop-blur-md rounded-[32px] md:rounded-[50px] border border-white shadow-xl shadow-gray-200/50"
+                    >
+                        <div className="w-24 h-24 bg-[#205457]/5 rounded-full flex items-center justify-center mx-auto mb-8">
+                            <Star size={48} className="text-[#205457]/20" />
+                        </div>
+                        <h3 className="text-3xl font-black text-gray-900 mb-4">Silence is Golden, But Reviews are Better</h3>
+                        <p className="text-gray-500 mb-10 max-w-sm mx-auto text-lg leading-relaxed">
+                            Share your first experience and help our community discover the best home finishes.
+                        </p>
+                        <button className="bg-[#205457] text-white px-8 py-3 md:px-10 md:py-4 rounded-xl md:rounded-2xl font-black text-sm md:text-lg hover:shadow-2xl hover:shadow-[#205457]/30 transition-all hover:-translate-y-1">
+                            Discover Products
+                        </button>
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="grid grid-cols-1 gap-8"
+                    >
+                        <AnimatePresence mode="popLayout">
+                            {reviews.map((review) => (
+                                <motion.div
+                                    key={review.reviewId || review.id}
+                                    variants={itemVariants}
+                                    layout
+                                    className="group bg-white/70 backdrop-blur-lg rounded-[20px] md:rounded-[40px] border border-white p-4 md:p-8 hover:shadow-2xl hover:shadow-[#205457]/10 transition-all duration-500 relative overflow-hidden"
+                                >
+                                    <div className="flex gap-4 md:gap-8 items-start">
+                                        {/* Product Identity - Left Side */}
+                                        <div className="relative flex-shrink-0">
+                                            <div className="w-16 h-16 md:w-[140px] md:h-[140px] bg-white rounded-[16px] md:rounded-[35px] shadow-lg border border-gray-100 overflow-hidden group-hover:scale-105 transition-transform duration-500">
+                                                <SafeImage
+                                                    src={
+                                                        review.productImage ||
+                                                        review.ProductImage ||
+                                                        review.imageUrl ||
+                                                        review.ImageUrl ||
+                                                        review.image ||
+                                                        review.Image ||
+                                                        review.product?.image ||
+                                                        review.product?.images?.[0]?.imageUrl
+                                                    }
+                                                    alt={review.productName}
+                                                    type="product"
+                                                    className="w-full h-full object-cover"
+                                                />
                                             </div>
                                         </div>
-                                    </motion.div>
-                                ))}
-                            </AnimatePresence>
-                        </motion.div>
-                    )}
-                </div>
+
+                                        {/* Review Content - Right Side */}
+                                        <div className="flex-1 min-w-0">
+                                            {/* Header */}
+                                            <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2 mb-3">
+                                                <div>
+                                                    <h4 className="font-black text-gray-900 text-base md:text-2xl mb-1 group-hover:text-[#205457] transition-colors truncate">
+                                                        {review.productName || "Product Review"}
+                                                    </h4>
+                                                    <div className="flex items-center gap-2 text-[10px] md:text-sm font-bold text-gray-400 flex-wrap">
+                                                        {review.storeName && (
+                                                            <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gray-50 rounded-md">
+                                                                <Store size={10} className="md:w-3.5 md:h-3.5 text-[#205457]" />
+                                                                <span>{review.storeName}</span>
+                                                            </div>
+                                                        )}
+                                                        <div className="flex items-center gap-1 px-1.5 py-0.5 bg-gray-50 rounded-md">
+                                                            <Calendar size={10} className="md:w-3.5 md:h-3.5" />
+                                                            <span>{new Date(review.reviewDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Rating */}
+                                                <div className="flex items-center self-start bg-amber-50 px-2 py-1 md:px-4 md:py-2 rounded-lg md:rounded-2xl border border-amber-100/50 flex-shrink-0">
+                                                    <div className="flex gap-0.5 md:gap-1">
+                                                        {[1, 2, 3, 4, 5].map((s) => (
+                                                            <Star
+                                                                key={s}
+                                                                size={10}
+                                                                className={`md:w-4 md:h-4 ${s <= review.rating ? "fill-amber-400 text-amber-400" : "text-amber-100"} transition-all duration-300`}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                    <span className="ml-1.5 font-black text-amber-600 text-xs md:text-lg">{review.rating.toFixed(1)}</span>
+                                                </div>
+                                            </div>
+
+                                            {/* Comment */}
+                                            <div className="relative mb-3 mt-1 p-3 md:p-6 bg-[#205457]/5 rounded-[16px] md:rounded-[30px] border-l-2 md:border-l-4 border-[#205457]">
+                                                <p className="text-gray-700 text-sm md:text-lg italic leading-relaxed font-medium relative z-10 line-clamp-3 md:line-clamp-none">
+                                                    "{review.comment}"
+                                                </p>
+                                            </div>
+
+                                            {/* Actions */}
+                                            <div className="flex gap-2 justify-end items-center opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300">
+                                                <button
+                                                    onClick={() => setEditingReview({ ...review })}
+                                                    className="p-2 md:px-5 md:py-2.5 rounded-xl md:rounded-2xl bg-white border border-gray-100 text-[#205457] hover:bg-[#205457] hover:text-white transition-all shadow-sm active:scale-95"
+                                                    title="Edit"
+                                                >
+                                                    <Edit3 size={14} className="md:w-4 md:h-4" />
+                                                    <span className="hidden md:inline md:ml-2 font-black text-sm">Edit</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(review.reviewId || review.id)}
+                                                    className="p-2 md:px-5 md:py-2.5 rounded-xl md:rounded-2xl bg-white border border-gray-100 text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm active:scale-95"
+                                                    title="Remove"
+                                                >
+                                                    <Trash2 size={14} className="md:w-4 md:h-4" />
+                                                    <span className="hidden md:inline md:ml-2 font-black text-sm">Remove</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    </motion.div>
+                )}
             </div>
+
 
             {/* Premium Overlay Modal */}
             <AnimatePresence>
@@ -265,22 +280,22 @@ const MyReviews = () => {
                             exit={{ opacity: 0, scale: 0.9, y: 30 }}
                             className="bg-white w-full max-w-xl rounded-[50px] shadow-2xl overflow-hidden relative z-20 border border-white"
                         >
-                            <div className="p-10 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white">
+                            <div className="p-6 md:p-10 border-b border-gray-100 flex justify-between items-center bg-gradient-to-r from-gray-50 to-white">
                                 <div>
-                                    <h3 className="text-3xl font-black text-gray-900 mb-1">Update Feeling</h3>
-                                    <p className="text-gray-400 font-medium">Edit your review for {editingReview.productName}</p>
+                                    <h3 className="text-2xl md:text-3xl font-black text-gray-900 mb-1">Update Feeling</h3>
+                                    <p className="text-gray-400 font-medium text-sm md:text-base">Edit your review for {editingReview.productName}</p>
                                 </div>
                                 <button
                                     onClick={() => setEditingReview(null)}
-                                    className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all active:scale-95"
+                                    className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-red-50 hover:text-red-500 transition-all active:scale-95 flex-shrink-0"
                                 >
-                                    <X size={24} />
+                                    <X size={20} className="md:w-6 md:h-6" />
                                 </button>
                             </div>
-                            <form onSubmit={handleUpdate} className="p-10 space-y-8">
+                            <form onSubmit={handleUpdate} className="p-6 md:p-10 space-y-6 md:space-y-8">
                                 <div>
-                                    <label className="block text-sm font-black text-[#205457] uppercase tracking-widest mb-6 px-1">How would you rate it now?</label>
-                                    <div className="flex gap-4 p-4 bg-gray-50 rounded-[30px] justify-center items-center">
+                                    <label className="block text-xs md:text-sm font-black text-[#205457] uppercase tracking-widest mb-4 md:mb-6 px-1">How would you rate it now?</label>
+                                    <div className="flex gap-2 md:gap-4 p-4 bg-gray-50 rounded-[30px] justify-center items-center">
                                         {[1, 2, 3, 4, 5].map((s) => (
                                             <button
                                                 key={s}
@@ -289,8 +304,8 @@ const MyReviews = () => {
                                                 className="group relative"
                                             >
                                                 <Star
-                                                    size={42}
-                                                    className={`transition-all duration-300 ${s <= editingReview.rating ? "fill-amber-400 text-amber-400 scale-110 drop-shadow-md" : "text-gray-200 group-hover:text-amber-200 scale-100"}`}
+                                                    size={32}
+                                                    className={`md:w-[42px] md:h-[42px] transition-all duration-300 ${s <= editingReview.rating ? "fill-amber-400 text-amber-400 scale-110 drop-shadow-md" : "text-gray-200 group-hover:text-amber-200 scale-100"}`}
                                                 />
                                                 {s === editingReview.rating && (
                                                     <motion.div
@@ -306,7 +321,7 @@ const MyReviews = () => {
                                 <div className="space-y-4">
                                     <label className="block text-sm font-black text-[#205457] uppercase tracking-widest px-1">Describe your experience</label>
                                     <textarea
-                                        className="w-full p-8 bg-gray-50 border border-transparent rounded-[35px] outline-none focus:bg-white focus:border-[#205457]/10 focus:ring-4 focus:ring-[#205457]/5 min-h-[180px] transition-all italic text-gray-600 text-lg leading-relaxed shadow-inner"
+                                        className="w-full p-6 md:p-8 bg-gray-50 border border-transparent rounded-[25px] md:rounded-[35px] outline-none focus:bg-white focus:border-[#205457]/10 focus:ring-4 focus:ring-[#205457]/5 min-h-[120px] md:min-h-[180px] transition-all italic text-gray-600 text-base md:text-lg leading-relaxed shadow-inner"
                                         value={editingReview.comment}
                                         onChange={(e) => setEditingReview({ ...editingReview, comment: e.target.value })}
                                         required

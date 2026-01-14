@@ -287,7 +287,7 @@ const Shop = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pt-[150px]">
+    <div className="min-h-screen bg-background pt-[110px]">
       <ShopHeader />
 
       <main className="container mx-auto px-4 py-8">

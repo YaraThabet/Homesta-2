@@ -359,36 +359,38 @@ const ShoppingCart = () => {
               {cartItems.length > 0 && (
                 <div className="flex flex-col gap-6 pt-4">
                   {/* Coupon and Actions */}
-                  <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex items-center gap-2 bg-white p-1 rounded-full border border-gray-200 shadow-sm">
+                  <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4">
+                    <div className="flex items-center gap-2 bg-white p-1 rounded-full border border-gray-200 shadow-sm w-full md:w-auto">
                       <input
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value)}
                         placeholder={t('couponCode') || "Coupon Code"}
-                        className="bg-transparent px-4 py-2 text-sm outline-none w-40"
+                        className="bg-transparent px-4 py-2 text-sm outline-none w-full md:w-40"
                       />
                       <button
                         onClick={applyCoupon}
-                        className="bg-[#205457] text-white rounded-full px-5 py-2 text-xs font-bold hover:bg-[#1a4345] transition-colors"
+                        className="bg-[#205457] text-white rounded-full px-5 py-2 text-xs font-bold hover:bg-[#1a4345] transition-colors shrink-0"
                       >
                         {t('applyCoupon') || 'Apply'}
                       </button>
                     </div>
-                    {appliedCoupon && <span className="text-green-500 text-xs font-bold flex items-center gap-1"><Check size={12} /> Applied!</span>}
+                    {appliedCoupon && <span className="text-green-500 text-xs font-bold flex items-center gap-1 justify-center md:justify-start"><Check size={12} /> Applied!</span>}
 
-                    <div className="flex-1"></div>
+                    <div className="flex-1 hidden md:block"></div>
 
-                    <button
-                      onClick={() => setShowClearCartConfirm(true)}
-                      className="text-gray-500 hover:text-red-500 text-sm font-medium underline transition-colors"
-                    >
-                      {t('clearCart')}
-                    </button>
+                    <div className="flex items-center justify-between md:justify-end gap-6 w-full md:w-auto mt-2 md:mt-0">
+                      <Link to="/shop" className="text-[#205457] font-bold hover:underline transition-all flex items-center gap-2 text-sm">
+                        <ArrowLeftIcon /> {t('continueShopping') || 'Continue Shopping'}
+                      </Link>
+
+                      <button
+                        onClick={() => setShowClearCartConfirm(true)}
+                        className="text-gray-500 hover:text-red-500 text-sm font-medium underline transition-colors"
+                      >
+                        {t('clearCart')}
+                      </button>
+                    </div>
                   </div>
-
-                  <Link to="/shop" className="text-[#205457] font-bold hover:underline transition-all flex items-center gap-2">
-                    <ArrowLeftIcon /> Continue Shopping
-                  </Link>
                 </div>
               )}
             </div>

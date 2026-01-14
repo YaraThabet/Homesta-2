@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { FaFacebook, FaPinterest } from "react-icons/fa";
 import { AiFillTwitterCircle, AiFillInstagram } from "react-icons/ai";
 import { FaYoutube } from "react-icons/fa6";
+import { useAppContext } from "../context/AppContext";
 
 const Footer = () => {
   const navigate = useNavigate();
+  const { t } = useAppContext();
 
   const handleNavigation = (path) => {
     navigate(path);
-    window.scrollTo(0, 0);
   };
 
   return (
@@ -26,9 +27,7 @@ const Footer = () => {
           </div>
 
           <p className="font-outfit text-[16px] leading-[150%]">
-            Homesta helps you transform your home into your dream oasis by
-            selecting, designing, and implementing furniture, decor, and smart
-            solutions with professional expertise.
+            {t('footerDesc')}
           </p>
 
           <div className="flex gap-4">
@@ -52,87 +51,87 @@ const Footer = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10 flex-1">
           <div className="flex flex-col gap-4">
-            <p className="font-outfit font-medium text-[20px]">Company</p>
+            <p className="font-outfit font-medium text-[20px]">{t('company')}</p>
             <button
               onClick={() => handleNavigation("/about")}
-              className="font-outfit text-[18px] hover:underline text-left"
+              className="font-outfit text-[18px] hover:underline text-left text-white"
             >
-              About Us
+              {t('aboutUs')}
             </button>
             <button
               onClick={() => handleNavigation("/blogs")}
-              className="font-outfit text-[18px] hover:underline text-left"
+              className="font-outfit text-[18px] hover:underline text-left text-white"
             >
-              Blog
+              {t('blog')}
             </button>
             <button
               onClick={() => handleNavigation("/contact")}
-              className="font-outfit text-[18px] hover:underline text-left"
+              className="font-outfit text-[18px] hover:underline text-left text-white"
             >
-              Contact Us
+              {t('contactUs')}
             </button>
-            <a href="#" className="font-outfit text-[18px] hover:underline">
-              Career
+            <a href="#" className="font-outfit text-[18px] hover:underline text-white">
+              {t('career')}
             </a>
           </div>
 
           <div className="flex flex-col gap-4">
             <p className="font-outfit font-medium text-[20px]">
-              Customer Services
+              {t('customerServices')}
             </p>
             <button
               onClick={() => handleNavigation("/account")}
-              className="font-outfit text-[18px] hover:underline text-left"
+              className="font-outfit text-[18px] hover:underline text-left text-white"
             >
-              My Account
+              {t('myAccount')}
             </button>
             <button
               onClick={() => handleNavigation("/track-order")}
-              className="font-outfit text-[18px] hover:underline text-left"
+              className="font-outfit text-[18px] hover:underline text-left text-white"
             >
-              Track Your Order
+              {t('trackOrder')}
             </button>
-            <a href="#" className="font-outfit text-[18px] hover:underline">
-              Return
+            <a href="#" className="font-outfit text-[18px] hover:underline text-white">
+              {t('return')}
             </a>
             <button
               onClick={() => handleNavigation("/customer-support")}
-              className="font-outfit text-[18px] hover:underline text-left"
+              className="font-outfit text-[18px] hover:underline text-left text-white"
             >
-              FAQ
+              {t('faq')}
             </button>
           </div>
 
           <div className="flex flex-col gap-4">
             <p className="font-outfit font-medium text-[20px]">
-              Our Information
+              {t('ourInformation')}
             </p>
             <button
               onClick={() => handleNavigation("/privacy")}
-              className="font-outfit text-[18px] hover:underline text-left"
+              className="font-outfit text-[18px] hover:underline text-left text-white"
             >
-              Privacy
+              {t('privacy')}
             </button>
             <button
               onClick={() => handleNavigation("/privacy")}
-              className="font-outfit text-[18px] hover:underline text-left"
+              className="font-outfit text-[18px] hover:underline text-left text-white"
             >
-              User Terms & Condition
+              {t('termsCondition')}
             </button>
             <button
               onClick={() => handleNavigation("/privacy")}
-              className="font-outfit text-[18px] hover:underline text-left"
+              className="font-outfit text-[18px] hover:underline text-left text-white"
             >
-              Return Policy
+              {t('returnPolicy')}
             </button>
           </div>
 
           <div className="flex flex-col gap-4">
-            <p className="font-outfit font-medium text-[20px]">Contact Info</p>
-            <p className="font-outfit text-[18px]">+123-456-789</p>
-            <p className="font-outfit text-[18px]">HomestaTeam@gmail.com</p>
+            <p className="font-outfit font-medium text-[20px]">{t('contactInfo')}</p>
+            <p className="font-outfit text-[18px]" dir="ltr">+123-456-789</p>
+            <p className="font-outfit text-[18px]">support@homesta.com</p>
             <p className="font-outfit text-[18px]">
-              8502 Person Rd, Inglewood, Maine 98380
+              8502 Preston Rd. Inglewood, Maine 98380
             </p>
           </div>
         </div>
@@ -140,7 +139,7 @@ const Footer = () => {
 
       <div className="w-full bg-[#B19470] py-6 text-center">
         <p className="font-outfit text-[16px] text-white">
-          Copyright © {new Date().getFullYear()} Homesta. All Rights Reserved.
+          Copyright © {new Date().getFullYear()} Homesta. {t('copyright')}
         </p>
       </div>
     </footer>
