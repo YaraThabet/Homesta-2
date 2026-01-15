@@ -1,4 +1,4 @@
-import React from "react";
+import { Link } from "react-router-dom";
 
 const Error404 = () => {
   return (
@@ -37,12 +37,12 @@ const Error404 = () => {
           </div>
 
           {/* Go to Home Button */}
-          <a
-            href="/"
+          <Link
+            to="/"
             className="px-8 py-3 bg-teal-800 text-white font-semibold rounded-lg hover:bg-teal-900 transition-colors shadow-md hover:shadow-lg inline-block"
           >
             Go to Home Page
-          </a>
+          </Link>
         </div>
       </div>
     </div>

@@ -192,242 +192,246 @@ const Wishlist = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB] pt-[120px] pb-20">
-      {/* Premium Header Section */}
-      <div className="relative h-[250px] bg-[#205457] overflow-hidden flex items-center justify-center mb-12">
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
-        <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-[#7DDCC9]/20 rounded-full blur-3xl"></div>
-        <div className="absolute -top-20 -right-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
+    <div className="min-h-screen bg-[#FDFCFB] pt-[120px] flex flex-col">
+      <div className="flex-grow pb-20">
+        {/* Premium Header Section */}
+        <div className="relative h-[250px] bg-[#205457] overflow-hidden flex items-center justify-center mb-12">
+          {/* ... existing header content ... */}
+          <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+          <div className="absolute -bottom-20 -left-20 w-80 h-80 bg-[#7DDCC9]/20 rounded-full blur-3xl"></div>
+          <div className="absolute -top-20 -right-20 w-80 h-80 bg-white/10 rounded-full blur-3xl"></div>
 
-        <div className="relative text-center px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full text-white/80 text-xs font-bold uppercase tracking-widest border border-white/20 mb-4"
-          >
-            <Heart className="w-3 h-3 fill-[#7DDCC9] text-[#7DDCC9]" /> My Collection
-          </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight"
-          >
-            {categoryName ? `${categoryName} Collection` : "Your Wishlist"}
-          </motion.h1>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="flex items-center justify-center gap-2 text-white/60 text-sm"
-          >
-            <span>Home</span> <ChevronRight className="w-4 h-4" /> <span className="text-[#7DDCC9] font-medium">Wishlist</span>
-          </motion.div>
-        </div>
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4">
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 space-y-4">
-            <div className="w-12 h-12 border-4 border-[#205457]/10 border-t-[#205457] rounded-full animate-spin"></div>
-            <p className="text-[#205457] font-medium animate-pulse uppercase tracking-widest text-xs">Syncing your products...</p>
-          </div>
-        ) : items.length === 0 ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-[40px] p-12 text-center border border-gray-100 shadow-xl shadow-[#205457]/5 flex flex-col items-center max-w-2xl mx-auto"
-          >
-            <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
-              <Package className="w-10 h-10 text-gray-300" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Your wishlist is empty</h2>
-            <p className="text-gray-500 mb-8 max-w-sm">Looks like you haven't added anything yet. Explore our curated collections and find something you love!</p>
-            <button
-              onClick={() => navigate('/shop')}
-              className="bg-[#205457] text-white px-8 py-4 rounded-2xl font-bold hover:bg-[#1a4346] transition-all flex items-center gap-2 group shadow-lg shadow-[#205457]/20"
+          <div className="relative text-center px-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md px-4 py-1.5 rounded-full text-white/80 text-xs font-bold uppercase tracking-widest border border-white/20 mb-4"
             >
-              Start Shopping <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-          </motion.div>
-        ) : (
-          <div className="space-y-6">
-            {/* Action Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-3xl border border-gray-100 shadow-sm mb-8">
-              <div className="flex items-center gap-3">
-                <div className="bg-[#205457]/5 p-2.5 rounded-2xl">
-                  <Tag className="w-5 h-5 text-[#205457]" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-900 leading-tight">{items.length} Items</h3>
-                  <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Saved in your list</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                {categoryFilter && (
-                  <button
-                    onClick={() => navigate('/wishlist')}
-                    className="flex items-center gap-2 text-xs font-black bg-[#205457] text-white px-4 py-2 rounded-xl shadow-lg shadow-[#205457]/20 hover:scale-105 transition-transform"
-                  >
-                    Collection: {categoryName || categoryFilter} <X size={14} />
-                  </button>
-                )}
-                <button
-                  onClick={copyLink}
-                  className="p-3 text-gray-400 hover:text-[#205457] hover:bg-[#205457]/5 rounded-2xl transition-all"
-                  title="Share List"
-                >
-                  <Share2 className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setShowClearConfirm(true)}
-                  className="flex items-center gap-2 text-sm font-bold text-red-400 hover:text-red-600 hover:bg-red-50 px-4 py-2.5 rounded-2xl transition-all"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  <span className="hidden sm:inline">Clear All</span>
-                </button>
-              </div>
-            </div>
+              <Heart className="w-3 h-3 fill-[#7DDCC9] text-[#7DDCC9]" /> My Collection
+            </motion.div>
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="text-4xl md:text-5xl font-black text-white mb-4 tracking-tight"
+            >
+              {categoryName ? `${categoryName} Collection` : "Your Wishlist"}
+            </motion.h1>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="flex items-center justify-center gap-2 text-white/60 text-sm"
+            >
+              <span>Home</span> <ChevronRight className="w-4 h-4" /> <span className="text-[#7DDCC9] font-medium">Wishlist</span>
+            </motion.div>
+          </div>
+        </div>
 
-            {/* List Header - Hidden on Mobile */}
-            <div className="hidden md:grid grid-cols-12 gap-6 px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-[#205457]/40 mb-2">
-              <div className="col-span-6">Product Details</div>
-              <div className="col-span-2 text-center">Price</div>
-              <div className="col-span-2 text-center">Stock status</div>
-              <div className="col-span-2 text-right">Actions</div>
+        <div className="max-w-7xl mx-auto px-4">
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 space-y-4">
+              <div className="w-12 h-12 border-4 border-[#205457]/10 border-t-[#205457] rounded-full animate-spin"></div>
+              <p className="text-[#205457] font-medium animate-pulse uppercase tracking-widest text-xs">Syncing your products...</p>
             </div>
-
-            {/* Items Column */}
-            <div className="space-y-4">
-              <AnimatePresence mode='popLayout'>
-                {items
-                  .filter(item => !categoryFilter || String(item.categoryId) === String(categoryFilter))
-                  .map((item, idx) => (
-                    <motion.div
-                      key={item.id}
-                      layout
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ delay: idx * 0.05 }}
-                      className="group bg-white rounded-[32px] p-5 md:p-6 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-[#205457]/10 transition-all duration-500 relative overflow-hidden"
+          ) : items.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-[40px] p-12 text-center border border-gray-100 shadow-xl shadow-[#205457]/5 flex flex-col items-center max-w-2xl mx-auto"
+            >
+              <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6">
+                <Package className="w-10 h-10 text-gray-300" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Your wishlist is empty</h2>
+              <p className="text-gray-500 mb-8 max-w-sm">Looks like you haven't added anything yet. Explore our curated collections and find something you love!</p>
+              <button
+                onClick={() => navigate('/shop')}
+                className="bg-[#205457] text-white px-8 py-4 rounded-2xl font-bold hover:bg-[#1a4346] transition-all flex items-center gap-2 group shadow-lg shadow-[#205457]/20"
+              >
+                Start Shopping <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+            </motion.div>
+          ) : (
+            <div className="space-y-6">
+              {/* Action Bar */}
+              <div className="flex flex-wrap items-center justify-between gap-4 bg-white p-4 rounded-3xl border border-gray-100 shadow-sm mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="bg-[#205457]/5 p-2.5 rounded-2xl">
+                    <Tag className="w-5 h-5 text-[#205457]" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900 leading-tight">{items.length} Items</h3>
+                    <p className="text-xs text-gray-400 font-medium uppercase tracking-wide">Saved in your list</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  {categoryFilter && (
+                    <button
+                      onClick={() => navigate('/wishlist')}
+                      className="flex items-center gap-2 text-xs font-black bg-[#205457] text-white px-4 py-2 rounded-xl shadow-lg shadow-[#205457]/20 hover:scale-105 transition-transform"
                     >
-                      {/* Hover Decoration */}
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-[#205457]/[0.02] rounded-full -mr-16 -mt-16 transition-all group-hover:scale-150 duration-700"></div>
+                      Collection: {categoryName || categoryFilter} <X size={14} />
+                    </button>
+                  )}
+                  <button
+                    onClick={copyLink}
+                    className="p-3 text-gray-400 hover:text-[#205457] hover:bg-[#205457]/5 rounded-2xl transition-all"
+                    title="Share List"
+                  >
+                    <Share2 className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setShowClearConfirm(true)}
+                    className="flex items-center gap-2 text-sm font-bold text-red-400 hover:text-red-600 hover:bg-red-50 px-4 py-2.5 rounded-2xl transition-all"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span className="hidden sm:inline">Clear All</span>
+                  </button>
+                </div>
+              </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center relative">
-                        {/* Product Base Info */}
-                        <div className="col-span-12 md:col-span-6 flex items-center gap-6">
-                          <div className="relative group/img cursor-pointer" onClick={() => navigate(`/product/${item.id}`)}>
-                            <div className="w-24 h-24 md:w-32 md:h-32 rounded-[24px] overflow-hidden bg-gray-50 border border-gray-100 p-2">
-                              <SafeImage
-                                src={item.image}
-                                alt={item.name}
-                                className="w-full h-full object-contain mix-blend-multiply transition-transform group-hover/img:scale-110 duration-500"
-                              />
-                            </div>
-                            <button
-                              onClick={(e) => { e.stopPropagation(); removeItem(item.id, item.name); }}
-                              className="absolute -top-3 -left-3 w-8 h-8 bg-white border border-gray-100 text-red-500 rounded-full flex items-center justify-center shadow-lg transform scale-0 group-hover:scale-100 transition-all hover:bg-red-50"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
+              {/* Table Headers for Desktop */}
+              <div className="hidden md:grid grid-cols-12 gap-6 px-10 py-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                <div className="col-span-6">Product Details</div>
+                <div className="col-span-2 text-center border-l border-gray-100">Price</div>
+                <div className="col-span-2 text-center border-l border-gray-100">Availability</div>
+                <div className="col-span-2 text-right border-l border-gray-100">Manage</div>
+              </div>
 
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <span className="bg-[#205457]/10 text-[#205457] text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">Homesta Premium</span>
-                            </div>
-                            <h3 className="text-lg md:text-xl font-bold text-gray-900 truncate group-hover:text-[#205457] transition-colors cursor-pointer" onClick={() => navigate(`/product/${item.id}`)}>
-                              {item.name}
-                            </h3>
-                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
-                              <div className="flex items-center gap-1.5 text-xs text-gray-400">
-                                <Calendar className="w-3.5 h-3.5" />
-                                Added {item.dateAdded}
+              {/* Items Column */}
+              <div className="space-y-4">
+                <AnimatePresence mode='popLayout'>
+                  {items
+                    .filter(item => !categoryFilter || String(item.categoryId) === String(categoryFilter))
+                    .map((item, idx) => (
+                      <motion.div
+                        key={item.id}
+                        layout
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        transition={{ delay: idx * 0.05 }}
+                        className="group bg-white rounded-[32px] p-5 md:p-6 border border-gray-100 shadow-sm hover:shadow-2xl hover:shadow-[#205457]/10 transition-all duration-500 relative overflow-hidden"
+                      >
+                        {/* Hover Decoration */}
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#205457]/[0.02] rounded-full -mr-16 -mt-16 transition-all group-hover:scale-150 duration-700"></div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center relative">
+                          {/* Product Base Info */}
+                          <div className="col-span-12 md:col-span-6 flex items-start md:items-center gap-4 md:gap-6">
+                            <div className="relative group/img cursor-pointer shrink-0" onClick={() => navigate(`/product/${item.id}`)}>
+                              <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 rounded-[20px] md:rounded-[24px] overflow-hidden bg-gray-50 border border-gray-100 p-2">
+                                <SafeImage
+                                  src={item.image}
+                                  alt={item.name}
+                                  className="w-full h-full object-contain mix-blend-multiply transition-transform group-hover/img:scale-110 duration-500"
+                                />
                               </div>
-                              <div className="flex items-center gap-2 text-xs font-bold">
-                                <span className="text-gray-400">Color:</span>
-                                <div className="flex items-center gap-1.5" title={item.color}>
-                                  <div
-                                    className="w-4 h-4 rounded-full border border-gray-100 shadow-sm"
-                                    style={{ backgroundColor: COLOR_MAP[item.color?.toLowerCase()] || item.color || '#ccc' }}
-                                  ></div>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); removeItem(item.id, item.name); }}
+                                className="absolute -top-2 -left-2 w-7 h-7 bg-white border border-gray-100 text-red-500 rounded-full flex items-center justify-center shadow-lg md:scale-0 group-hover:scale-100 transition-all hover:bg-red-50"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+
+                            <div className="flex-1 min-w-0 py-1">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="bg-[#205457]/10 text-[#205457] text-[8px] md:text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">Homesta Premium</span>
+                              </div>
+                              <h3 className="text-sm sm:text-base md:text-xl font-bold text-gray-900 truncate group-hover:text-[#205457] transition-colors cursor-pointer" onClick={() => navigate(`/product/${item.id}`)}>
+                                {item.name}
+                              </h3>
+                              <div className="flex flex-col sm:flex-row sm:items-center gap-x-4 gap-y-1 mt-1.5 md:mt-2">
+                                <div className="flex items-center gap-1.5 text-[10px] md:text-xs text-gray-400">
+                                  <Calendar className="w-3 md:w-3.5 h-3 md:h-3.5" />
+                                  Added {item.dateAdded}
+                                </div>
+                                <div className="flex items-center gap-2 text-[10px] md:text-xs font-bold">
+                                  <span className="text-gray-400">Color:</span>
+                                  <div className="flex items-center gap-1.5" title={item.color}>
+                                    <div
+                                      className="w-3 h-3 md:w-4 md:h-4 rounded-full border border-gray-100 shadow-sm"
+                                      style={{ backgroundColor: COLOR_MAP[item.color?.toLowerCase()] || item.color || '#ccc' }}
+                                    ></div>
+                                  </div>
                                 </div>
                               </div>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Price */}
-                        <div className="col-span-12 md:col-span-2 text-center md:border-x md:border-gray-50">
-                          <span className="md:hidden text-xs text-gray-400 font-medium mr-2">Price:</span>
-                          <span className="text-xl md:text-2xl font-black text-[#205457]">{formatPrice(item.price)}</span>
-                        </div>
-
-                        {/* Status */}
-                        <div className="col-span-12 md:col-span-2 flex flex-col items-center justify-center">
-                          <span className="md:hidden text-xs text-gray-400 font-medium mb-1">Stock Status:</span>
-                          {item.quantity > 0 ? (
-                            <div className="flex flex-col items-center">
-                              <span className="px-4 py-1.5 bg-green-50 text-green-600 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5">
-                                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
-                                In Stock
-                              </span>
-                              <span className="text-[10px] text-gray-400 mt-1 font-medium italic">{item.quantity} available</span>
+                          {/* Price & Status Group (Mobile Friendly) */}
+                          <div className="col-span-12 md:col-span-4 grid grid-cols-2 md:grid-cols-2 gap-4 items-center">
+                            {/* Price */}
+                            <div className="text-left md:text-center md:border-l md:border-gray-50">
+                              <span className="block md:hidden text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Price</span>
+                              <span className="text-base sm:text-lg md:text-2xl font-black text-[#205457]">{formatPrice(item.price)}</span>
                             </div>
-                          ) : (
-                            <span className="px-4 py-1.5 bg-red-50 text-red-400 rounded-full text-[10px] font-black uppercase tracking-widest">
-                              Out of Stock
-                            </span>
-                          )}
+
+                            {/* Status */}
+                            <div className="flex flex-col items-end md:items-center justify-center md:border-l md:border-gray-50">
+                              <span className="block md:hidden text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1">Stock Status</span>
+                              {item.quantity > 0 ? (
+                                <div className="flex flex-col items-end md:items-center">
+                                  <span className="px-2 md:px-4 py-1 md:py-1.5 bg-green-50 text-green-600 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest flex items-center gap-1 md:gap-1.5">
+                                    <div className="w-1 md:w-1.5 h-1 md:h-1.5 bg-green-500 rounded-full animate-pulse"></div>
+                                    In Stock
+                                  </span>
+                                  <span className="text-[8px] md:text-[10px] text-gray-400 mt-0.5 md:mt-1 font-medium italic">{item.quantity} available</span>
+                                </div>
+                              ) : (
+                                <span className="px-3 md:px-4 py-1 md:py-1.5 bg-red-50 text-red-400 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest">
+                                  Out of Stock
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Final Action */}
+                          <div className="col-span-12 md:col-span-2 flex justify-end">
+                            <button
+                              onClick={() => addToCart(item)}
+                              disabled={item.quantity <= 0}
+                              className="w-full md:w-auto bg-[#205457] hover:bg-[#1a4346] disabled:opacity-30 disabled:cursor-not-allowed text-white py-3 md:py-4 px-4 md:px-6 rounded-xl md:rounded-2xl font-bold text-xs md:text-sm transition-all flex items-center justify-center gap-2 md:gap-3 shadow-lg shadow-[#205457]/10 active:scale-95 group/btn"
+                            >
+                              <ShoppingCart className="w-3.5 md:w-4 h-3.5 md:h-4 group-hover/btn:rotate-12 transition-transform" />
+                              <span>Move to Cart</span>
+                            </button>
+                          </div>
                         </div>
+                      </motion.div>
+                    ))}
+                </AnimatePresence>
+              </div>
 
-                        {/* Final Action */}
-                        <div className="col-span-12 md:col-span-2 flex justify-end">
-                          <button
-                            onClick={() => addToCart(item)}
-                            disabled={item.quantity <= 0}
-                            className="w-full md:w-auto bg-[#205457] hover:bg-[#1a4346] disabled:opacity-30 disabled:cursor-not-allowed text-white py-4 px-6 rounded-2xl font-bold text-sm transition-all flex items-center justify-center gap-3 shadow-lg shadow-[#205457]/10 active:scale-95 group/btn"
-                          >
-                            <ShoppingCart className="w-4 h-4 group-hover/btn:rotate-12 transition-transform" />
-                            <span className="md:hidden lg:inline">Move to Cart</span>
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-              </AnimatePresence>
-            </div>
-
-            {/* Bulk Actions */}
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-12">
-              <button
-                onClick={() => navigate('/shop')}
-                className="group flex items-center gap-3 text-[#205457] font-bold text-sm"
-              >
-                <div className="bg-[#205457]/5 p-2 rounded-full group-hover:bg-[#205457] group-hover:text-white transition-all">
-                  <ChevronRight className="w-4 h-4 rotate-180" />
-                </div>
-                Continue Shopping
-              </button>
-
-              <div className="flex gap-4 w-full md:w-auto">
+              {/* Bulk Actions */}
+              <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-12">
                 <button
-                  onClick={() => items.length > 0 && items.forEach(it => it.quantity > 0 && addToCart(it))}
-                  className="flex-1 md:flex-none border-2 border-[#205457] text-[#205457] px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-[#205457] hover:text-white transition-all"
+                  onClick={() => navigate('/shop')}
+                  className="group flex items-center gap-3 text-[#205457] font-bold text-sm"
                 >
-                  Add All to Cart
+                  <div className="bg-[#205457]/5 p-2 rounded-full group-hover:bg-[#205457] group-hover:text-white transition-all">
+                    <ChevronRight className="w-4 h-4 rotate-180" />
+                  </div>
+                  Continue Shopping
                 </button>
+
+                <div className="flex gap-4 w-full md:w-auto">
+                  <button
+                    onClick={() => items.length > 0 && items.forEach(it => it.quantity > 0 && addToCart(it))}
+                    className="flex-1 md:flex-none border-2 border-[#205457] text-[#205457] px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-[#205457] hover:text-white transition-all"
+                  >
+                    Add All to Cart
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
 
-      <div className="mt-20">
-        <FooterBenefits />
-      </div>
+      <FooterBenefits />
 
       <ConfirmModal
         isOpen={showClearConfirm}

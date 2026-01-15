@@ -363,10 +363,6 @@ const Login = () => {
                 </div>
               </div>
             </div>
-
-            <button className="absolute top-8 right-8 py-3 px-8 bg-white/20 text-white border border-white/30 rounded-3xl cursor-pointer text-sm backdrop-blur-md transition-all duration-300 hover:bg-white/30 hover:border-white/50">
-              Skip
-            </button>
           </div>
         </div>
       </div>

@@ -203,8 +203,12 @@ const Products = () => {
         if (!deleteId) return;
         try {
             setIsDeleting(true);
+            const productToDelete = products.find(p => (p.productId || p.id) === deleteId);
+            const productName = productToDelete ? productToDelete.name : 'Product';
+
             await api.delete(`/Product/Delete/${deleteId}`);
             setProducts(products.filter(p => (p.productId || p.id) !== deleteId));
+            showAlert(`${productName} has been permanently removed from your inventory.`, "success", "Deleted Successfully");
             setDeleteId(null);
         } catch (err) {
             console.error("Delete failed:", err);

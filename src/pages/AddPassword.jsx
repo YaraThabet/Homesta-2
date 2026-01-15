@@ -9,7 +9,10 @@ import PageLoader from "../components/PageLoader";
 import forgetPassImg from '../assets/imges/forget-pass-img.jpg';
 
 const schema = z.object({
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string()
+    .min(7, 'Password must be at least 7 characters')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{7,}$/,
+      'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character'),
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",

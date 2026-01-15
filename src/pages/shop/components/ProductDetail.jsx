@@ -535,7 +535,7 @@ const ProductDetail = () => {
     if (token) {
       // Give a short delay for state update/toast
       setTimeout(() => {
-        navigate('/checkout');
+        navigate('/shopping-cart');
       }, 500);
     }
   };

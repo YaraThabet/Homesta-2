@@ -1,8 +1,33 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, FileText, CreditCard, Shield, Settings, Users, Headphones, Mail, MessageCircle, Phone, ChevronRight } from 'lucide-react';
+import { useAppContext } from '../../context/AppContext';
 
 const HelpCenter = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
+  const { showAlert } = useAppContext();
+
+  const handleCategoryClick = (title) => {
+    navigate('/customer-support');
+  };
+
+  const handleArticleClick = (title) => {
+    // Navigate to customer support page which contains FAQs
+    navigate('/customer-support');
+  };
+
+  const handleSupportAction = (option) => {
+    if (option.action === 'Call Now') {
+      window.location.href = 'tel:+1234567890';
+    } else if (option.action === 'Send Email') {
+      window.location.href = 'mailto:support@homesta.com';
+    } else if (option.action === 'Start Chat') {
+      navigate('/chatai');
+    } else {
+      showAlert(`Starting ${option.title.toLowerCase()}...`, 'success', 'Support');
+    }
+  };
 
   const categories = [
     { icon: FileText, title: 'Getting Started', description: 'Learn the basics and set up your account', articles: 12, color: 'bg-cyan-50 text-cyan-600' },
@@ -34,7 +59,7 @@ const HelpCenter = () => {
       <div className="bg-gradient-to-b from-gray-50 to-white py-12 text-center">
         <h1 className="text-2xl font-semibold text-teal-700 mb-2">Help Center</h1>
         <p className="text-xl font-medium text-gray-900 mb-8">How can we help you today?</p>
-        
+
         {/* Search Bar */}
         <div className="max-w-xl mx-auto px-4">
           <div className="relative">
@@ -45,6 +70,7 @@ const HelpCenter = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-12 pr-4 py-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+              onKeyDown={(e) => e.key === 'Enter' && searchQuery && showAlert(`Searching for: ${searchQuery}`, 'info', 'Search')}
             />
           </div>
         </div>
@@ -58,12 +84,13 @@ const HelpCenter = () => {
             {categories.map((category, index) => (
               <div
                 key={index}
-                className="p-5 border border-gray-100 rounded-xl hover:shadow-md transition-shadow cursor-pointer bg-white"
+                onClick={() => handleCategoryClick(category.title)}
+                className="p-5 border border-gray-100 rounded-xl hover:shadow-md transition-shadow cursor-pointer bg-white group"
               >
-                <div className={`w-10 h-10 ${category.color} rounded-lg flex items-center justify-center mb-3`}>
+                <div className={`w-10 h-10 ${category.color} rounded-lg flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
                   <category.icon className="w-5 h-5" />
                 </div>
-                <h3 className="font-medium text-gray-900 mb-1">{category.title}</h3>
+                <h3 className="font-medium text-gray-900 mb-1 group-hover:text-teal-600 transition-colors uppercase text-xs font-black tracking-widest">{category.title}</h3>
                 <p className="text-sm text-gray-500 mb-2">{category.description}</p>
                 <p className="text-xs text-gray-400">{category.articles} articles</p>
               </div>
@@ -78,20 +105,21 @@ const HelpCenter = () => {
             {popularArticles.map((article, index) => (
               <div
                 key={index}
-                className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:shadow-sm transition-shadow cursor-pointer bg-white"
+                onClick={() => handleArticleClick(article.title)}
+                className="flex items-center justify-between p-4 border border-gray-100 rounded-xl hover:shadow-sm transition-shadow cursor-pointer bg-white group"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-gray-400" />
+                  <div className="w-10 h-10 bg-gray-50 rounded-lg flex items-center justify-center group-hover:bg-teal-50 transition-colors">
+                    <FileText className="w-5 h-5 text-gray-400 group-hover:text-teal-500" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">{article.title}</h3>
+                    <h3 className="font-medium text-gray-900 group-hover:text-teal-600 transition-colors">{article.title}</h3>
                     <p className="text-sm text-gray-400">
                       {article.category} · {article.views} · {article.readTime}
                     </p>
                   </div>
                 </div>
-                <ChevronRight className="w-5 h-5 text-gray-300" />
+                <ChevronRight className="w-5 h-5 text-gray-300 group-hover:translate-x-1 transition-transform" />
               </div>
             ))}
           </div>
@@ -104,14 +132,17 @@ const HelpCenter = () => {
             {supportOptions.map((option, index) => (
               <div
                 key={index}
-                className={`${option.color} rounded-xl p-6 text-center`}
+                className={`${option.color} rounded-xl p-6 text-center shadow-sm hover:shadow-md transition-all`}
               >
-                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
                   <option.icon className="w-6 h-6 text-gray-600" />
                 </div>
                 <h3 className="font-medium text-gray-900 mb-1">{option.title}</h3>
                 <p className="text-sm text-gray-500 mb-4">{option.description}</p>
-                <button className="px-6 py-2 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                <button
+                  onClick={() => handleSupportAction(option)}
+                  className="px-6 py-2 bg-white border border-gray-200 rounded-full text-sm font-semibold text-teal-700 hover:bg-teal-50 hover:border-teal-200 transition-all shadow-sm active:scale-95"
+                >
                   {option.action}
                 </button>
               </div>

@@ -540,100 +540,188 @@ const AdminOrders = () => {
                     </div>
                 </div>
 
-                {/* Orders Table-like Cards */}
-                <div className="space-y-4">
-                    {filteredOrders.length > 0 ? (
-                        filteredOrders.map((order, idx) => (
-                            <motion.div
-                                key={order.orderId || order.id || idx}
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: idx * 0.05 }}
-                                className="bg-white p-4 sm:p-6 md:p-8 rounded-[25px] sm:rounded-[35px] border border-gray-100 shadow-[0_10px_40px_rgba(0,0,0,0.02)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.04)] transition-all group"
-                            >
-                                <div className="flex flex-col gap-4">
-                                    {/* Mobile: Order ID & Status Row */}
-                                    <div className="flex items-center justify-between gap-3">
-                                        <div className="flex items-center gap-3 sm:gap-5 flex-1 min-w-0">
-                                            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#205457]/10 rounded-xl sm:rounded-2xl flex items-center justify-center text-[#205457] flex-shrink-0">
-                                                <ShoppingBag size={20} className="sm:w-6 sm:h-6" />
+                {/* Orders Content: Table for Desktop, Cards for Mobile */}
+                <div className="bg-white rounded-[25px] sm:rounded-[40px] border border-gray-100 shadow-sm overflow-hidden">
+                    {/* Desktop Table View */}
+                    <div className="hidden lg:block overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead className="bg-gray-50/50 border-b border-gray-100">
+                                <tr className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">
+                                    <th className="px-8 py-6">Order Info</th>
+                                    <th className="px-8 py-6">Customer</th>
+                                    <th className="px-8 py-6">Items</th>
+                                    <th className="px-8 py-6 text-center">Status</th>
+                                    <th className="px-8 py-6 text-right">Total</th>
+                                    <th className="px-8 py-6 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                                {filteredOrders.map((order, idx) => (
+                                    <tr key={order.orderId || order.id || idx} className="hover:bg-gray-50/50 transition-colors group">
+                                        <td className="px-8 py-7">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 bg-[#205457]/10 rounded-xl flex items-center justify-center text-[#205457]">
+                                                    <ShoppingBag size={20} />
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-gray-900 text-sm">#{order.orderId || order.id}</p>
+                                                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest mt-1">
+                                                        {new Date(order.orderDate).toLocaleDateString()}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <div className="min-w-0 flex-1">
-                                                <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5 sm:mb-1">Order ID</p>
-                                                <p className="font-bold text-gray-900 text-sm sm:text-base truncate">#{order.orderId || order.id}</p>
+                                        </td>
+                                        <td className="px-8 py-7">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-400">
+                                                    <User size={14} />
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-gray-700 text-sm">
+                                                        {order.firstName && order.lastName
+                                                            ? `${order.firstName} ${order.lastName}`
+                                                            : (order.firstName || order.userName || 'Guest')}
+                                                    </p>
+                                                    <p className="text-[10px] text-gray-400 font-medium truncate max-w-[120px]" title={order.email}>
+                                                        {order.email}
+                                                    </p>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest whitespace-nowrap flex-shrink-0 ${order.status === 'Delivered' ? 'bg-green-50 text-green-600' :
-                                            order.status === 'Cancelled' ? 'bg-red-50 text-red-600' :
-                                                order.status === 'Shipped' ? 'bg-indigo-50 text-indigo-600' :
-                                                    order.status === 'Processing' ? 'bg-blue-50 text-blue-600' :
-                                                        'bg-amber-50 text-amber-600'
-                                            }`}>
-                                            {order.status || 'Accepted'}
-                                        </div>
-                                    </div>
+                                        </td>
+                                        <td className="px-8 py-7">
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex -space-x-2">
+                                                    {(order.orderItems || order.items || []).slice(0, 3).map((item, i) => (
+                                                        <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gray-50 overflow-hidden shadow-sm">
+                                                            <SafeImage src={item.image || item.imagePath} alt="" className="w-full h-full object-cover" type="product" />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                <span className="text-[10px] font-bold text-gray-400 ml-2">
+                                                    {(order.orderItems || order.items || []).length} items
+                                                </span>
+                                            </div>
+                                        </td>
+                                        <td className="px-8 py-7 text-center">
+                                            <span className={`px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest inline-block ${order.status === 'Delivered' ? 'bg-green-50 text-green-600' :
+                                                order.status === 'Cancelled' ? 'bg-red-50 text-red-600' :
+                                                    order.status === 'Shipped' ? 'bg-indigo-50 text-indigo-600' :
+                                                        order.status === 'Processing' ? 'bg-blue-50 text-blue-600' :
+                                                            'bg-amber-50 text-amber-600'
+                                                }`}>
+                                                {order.status || 'Accepted'}
+                                            </span>
+                                        </td>
+                                        <td className="px-8 py-7 text-right">
+                                            <p className="text-base font-black text-[#205457]">
+                                                ${(order.displayTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                                            </p>
+                                        </td>
+                                        <td className="px-8 py-7 text-right">
+                                            <button
+                                                onClick={() => setSelectedOrder(order)}
+                                                className="p-2 hover:bg-[#205457] hover:text-white transition-all rounded-lg inline-flex items-center justify-center text-gray-400"
+                                            >
+                                                <Eye size={18} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
-                                    {/* Customer & Amount Row */}
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
-                                            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 flex-shrink-0">
-                                                <User size={16} className="sm:w-[18px] sm:h-[18px]" />
+                    {/* Mobile Card View */}
+                    <div className="lg:hidden divide-y divide-gray-50">
+                        {filteredOrders.length > 0 ? (
+                            filteredOrders.map((order, idx) => (
+                                <motion.div
+                                    key={order.orderId || order.id || idx}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="p-4 sm:p-6 group"
+                                >
+                                    <div className="flex flex-col gap-4">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-3 sm:gap-5 flex-1 min-w-0">
+                                                <div className="w-12 h-12 sm:w-14 sm:h-14 bg-[#205457]/10 rounded-xl sm:rounded-2xl flex items-center justify-center text-[#205457] flex-shrink-0">
+                                                    <ShoppingBag size={20} className="sm:w-6 sm:h-6" />
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5 sm:mb-1">Order ID</p>
+                                                    <p className="font-bold text-gray-900 text-sm sm:text-base truncate">#{order.orderId || order.id}</p>
+                                                </div>
                                             </div>
-                                            <div className="min-w-0 flex-1">
-                                                <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Customer</p>
-                                                <p className="font-bold text-gray-700 text-sm sm:text-base truncate">
-                                                    {order.firstName && order.lastName
-                                                        ? `${order.firstName} ${order.lastName}`
-                                                        : (order.firstName || order.userName || 'Guest User')}
+                                            <div className={`px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-black uppercase tracking-widest whitespace-nowrap flex-shrink-0 ${order.status === 'Delivered' ? 'bg-green-50 text-green-600' :
+                                                order.status === 'Cancelled' ? 'bg-red-50 text-red-600' :
+                                                    order.status === 'Shipped' ? 'bg-indigo-50 text-indigo-600' :
+                                                        order.status === 'Processing' ? 'bg-blue-50 text-blue-600' :
+                                                            'bg-amber-50 text-amber-600'
+                                                }`}>
+                                                {order.status || 'Accepted'}
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start justify-between gap-4">
+                                            <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                                                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-gray-50 rounded-full flex items-center justify-center text-gray-400 flex-shrink-0">
+                                                    <User size={16} className="sm:w-[18px] sm:h-[18px]" />
+                                                </div>
+                                                <div className="min-w-0 flex-1">
+                                                    <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Customer</p>
+                                                    <p className="font-bold text-gray-700 text-sm sm:text-base truncate">
+                                                        {order.firstName && order.lastName
+                                                            ? `${order.firstName} ${order.lastName}`
+                                                            : (order.firstName || order.userName || 'Guest')}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <div className="text-right flex-shrink-0">
+                                                <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5 sm:mb-1">Total</p>
+                                                <p className="text-base sm:text-xl font-black text-[#205457] tracking-tighter">
+                                                    ${(order.displayTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                                                 </p>
                                             </div>
                                         </div>
-                                        <div className="text-right flex-shrink-0">
-                                            <p className="text-[9px] sm:text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5 sm:mb-1">Total</p>
-                                            <p className="text-base sm:text-xl font-black text-[#205457] tracking-tighter">
-                                                ${(order.displayTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                                            </p>
-                                        </div>
-                                    </div>
 
-                                    {/* Items Preview & View Button */}
-                                    <div className="flex items-center justify-between gap-4 pt-3 border-t border-gray-50">
-                                        <div className="flex items-center gap-3 flex-1">
-                                            <div className="flex -space-x-3">
-                                                {(order.orderItems || order.items || []).slice(0, 3).map((item, i) => (
-                                                    <div key={i} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white bg-gray-100 overflow-hidden shadow-sm">
-                                                        <SafeImage src={item.image || item.imagePath} alt="" className="w-full h-full object-cover" type="product" />
-                                                    </div>
-                                                ))}
-                                                {(order.orderItems || order.items || []).length > 3 && (
-                                                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white bg-[#B19470] text-white flex items-center justify-center text-[9px] sm:text-[10px] font-black">
-                                                        +{(order.orderItems || order.items || []).length - 3}
-                                                    </div>
-                                                )}
+                                        <div className="flex items-center justify-between gap-4 pt-3 border-t border-gray-50">
+                                            <div className="flex items-center gap-3 flex-1">
+                                                <div className="flex -space-x-3">
+                                                    {(order.orderItems || order.items || []).slice(0, 3).map((item, i) => (
+                                                        <div key={i} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white bg-gray-100 overflow-hidden shadow-sm">
+                                                            <SafeImage src={item.image || item.imagePath} alt="" className="w-full h-full object-cover" type="product" />
+                                                        </div>
+                                                    ))}
+                                                    {(order.orderItems || order.items || []).length > 3 && (
+                                                        <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-white bg-[#B19470] text-white flex items-center justify-center text-[9px] sm:text-[10px] font-black">
+                                                            +{(order.orderItems || order.items || []).length - 3}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <span className="text-[10px] sm:text-xs font-bold text-gray-400">
+                                                    {(order.orderItems || order.items || []).length} items
+                                                </span>
                                             </div>
-                                            <span className="text-[10px] sm:text-xs font-bold text-gray-400">
-                                                {(order.orderItems || order.items || []).length} items
-                                            </span>
+                                            <button
+                                                onClick={() => setSelectedOrder(order)}
+                                                className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-xl sm:rounded-2xl flex items-center justify-center text-gray-400 hover:bg-[#205457] hover:text-white transition-all shadow-sm group/btn flex-shrink-0"
+                                            >
+                                                <ChevronRight size={18} className="sm:w-5 sm:h-5 group-hover/btn:translate-x-0.5 transition-transform" />
+                                            </button>
                                         </div>
-                                        <button
-                                            onClick={() => setSelectedOrder(order)}
-                                            className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-50 rounded-xl sm:rounded-2xl flex items-center justify-center text-gray-400 hover:bg-[#205457] hover:text-white transition-all shadow-sm group/btn flex-shrink-0"
-                                        >
-                                            <ChevronRight size={18} className="sm:w-5 sm:h-5 group-hover/btn:translate-x-0.5 transition-transform" />
-                                        </button>
                                     </div>
+                                </motion.div>
+                            ))
+                        ) : (
+                            <div className="bg-white rounded-[50px] border border-dashed border-gray-200 py-32 text-center">
+                                <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-200">
+                                    <Package size={48} />
                                 </div>
-                            </motion.div>
-                        ))
-                    ) : (
-                        <div className="bg-white rounded-[50px] border border-dashed border-gray-200 py-32 text-center">
-                            <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-200">
-                                <Package size={48} />
+                                <h3 className="text-2xl font-bold text-gray-900 mb-2">No Matches Found</h3>
+                                <p className="text-gray-400 max-w-sm mx-auto">Try adjusting your search terms or filters to find what you're looking for.</p>
                             </div>
-                            <h3 className="text-2xl font-bold text-gray-900 mb-2">No Matches Found</h3>
-                            <p className="text-gray-400 max-w-sm mx-auto">Try adjusting your search terms or filters to find what you're looking for.</p>
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
             </div>
 

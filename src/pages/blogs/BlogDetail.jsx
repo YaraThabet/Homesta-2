@@ -55,8 +55,8 @@ const BlogDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFCFB]  pb-20 font-outfit">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-[120px]">
+    <div className="min-h-screen bg-[#FDFCFB] font-outfit flex flex-col">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-[120px] flex-grow w-full pb-20">
         {/* Back Button */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -244,9 +244,7 @@ const BlogDetail = () => {
         )}
       </div>
 
-      <div className="mt-20">
-        <FooterBenefits />
-      </div>
+      <FooterBenefits />
     </div>
   );
 };

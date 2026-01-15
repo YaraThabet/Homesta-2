@@ -10,7 +10,7 @@ import FooterBenefits from "./components/FooterBenefits";
 import SortDropdown from "./components/SortDropdown";
 import api from "../../lib/axios";
 
-const ITEMS_PER_PAGE = 12;
+const ITEMS_PER_PAGE = 24;
 
 const Shop = () => {
   const [searchParams] = useSearchParams();
@@ -287,7 +287,7 @@ const Shop = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background pt-[110px]">
+    <div className="min-h-screen bg-background pt-[150px]">
       <ShopHeader />
 
       <main className="container mx-auto px-4 py-8">

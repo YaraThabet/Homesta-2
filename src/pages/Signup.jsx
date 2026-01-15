@@ -13,7 +13,10 @@ const schema = z.object({
   firstName: z.string().min(1, { message: 'First name is required' }),
   lastName: z.string().min(1, { message: 'Last name is required' }),
   email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
+  password: z.string()
+    .min(7, 'Password must be at least 7 characters')
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{7,}$/,
+      'Password must contain at least one uppercase letter, one lowercase letter, one number and one special character'),
   role: z.enum(['buyer', 'seller'], {
     required_error: "Please select a role",
   }),
@@ -336,18 +339,6 @@ const Signup = () => {
           </div>
         </div>
 
-        {/* Skip Button */}
-        <button
-          onClick={() => navigate('/')}
-          className="
-    absolute top-8 right-8 px-4 py-2
-    bg-white/20 backdrop-blur-sm
-    text-white rounded-lg
-    hover:bg-white/30 transition-colors
-  ">
-          Skip &gt;
-        </button>
-
         {/* Progress Indicator */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex space-x-2">
           <div className="w-8 h-1 bg-white rounded-full"></div>
@@ -355,7 +346,6 @@ const Signup = () => {
           <div className="w-8 h-1 bg-white/50 rounded-full"></div>
         </div>
       </div>
-
     </div>
   );
 };

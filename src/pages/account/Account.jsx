@@ -203,8 +203,8 @@ const Account = () => {
     location.pathname === "/account/";
 
   return (
-    <div className="min-h-screen bg-gray-100 pt-32 md:pt-32">
-      <div className="px-4 md:px-8 py-8">
+    <div className="min-h-screen bg-gray-100 pt-32 md:pt-32 flex flex-col">
+      <div className="px-4 md:px-8 py-8 flex-grow">
         {/* Mobile Menu Button */}
         <div className="lg:hidden mb-4">
           <button

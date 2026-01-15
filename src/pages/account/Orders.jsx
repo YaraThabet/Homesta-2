@@ -418,10 +418,10 @@ const Orders = () => {
         </div>
 
         {/* Orders List */}
-        <div className="space-y-6 lg:max-h-[850px] lg:overflow-y-auto lg:pr-4 custom-scrollbar scroll-smooth">
+        <div className="flex flex-col gap-6 lg:max-h-[850px] lg:overflow-y-auto lg:pr-4 custom-scrollbar scroll-smooth">
           {filteredOrders.length > 0 ? (
             filteredOrders.map((order, index) => (
-              <div key={order.orderId || index} className="bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all group">
+              <div key={order.orderId || index} className="w-full bg-card rounded-2xl border border-border overflow-hidden shadow-sm hover:shadow-md transition-all group">
                 {/* Order Header */}
                 <div className="bg-gray-50/80 px-5 py-5 grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-5 border-b border-border text-left">
                   <div className="col-span-1">
