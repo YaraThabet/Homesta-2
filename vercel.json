@@ -21,6 +21,7 @@
             "destination": "http://homefinish.runasp.net/content/:path*"
         },
         {
+            "source": "/product-images/:path*",
             "destination": "http://homefinish.runasp.net/product-images/:path*"
         },
         {
