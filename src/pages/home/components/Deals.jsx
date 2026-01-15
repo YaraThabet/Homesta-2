@@ -57,7 +57,7 @@ const Deals = () => {
       <div className="flex flex-col lg:flex-row w-full gap-6 justify-between mb-12">
         <div className="w-full lg:max-w-md h-auto">
           <p className="font-[Outfit] font-medium text-[28px] md:text-[36px] lg:text-[40px] leading-[120%]">
-            <span className="text-[#205457]">{t('dealsOfDay').split(' ')[0]}</span> {t('dealsOfDay').split(' ').slice(1).join(' ')}
+            <span className="text-[#205457]">{t('DealsOftheDay').split(' ')[0]}</span> {t('DealsOftheDay').split(' ').slice(1).join(' ')}
           </p>
         </div>
         <div className="w-full lg:max-w-lg h-auto">

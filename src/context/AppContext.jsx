@@ -256,7 +256,7 @@ const translations = {
         saveCard: "حفظ البطاقة للمدفوعات المستقبلية",
         addCard: "إضافة البطاقة",
         orderPlacedSuccess: "تم تقديم الطلب بنجاح!",
-        dealsOfDay: "صفقات الـيوم",
+        DealsOftheDay: "صفقات الـيوم",
         buyNow: "اشتر الآن",
         shopNow: "تسوق الآن",
         freeShipping: "شحن مجاني",
