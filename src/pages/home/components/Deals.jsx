@@ -9,23 +9,23 @@ const Deals = () => {
   const { formatPrice, t } = useAppContext();
   const deals = [
     {
-      id: 1,
+      id: 180,
       category: t('chairs') || "Chair",
-      name: "Comfort Sofa Plus",
-      price: 105,
-      oldPrice: 150,
-      discount: "20% Off",
+      name: "Cloud-View Ergonomic Leather Recliner",
+      price: 700,
+      oldPrice: 850,
+      discount: "15% Off",
       rating: 4.9,
       image: "/img/chair1.jpg",
       description:
         "Experience the perfect blend of style and support with our premium ergonomic design, perfect for modern living spaces.",
     },
     {
-      id: 2,
+      id: 187,
       category: t('sofa') || "Sofa",
-      name: "Comfort Sofa Plus",
-      price: 220,
-      oldPrice: 310,
+      name: "Monochrome Fluidity 3D Textured Canvas",
+      price: 310,
+      oldPrice: 400,
       discount: "20% Off",
       rating: 4.7,
       image: "/img/chair2.png",
@@ -54,14 +54,12 @@ const Deals = () => {
 
   return (
     <div className="w-full min-h-screen px-4 md:px-10 lg:px-20 py-16">
-      <div className="flex flex-col lg:flex-row w-full gap-6 justify-between mb-12">
-        <div className="w-full lg:max-w-md h-auto">
-          <p className="font-[Outfit] font-medium text-[28px] md:text-[36px] lg:text-[40px] leading-[120%]">
+      <div className="flex flex-col w-full gap-4 mb-12">
+        <div className="w-full h-auto">
+          <p className="font-[Outfit] font-medium text-[28px] md:text-[36px] lg:text-[40px] leading-[120%] mb-2">
             <span className="text-[#205457]">{t('DealsOftheDay').split(' ')[0]}</span> {t('DealsOftheDay').split(' ').slice(1).join(' ')}
           </p>
-        </div>
-        <div className="w-full lg:max-w-lg h-auto">
-          <p className="font-[Outfit] font-normal text-[14px] md:text-[15px] lg:text-[16px] leading-[150%] text-gray-600">
+          <p className="font-[Outfit] font-light text-[14px] md:text-[16px] leading-[150%] text-gray-500 max-w-2xl">
             {t('discoverQuality')}
           </p>
         </div>
@@ -71,7 +69,8 @@ const Deals = () => {
           {deals.map((item) => (
             <div
               key={item.id}
-              className="group w-full h-auto p-4 border-zinc-500 rounded-2xl shadow-xl flex flex-col md:flex-row gap-6 md:gap-[30px] transition-all duration-300 bg-white"
+              className="group w-full h-auto p-4 border-zinc-500 rounded-2xl shadow-xl flex flex-col md:flex-row gap-6 md:gap-[30px] transition-all duration-300 bg-white cursor-pointer"
+              onClick={() => navigate(`/product/${item.id}`)}
             >
               <div
                 className="w-full md:w-[280px] h-[250px] md:h-auto min-h-[250px] rounded-3xl shadow-lg overflow-hidden relative shrink-0"
@@ -90,71 +89,40 @@ const Deals = () => {
 
               <div className="flex flex-col w-full md:flex-1 gap-4 justify-center">
                 <div className="flex flex-col gap-1">
-                  <p className="font-outfit font-normal text-[16px] text-gray-500">
-                    {item.category}
-                  </p>
-                  <p className="font-outfit font-medium text-[20px] text-gray-900">
+                  <div className="flex justify-between items-start w-full">
+                    <p className="font-outfit font-normal text-[14px] md:text-[16px] text-gray-500">
+                      {item.category}
+                    </p>
+                  </div>
+                  <p className="font-outfit font-medium text-[18px] md:text-[20px] text-gray-900 line-clamp-2 min-h-[1.5em] md:min-h-[2.4em]">
                     {item.name}
                   </p>
-                  <p className="font-outfit font-medium text-[18px]">
+                  <p className="font-outfit font-medium text-[16px] md:text-[18px]">
                     {formatPrice(item.price)}{" "}
                     <span className="text-[#A4A7AE] line-through ml-2 font-normal">{formatPrice(item.oldPrice)}</span>
                   </p>
                 </div>
 
                 <div className="flex items-center gap-1">
-                  <FaStar className="w-4 h-4 text-[#FFCC00]" />
-                  <p className="font-outfit font-normal text-[15px]">
+                  <FaStar className="w-3 h-3 md:w-4 md:h-4 text-[#FFCC00]" />
+                  <p className="font-outfit font-normal text-[13px] md:text-[15px]">
                     {item.rating}
                   </p>
                 </div>
 
-                <p className="font-outfit font-normal text-[15px] leading-[150%] text-[#4D4A4A] line-clamp-3">
+                <p className="font-outfit font-normal text-[14px] md:text-[15px] leading-[150%] text-[#4D4A4A] line-clamp-2 md:line-clamp-3">
                   {item.description}
                 </p>
 
                 <button
-                  onClick={async (e) => {
+                  onClick={(e) => {
                     e.stopPropagation();
-                    const token = localStorage.getItem('token');
-                    if (!token) {
-                      navigate('/login');
-                      return;
-                    }
-                    try {
-                      // Assuming direct add without options for these deals, or redirect to product page if complex
-                      // For Quick Add:
-                      /*
-                      await api.post('Cart/add', {
-                          productId: item.id,
-                          quantity: 1
-                      });
-                      navigate('/shopping-cart');
-                      */
-                      // Since these seem to be deals, let's redirect to product detail but with intent or just add if possible.
-                      // Given the request "make the buy now button add to cart and move u to cart immedialty"
-                      // We need real IDs. The mock data has IDs 1, 2. If these are real, we can add.
-                      // If not, we should probably just navigate to shop or product page.
-                      // Assuming IDs are real for demo purposes or fallback handling
-                      try {
-                        await api.post('Cart/add', {
-                          productId: item.id,
-                          quantity: 1
-                        });
-                        navigate('/shopping-cart');
-                      } catch (err) {
-                        console.error("Add to cart failed", err);
-                        // Fallback to product page if add fails (e.g. options needed)
-                        navigate(`/product/${item.id}`);
-                      }
-                    } catch (err) {
-                      console.error(err);
-                    }
+                    navigate(`/product/${item.id}`);
                   }}
-                  className="mt-2 flex items-center justify-center gap-2 w-full md:max-w-[180px] h-[48px] rounded-full bg-[#205457] hover:bg-[#1a4345] active:scale-95 transition-all shadow-md"
+                  className="mt-2 flex items-center justify-center gap-2 w-full md:max-w-[180px] h-[44px] md:h-[48px] rounded-full bg-[#205457] hover:bg-[#1a4345] active:scale-95 transition-all shadow-md"
                 >
-                  <span className="text-white font-outfit font-medium text-[16px]">
-                    {t('buyNow')}
+                  <span className="text-white font-outfit font-medium text-[14px] md:text-[16px]">
+                    {t('viewDetails') || 'View Details'}
                   </span>
                   <FaArrowRightLong className="text-white transform rtl:rotate-180" />
                 </button>

@@ -78,7 +78,7 @@ const getColorName = (colorVal) => {
 };
 
 // --- MODAL COMPONENT ---
-const ProductDetailsModal = ({ product, onClose }) => {
+const ProductDetailsModal = ({ product, onClose, categoryMap, subCategoryMap }) => {
     const [images, setImages] = useState([]);
     const [reviews, setReviews] = useState([]);
     const [loadingImages, setLoadingImages] = useState(true);
@@ -124,7 +124,7 @@ const ProductDetailsModal = ({ product, onClose }) => {
             >
                 <div className="flex justify-between items-center p-4 sm:p-8 border-b border-gray-100 bg-gray-50/50">
                     <div className="flex-1 min-w-0 pr-2">
-                        <h2 className="text-lg sm:text-2xl font-bold text-gray-900 truncate">{product.name}</h2>
+                        <h2 className="text-lg sm:text-2xl font-bold text-gray-900 break-words">{product.name}</h2>
                         <p className="text-gray-500 text-xs sm:text-sm">Product ID: #{product.productId || product.id}</p>
                     </div>
                     <button onClick={onClose} className="p-2 sm:p-3 bg-white rounded-xl sm:rounded-2xl hover:bg-gray-100 transition-colors shadow-sm text-gray-400 flex-shrink-0">
@@ -163,10 +163,15 @@ const ProductDetailsModal = ({ product, onClose }) => {
                     </div>
                     <div className="space-y-8">
                         <div>
-                            <div className="flex items-center gap-2 mb-2">
+                            <div className="flex flex-wrap items-center gap-2 mb-2">
                                 <span className="text-[10px] font-black text-[#B19470] bg-[#B19470]/10 px-3 py-1 rounded-lg uppercase tracking-widest">
-                                    {product.category || 'Furniture'}
+                                    {categoryMap[product.categoryId] || 'Furniture'}
                                 </span>
+                                {subCategoryMap[product.subCategoryId] && (
+                                    <span className="text-[10px] font-black text-[#205457] bg-[#205457]/5 px-3 py-1 rounded-lg uppercase tracking-widest">
+                                        {subCategoryMap[product.subCategoryId]}
+                                    </span>
+                                )}
                                 <div className="flex items-center gap-1 bg-amber-50 px-2 py-1 rounded-lg">
                                     <Star size={12} className="fill-amber-400 text-amber-400" />
                                     <span className="text-xs font-bold text-amber-700">{product.rating || '0.0'}</span>
@@ -270,7 +275,7 @@ const ProductDetailsModal = ({ product, onClose }) => {
 };
 
 // Separate component for each product card to handle individual image fetching
-const StoreProductCard = ({ product, onViewClick }) => {
+const StoreProductCard = ({ product, onViewClick, categoryMap }) => {
     const [images, setImages] = useState([]);
     const [loadingImage, setLoadingImage] = useState(true);
     const [showActions, setShowActions] = useState(false);
@@ -334,15 +339,15 @@ const StoreProductCard = ({ product, onViewClick }) => {
                 )}
 
                 {/* Status Badges */}
-                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                <div className="absolute top-2 left-2 sm:top-4 sm:left-4 flex flex-col gap-1 sm:gap-2">
                     {product.quantity <= 10 && (
-                        <span className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest ${product.quantity === 0 ? 'bg-red-500 text-white' : 'bg-amber-500 text-white'
+                        <span className={`px-2 py-1 sm:px-3 sm:py-1.5 rounded-lg sm:rounded-xl text-[8px] sm:text-[9px] font-black uppercase tracking-widest ${product.quantity === 0 ? 'bg-red-500 text-white' : 'bg-amber-500 text-white'
                             }`}>
                             {product.quantity === 0 ? 'Out of Stock' : `Low Stock: ${product.quantity}`}
                         </span>
                     )}
                     {product.discount > 0 && (
-                        <span className="px-3 py-1.5 bg-[#205457] text-white rounded-xl text-[9px] font-black uppercase tracking-widest">
+                        <span className="px-2 py-1 sm:px-3 sm:py-1.5 bg-[#205457] text-white rounded-lg sm:rounded-xl text-[8px] sm:text-[9px] font-black uppercase tracking-widest">
                             -{product.discount}% OFF
                         </span>
                     )}
@@ -367,24 +372,24 @@ const StoreProductCard = ({ product, onViewClick }) => {
                 )}
             </div>
 
-            <div className="p-6 flex-1 flex flex-col">
-                <div className="mb-3">
-                    <p className="text-[10px] font-black text-[#B19470] uppercase tracking-widest mb-1">
-                        {product.category || 'Furniture piece'}
+            <div className="p-3 sm:p-6 flex-1 flex flex-col">
+                <div className="mb-2 sm:mb-3">
+                    <p className="text-[8px] sm:text-[10px] font-black text-[#B19470] uppercase tracking-widest mb-0.5 sm:mb-1">
+                        {categoryMap[product.categoryId] || 'Furniture piece'}
                     </p>
-                    <h3 className="font-bold text-gray-900 line-clamp-1 text-lg leading-tight" title={product.name}>
+                    <h3 className="font-bold text-gray-900 line-clamp-1 text-xs sm:text-lg leading-tight" title={product.name}>
                         {product.name}
                     </h3>
                 </div>
 
-                <div className="mt-auto flex items-end justify-between">
-                    <div>
-                        <span className="text-xs text-gray-400 block mb-1 font-medium">Market Price</span>
-                        <p className="text-2xl font-black text-[#205457] tracking-tight leading-none">${product.price}</p>
+                <div className="mt-auto flex items-end justify-between gap-1">
+                    <div className="min-w-0">
+                        <span className="text-[8px] sm:text-xs text-gray-400 block mb-0.5 sm:mb-1 font-medium truncate">Price</span>
+                        <p className="text-sm sm:text-2xl font-black text-[#205457] tracking-tight leading-none">${product.price}</p>
                     </div>
-                    <div className="text-right">
-                        <span className="text-xs text-gray-400 block mb-1 font-medium">Available</span>
-                        <p className="text-sm font-bold text-gray-900">{product.quantity} units</p>
+                    <div className="text-right flex-shrink-0">
+                        <span className="text-[8px] sm:text-xs text-gray-400 block mb-0.5 sm:mb-1 font-medium">Stock</span>
+                        <p className="text-[10px] sm:text-sm font-bold text-gray-900 whitespace-nowrap">{product.quantity} units</p>
                     </div>
                 </div>
             </div>
@@ -603,6 +608,13 @@ const AdminStoreDetails = () => {
     const [storeReviews, setStoreReviews] = useState([]);
     const [loadingReviews, setLoadingReviews] = useState(false);
     const [allProducts, setAllProducts] = useState([]);
+    const [categories, setCategories] = useState([]);
+    const [categoryMap, setCategoryMap] = useState({});
+    const [subCategoryMap, setSubCategoryMap] = useState({});
+    const [allSubCategories, setAllSubCategories] = useState([]);
+    const [selectedCategory, setSelectedCategory] = useState('All');
+    const [selectedSubCategory, setSelectedSubCategory] = useState('All');
+    const [sortBy, setSortBy] = useState('default'); // 'default' or 'newest'
 
     const fetchData = async () => {
         try {
@@ -616,14 +628,39 @@ const AdminStoreDetails = () => {
                 setStore(foundStore);
                 // 2. Fetch Products and filter against global active list
                 console.log("Fetching products for store:", id);
-                const [prodRes, globalRes] = await Promise.all([
+                const [prodRes, globalRes, catRes] = await Promise.all([
                     api.get(`/Store/${id}/products`),
-                    api.get('Product/GetAllProducts')
+                    api.get('Product/GetAllProducts'),
+                    api.get('Category')
                 ]);
 
                 const productsList = prodRes.data?.products || (Array.isArray(prodRes.data) ? prodRes.data : []);
                 const globalActive = Array.isArray(globalRes.data) ? globalRes.data : [];
                 setAllProducts(globalActive);
+
+                const cats = Array.isArray(catRes.data) ? catRes.data : [];
+                setCategories(cats);
+                const cMap = {};
+                cats.forEach(c => cMap[c.id || c.categoryId] = c.name);
+                setCategoryMap(cMap);
+
+                // Fetch Subcategories
+                const subsPromises = cats.map(c =>
+                    api.get(`/SubCategory/by-category/${c.id || c.categoryId}`).catch(() => ({ data: [] }))
+                );
+                const subsResults = await Promise.all(subsPromises);
+                const sMap = {};
+                const sList = [];
+                subsResults.forEach(res => {
+                    if (Array.isArray(res.data)) {
+                        res.data.forEach(s => {
+                            sMap[s.id || s.subCategoryId] = s.name;
+                            sList.push(s);
+                        });
+                    }
+                });
+                setSubCategoryMap(sMap);
+                setAllSubCategories(sList);
 
                 // Only show products that exist in the global active catalog
                 const filteredActive = productsList.filter(p =>
@@ -671,9 +708,35 @@ const AdminStoreDetails = () => {
         }
     };
 
-    const filteredProducts = products.filter(p =>
-        p.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredProducts = products.filter(p => {
+        const matchesSearch = p.name?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const catName = categoryMap[p.categoryId] || 'Uncategorized';
+        const matchesCategory = selectedCategory === 'All' || catName === selectedCategory;
+
+        let matchesSubCategory = true;
+        if (selectedCategory !== 'All' && selectedSubCategory !== 'All') {
+            const subName = subCategoryMap[p.subCategoryId];
+            matchesSubCategory = subName === selectedSubCategory;
+        }
+
+        return matchesSearch && matchesCategory && matchesSubCategory;
+    });
+
+    const sortedProducts = [...filteredProducts].sort((a, b) => {
+        if (sortBy === 'newest') {
+            return (b.productId || b.id) - (a.productId || a.id);
+        }
+        return 0; // Default order from API
+    });
+
+    const categoryNames = ['All', ...new Set(Object.values(categoryMap))];
+    const selectedCategoryId = Object.keys(categoryMap).find(key => categoryMap[key] === selectedCategory);
+    const availableSubCategories = selectedCategory === 'All'
+        ? []
+        : allSubCategories
+            .filter(sub => sub.categoryId == selectedCategoryId)
+            .map(sub => sub.name);
 
     if (loading) return <PageLoader />;
     if (!store) return <div className="pt-[120px] text-center">Store not found</div>;
@@ -754,28 +817,81 @@ const AdminStoreDetails = () => {
                                     <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Store Inventory</h2>
                                     <p className="text-gray-400 text-xs sm:text-sm mt-1">Manage products listed by this store.</p>
                                 </div>
-                                <div className="relative w-full">
-                                    <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                                    <input
-                                        type="text"
-                                        placeholder="Search products..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 bg-white border border-gray-100 rounded-xl text-sm sm:text-base focus:ring-2 focus:ring-[#205457]/20 outline-none transition-all"
-                                    />
+                                <div className="flex flex-col md:flex-row gap-4">
+                                    <div className="relative flex-1">
+                                        <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                                        <input
+                                            type="text"
+                                            placeholder="Search products..."
+                                            value={searchTerm}
+                                            onChange={(e) => setSearchTerm(e.target.value)}
+                                            className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 bg-white border border-gray-100 rounded-xl text-xs sm:text-base focus:ring-2 focus:ring-[#205457]/20 outline-none transition-all"
+                                        />
+                                    </div>
+                                    <div className="flex gap-1.5 sm:gap-2 bg-white p-1.5 rounded-xl border border-gray-100 shadow-sm overflow-x-auto no-scrollbar">
+                                        {categoryNames.map(cat => (
+                                            <button
+                                                key={cat}
+                                                onClick={() => { setSelectedCategory(cat); setSelectedSubCategory('All'); }}
+                                                className={`px-3 py-1.5 rounded-lg text-[9px] sm:text-xs font-bold whitespace-nowrap transition-all flex-shrink-0 ${selectedCategory === cat
+                                                    ? 'bg-[#205457] text-white shadow-lg'
+                                                    : 'text-gray-400 hover:bg-gray-50'
+                                                    }`}
+                                            >
+                                                {cat}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <button
+                                        onClick={() => setSortBy(prev => prev === 'newest' ? 'default' : 'newest')}
+                                        className={`px-4 py-2.5 sm:py-3 rounded-xl border font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-2 ${sortBy === 'newest'
+                                            ? 'bg-amber-50 border-amber-200 text-amber-700'
+                                            : 'bg-white border-gray-100 text-gray-500 hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        <Star size={14} className={sortBy === 'newest' ? 'fill-amber-500' : ''} />
+                                        {sortBy === 'newest' ? 'Showing Newest' : 'Sort by Newest'}
+                                    </button>
                                 </div>
+
+                                {selectedCategory !== 'All' && availableSubCategories.length > 0 && (
+                                    <div className="flex flex-wrap gap-2 animate-fade-in">
+                                        <button
+                                            onClick={() => setSelectedSubCategory('All')}
+                                            className={`px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-bold whitespace-nowrap transition-all border ${selectedSubCategory === 'All'
+                                                ? 'bg-[#205457]/10 text-[#205457] border-[#205457]/20'
+                                                : 'bg-white text-gray-400 border-gray-200'
+                                                }`}
+                                        >
+                                            All {selectedCategory}
+                                        </button>
+                                        {availableSubCategories.map(sub => (
+                                            <button
+                                                key={sub}
+                                                onClick={() => setSelectedSubCategory(sub)}
+                                                className={`px-3 py-1.5 rounded-lg text-[9px] sm:text-[10px] font-bold whitespace-nowrap transition-all border ${selectedSubCategory === sub
+                                                    ? 'bg-[#205457]/10 text-[#205457] border-[#205457]/20'
+                                                    : 'bg-white text-gray-400 border-gray-200'
+                                                    }`}
+                                            >
+                                                {sub}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                                {filteredProducts.map((product) => (
+                            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
+                                {sortedProducts.map((product) => (
                                     <StoreProductCard
                                         key={product.productId || product.id}
                                         product={product}
+                                        categoryMap={categoryMap}
                                         onViewClick={setSelectedProduct}
                                     />
                                 ))}
                             </div>
-                            {filteredProducts.length === 0 && (
+                            {sortedProducts.length === 0 && (
                                 <div className="text-center py-12 sm:py-20 bg-white rounded-[20px] sm:rounded-[30px] border border-dashed border-gray-200">
                                     <Package size={32} className="sm:w-10 sm:h-10 mx-auto text-gray-300 mb-3 sm:mb-4" />
                                     <h3 className="text-gray-900 font-bold text-base sm:text-lg">No Products Found</h3>
@@ -928,6 +1044,8 @@ const AdminStoreDetails = () => {
                 {selectedProduct && (
                     <ProductDetailsModal
                         product={selectedProduct}
+                        categoryMap={categoryMap}
+                        subCategoryMap={subCategoryMap}
                         onClose={() => setSelectedProduct(null)}
                     />
                 )}

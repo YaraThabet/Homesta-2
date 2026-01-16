@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const Sale = () => {
   const navigate = useNavigate();
@@ -81,12 +82,25 @@ const Sale = () => {
             </div>
 
             {/* Button */}
-            <button
+            <motion.button
               onClick={() => navigate('/shop')}
+              animate={{
+                scale: [1, 1.05, 1],
+                boxShadow: [
+                  "0 0 0 rgba(32, 84, 87, 0)",
+                  "0 0 20px rgba(32, 84, 87, 0.4)",
+                  "0 0 0 rgba(32, 84, 87, 0)"
+                ]
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
               className="flex items-center gap-3 bg-[#205457] text-white px-10 py-4 rounded-full hover:shadow-xl hover:shadow-[#205457]/20 transition-all font-bold active:scale-95"
             >
               Shop Now
-            </button>
+            </motion.button>
           </div>
 
           {/* ===== Image ===== */}

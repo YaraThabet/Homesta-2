@@ -113,6 +113,7 @@ const Products = () => {
     // Filters State
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [selectedSubCategory, setSelectedSubCategory] = useState('All');
+    const [sortBy, setSortBy] = useState('default'); // 'default' or 'newest'
 
     const storeId = localStorage.getItem('storeId');
 
@@ -249,6 +250,13 @@ const Products = () => {
         return matchesSearch && matchesCategory && matchesSubCategory;
     });
 
+    const sortedProducts = [...filteredProducts].sort((a, b) => {
+        if (sortBy === 'newest') {
+            return (b.productId || b.id) - (a.productId || a.id);
+        }
+        return 0;
+    });
+
     const containerVariants = {
         hidden: { opacity: 0 },
         visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
@@ -322,20 +330,33 @@ const Products = () => {
 
                     {/* Filters Row */}
                     <div className="flex flex-col sm:flex-row gap-4">
-                        {/* Category List */}
-                        <div className="flex gap-2 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm overflow-x-auto max-w-full md:max-w-2xl no-scrollbar">
-                            {categoryNames.map(cat => (
-                                <button
-                                    key={cat}
-                                    onClick={() => { setSelectedCategory(cat); setSelectedSubCategory('All'); }}
-                                    className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all flex-shrink-0 ${selectedCategory === cat
-                                        ? 'bg-[#205457] text-white shadow-lg shadow-[#205457]/20 dashed-border'
-                                        : 'text-gray-400 hover:bg-gray-50'
-                                        }`}
-                                >
-                                    {cat}
-                                </button>
-                            ))}
+                        <div className="flex flex-wrap items-center gap-4">
+                            {/* Category List */}
+                            <div className="flex gap-2 bg-white p-2 rounded-2xl border border-gray-100 shadow-sm overflow-x-auto max-w-full md:max-w-2xl no-scrollbar">
+                                {categoryNames.map(cat => (
+                                    <button
+                                        key={cat}
+                                        onClick={() => { setSelectedCategory(cat); setSelectedSubCategory('All'); }}
+                                        className={`px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap transition-all flex-shrink-0 ${selectedCategory === cat
+                                            ? 'bg-[#205457] text-white shadow-lg shadow-[#205457]/20 dashed-border'
+                                            : 'text-gray-400 hover:bg-gray-50'
+                                            }`}
+                                    >
+                                        {cat}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <button
+                                onClick={() => setSortBy(prev => prev === 'newest' ? 'default' : 'newest')}
+                                className={`px-4 py-2.5 rounded-xl border font-bold text-sm transition-all flex items-center justify-center gap-2 ${sortBy === 'newest'
+                                    ? 'bg-[#205457]/10 border-[#205457]/20 text-[#205457]'
+                                    : 'bg-white border-gray-100 text-gray-500 hover:bg-gray-50 shadow-sm'
+                                    }`}
+                            >
+                                <Star size={16} className={sortBy === 'newest' ? 'fill-[#205457]' : ''} />
+                                {sortBy === 'newest' ? 'Newest' : 'Sort by Newest'}
+                            </button>
                         </div>
 
                         {/* SubCategory List - Only if Category Selected */}
@@ -408,7 +429,7 @@ const Products = () => {
                     </motion.div>
                 ) : viewMode === 'grid' ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                        {filteredProducts.map((product) => (
+                        {sortedProducts.map((product) => (
                             <ProductCard
                                 key={product.productId || product.id}
                                 product={product}
@@ -435,7 +456,7 @@ const Products = () => {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-50">
-                                {filteredProducts.map((product) => (
+                                {sortedProducts.map((product) => (
                                     <ProductRow
                                         key={product.productId || product.id}
                                         product={product}

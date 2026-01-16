@@ -546,13 +546,13 @@ const ProductDetail = () => {
         {/* Back Button */}
 
         <button
-          onClick={() => navigate('/shop')}
+          onClick={() => navigate(-1)}
           className="group inline-flex items-center gap-2 sm:gap-3 bg-white/80 backdrop-blur-md px-4 sm:px-6 py-2.5 sm:py-3 rounded-full text-[#205457] font-bold text-xs sm:text-sm shadow-sm hover:shadow-lg hover:-translate-y-0.5 border border-white/60 transition-all mb-6 sm:mb-8 md:mb-10"
         >
           <div className="bg-[#205457]/10 p-1 sm:p-1.5 rounded-full group-hover:bg-[#205457] group-hover:text-white transition-colors">
             <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           </div>
-          {t('backToShop') || 'Back to Shop'}
+          {t('back') || 'Back'}
         </button>
 
         {/* Product Section */}
