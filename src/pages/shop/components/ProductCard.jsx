@@ -197,16 +197,16 @@ const ProductCard = ({ product }) => {
               <Heart className={`w-4 h-4 ${inWishlist ? 'fill-red-500 text-red-500' : ''}`} />
             </button>
           </div>
-          <div className="p-4 flex flex-col flex-1">
-            <div className="mb-2">
-              <h3 className="text-sm font-medium text-foreground leading-tight line-clamp-2 min-h-[2.5em]">
+          <div className="p-3 sm:p-4 flex flex-col flex-1">
+            <div className="mb-1 sm:mb-2">
+              <h3 className="text-xs sm:text-sm font-medium text-foreground leading-tight line-clamp-2 min-h-[2.5em]">
                 {product.name}
               </h3>
             </div>
 
             {/* Color Selection */}
             {availableColors.length > 0 && (
-              <div className="flex items-center gap-1.5 mb-2" onClick={(e) => e.preventDefault()}>
+              <div className="flex items-center gap-1 sm:gap-1.5 mb-1.5 sm:mb-2" onClick={(e) => e.preventDefault()}>
                 {availableColors.map((color, index) => {
                   const colorValue = getColorValue(color);
                   return (
@@ -217,7 +217,7 @@ const ProductCard = ({ product }) => {
                         e.stopPropagation();
                         setSelectedColor(color);
                       }}
-                      className={`w-5 h-5 rounded-full border-2 transition-all ${selectedColor === color
+                      className={`w-3.5 h-3.5 sm:w-5 sm:h-5 rounded-full border-2 transition-all ${selectedColor === color
                         ? 'border-[#205457] ring-2 ring-[#205457]/30 scale-110'
                         : 'border-gray-200 hover:border-gray-300'
                         }`}
@@ -230,19 +230,19 @@ const ProductCard = ({ product }) => {
             )}
 
             <div className="flex items-center justify-between mt-auto">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-foreground">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-2">
+                <span className="text-xs sm:text-sm font-semibold text-foreground">
                   ${product.price.toFixed(2)}
                 </span>
                 {originalPrice && (
-                  <span className="text-xs text-price-original line-through">
+                  <span className="text-[10px] sm:text-xs text-price-original line-through">
                     ${originalPrice.toFixed(2)}
                   </span>
                 )}
               </div>
               <div className="flex items-center gap-1">
-                <Star className="h-3 w-3 fill-rating text-rating fill-yellow-400 text-yellow-400" />
-                <span className="text-xs text-muted-foreground">{product.rating || 0}</span>
+                <Star className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-rating text-rating fill-yellow-400 text-yellow-400" />
+                <span className="text-[10px] sm:text-xs text-muted-foreground">{product.rating || 0}</span>
               </div>
             </div>
           </div>
@@ -251,14 +251,14 @@ const ProductCard = ({ product }) => {
         {/* Floating Cart Button */}
         <button
           onClick={handleAddToCart}
-          className={`absolute bottom-16 right-4 w-10 h-10 rounded-full shadow-lg flex items-center justify-center transition-all ${(product.quantity || 0) <= 0
+          className={`absolute bottom-12 sm:bottom-16 right-2 sm:right-4 w-8 h-8 sm:w-10 sm:h-10 rounded-full shadow-lg flex items-center justify-center transition-all ${(product.quantity || 0) <= 0
             ? 'bg-gray-100 text-gray-400'
             : 'bg-white text-[#205457] hover:bg-[#205457] hover:text-white'
             }`}
           disabled={adding}
           title={(product.quantity || 0) <= 0 ? "Out of Stock" : "Add to Cart"}
         >
-          <ShoppingCart className={`h-5 w-5 ${adding ? 'animate-bounce' : ''}`} />
+          <ShoppingCart className={`h-4 w-4 sm:h-5 sm:w-5 ${adding ? 'animate-bounce' : ''}`} />
         </button>
       </div>
 

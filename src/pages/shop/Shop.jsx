@@ -12,8 +12,43 @@ import api from "../../lib/axios";
 
 const ITEMS_PER_PAGE = 24;
 
+const COLOR_MAP = {
+  "brown": "#A67B5B",
+  "grey": "#9E9E9E",
+  "gray": "#9E9E9E",
+  "green": "#5B8C5A",
+  "red": "#D64545",
+  "orange": "#E8915B",
+  "blue": "#5B9BD5",
+  "white": "#F5F5F5",
+  "black": "#2D2D2D",
+  "yellow": "#F59E0B",
+  "purple": "#8B5CF6",
+  "pink": "#EC4899",
+  "beige": "#F5F5DC",
+  "gold": "#FFD700",
+  "silver": "#C0C0C0",
+  "oak": "#B08968",
+  "walnut": "#432818",
+  "mahogany": "#4A0E0E",
+  "cream": "#FFFDD0",
+  "ivory": "#FFFFF0",
+  "navy": "#000080",
+  "teal": "#008080",
+  "charcoal": "#36454F",
+  "darkgrey": "#545454",
+  "darkgray": "#545454",
+  "lightgrey": "#D3D3D3",
+  "lightgray": "#D3D3D3"
+};
+
 const Shop = () => {
   const [searchParams] = useSearchParams();
+
+  // Scroll to top on mount/refresh
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   // Data State
   const [products, setProducts] = useState([]);
@@ -28,6 +63,7 @@ const Shop = () => {
   const [selectedColors, setSelectedColors] = useState([]);
   const [inStock, setInStock] = useState(null);
   const [sortBy, setSortBy] = useState("default");
+  const [absoluteMaxPrice, setAbsoluteMaxPrice] = useState(1000);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
@@ -48,9 +84,10 @@ const Shop = () => {
         const fetchedCats = Array.isArray(catRes.data) ? catRes.data : [];
         setCategories(fetchedCats.map(c => ({ id: c.categoryId || c.id, name: c.name })));
 
-        // Calculate dynamic max price from products
+        // Calculate absolute max price from all products
         if (fetchedProducts.length > 0) {
           const max = Math.ceil(Math.max(...fetchedProducts.map(p => p.price)));
+          setAbsoluteMaxPrice(max);
           setPriceRange([0, max]);
         }
 
@@ -85,13 +122,19 @@ const Shop = () => {
   }, [searchParams]);
 
   // --- 2. Derive Dynamic Filter Options ---
-  const { availableColors, maxProductPrice } = useMemo(() => {
-    if (products.length === 0) return { availableColors: [], maxProductPrice: 1000 };
+  const { availableColors, maxProductPrice, filteredSubCategories } = useMemo(() => {
+    if (products.length === 0) return { availableColors: [], maxProductPrice: 1000, filteredSubCategories: [] };
 
-    const colorsSet = new Set();
+    // Filter products by selected categories first (if any)
+    let relevantProducts = products;
+    if (selectedCategories.length > 0) {
+      relevantProducts = products.filter(p => selectedCategories.includes(p.categoryId));
+    }
+
+    const colorsMap = new Map(); // Use Map to track normalized -> original value
     let max = 0;
 
-    products.forEach(p => {
+    relevantProducts.forEach(p => {
       // Max Price
       if (p.price > max) max = p.price;
 
@@ -104,16 +147,38 @@ const Shop = () => {
           pColors = p.colors.split(',').map(c => c.trim());
         }
         pColors.forEach(c => {
-          if (c) colorsSet.add(c); // Use raw case first, normalize later if needed
+          if (c) {
+            const cleaned = c.trim().replace(/\s+/g, '');
+            const lower = cleaned.toLowerCase();
+
+            // Resolve to hex for visual deduplication
+            const hex = cleaned.startsWith('#')
+              ? cleaned.toUpperCase()
+              : (COLOR_MAP[lower] || "#CCCCCC");
+
+            // Only add unique visual hexes
+            if (!colorsMap.has(hex)) {
+              colorsMap.set(hex, hex);
+            }
+          }
         });
       }
     });
 
+    // Filter subcategories based on selected categories
+    let relevantSubCategories = subCategories;
+    if (selectedCategories.length > 0) {
+      relevantSubCategories = subCategories.filter(sub =>
+        selectedCategories.includes(sub.categoryId)
+      );
+    }
+
     return {
-      availableColors: Array.from(colorsSet).sort(),
-      maxProductPrice: Math.ceil(max) || 1000
+      availableColors: Array.from(colorsMap.values()).sort(),
+      maxProductPrice: Math.ceil(max) || 1000,
+      filteredSubCategories: relevantSubCategories
     };
-  }, [products]);
+  }, [products, subCategories, selectedCategories]);
 
 
   // --- 3. Handlers ---
@@ -174,9 +239,13 @@ const Shop = () => {
         const pColors = Array.isArray(product.colors)
           ? product.colors
           : product.colors.split(',').map(c => c.trim());
-        // Check if any selected color is in product colors (case insensitive)
-        return selectedColors.some(sel =>
-          pColors.some(pc => pc.toLowerCase() === sel.toLowerCase())
+
+        return selectedColors.some(selHex =>
+          pColors.some(pc => {
+            const lower = pc.toLowerCase();
+            const productHex = pc.startsWith('#') ? pc.toUpperCase() : (COLOR_MAP[lower] || "#CCCCCC");
+            return productHex === selHex.toUpperCase();
+          })
         );
       });
     }
@@ -233,42 +302,34 @@ const Shop = () => {
       if (sub) filters.push({ type: "subcategory", value: sub.name, id: subId });
     });
 
-    if (priceRange[0] !== 0 || priceRange[1] !== maxProductPrice) {
-      // Only show if different from default/max
-      // Actually maxProductPrice changes on load, so strictly checking might be tricky if it hasn't loaded yet.
-      // Let's just check against current maxProductPrice
-      if (maxProductPrice > 0 && (priceRange[0] > 0 || priceRange[1] < maxProductPrice)) {
+    if (priceRange[0] !== 0 || priceRange[1] !== absoluteMaxPrice) {
+      if (absoluteMaxPrice > 0 && (priceRange[0] > 0 || priceRange[1] < absoluteMaxPrice)) {
         filters.push({ type: "price", value: `Price: $${priceRange[0]} - $${priceRange[1]}` });
       }
     }
 
-    selectedColors.forEach((color) => {
-      filters.push({ type: "color", value: color });
+    selectedColors.forEach((hex) => {
+      // Try to find the common name for the hex
+      const entry = Object.entries(COLOR_MAP).find(([name, color]) => color === hex.toUpperCase());
+      const label = entry ? entry[0].charAt(0).toUpperCase() + entry[0].slice(1) : hex;
+      filters.push({ type: "color", value: label });
     });
 
     if (inStock === true) filters.push({ type: "stock", value: "In Stock" });
     if (inStock === false) filters.push({ type: "stock", value: "Out of Stock" });
 
     return filters;
-  }, [selectedCategories, selectedSubCategories, priceRange, selectedColors, inStock, categories, subCategories, maxProductPrice]);
+  }, [selectedCategories, selectedSubCategories, priceRange, selectedColors, inStock, categories, subCategories, absoluteMaxPrice]);
 
   const handleRemoveFilter = (type, value) => {
     if (type === "category") {
-      // value passed here from ActiveFilters might be the name or ID depending on how we structured it above.
-      // In activeFilters construction, we pushed `value: cat.name`.
-      // Ideally ActiveFilters should pass back the 'id' if we attached it.
-      // Let's see how ActiveFilters works. I'm assuming it might just pass the 'type' and 'value'.
-      // I'll need to look up the ID by name if ActiveFilters component isn't smart enough.
-      // Or better, I'll assume I need to find the ID. 
-      // Strategy: modify ActiveFilters usage? No, I can't see ActiveFilters code right now.
-      // Safest: find ID by name.
       const cat = categories.find(c => c.name === value);
       if (cat) setSelectedCategories((prev) => prev.filter((c) => c !== cat.id));
     } else if (type === "subcategory") {
       const sub = subCategories.find(s => s.name === value);
       if (sub) setSelectedSubCategories((prev) => prev.filter((s) => s !== sub.id));
     } else if (type === "price") {
-      setPriceRange([0, maxProductPrice]);
+      setPriceRange([0, absoluteMaxPrice]);
     } else if (type === "color") {
       setSelectedColors((prev) => prev.filter((c) => c !== value));
     } else if (type === "stock") {
@@ -278,7 +339,7 @@ const Shop = () => {
   };
 
   const handleClearAll = () => {
-    setPriceRange([0, maxProductPrice]);
+    setPriceRange([0, absoluteMaxPrice]);
     setSelectedColors([]);
     setInStock(null);
     setSelectedCategories([]);
@@ -313,7 +374,7 @@ const Shop = () => {
             <FilterSidebar
               // Data Props
               availableCategories={categories}
-              availableSubCategories={subCategories}
+              availableSubCategories={filteredSubCategories}
               availableColors={availableColors}
               maxPrice={maxProductPrice}
               loading={loading}

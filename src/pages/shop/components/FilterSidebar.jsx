@@ -66,6 +66,9 @@ const FilterSidebar = ({
   inStock,
   onStockChange,
 }) => {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 1024;
+  const defaultOpen = !isMobile;
+
   return (
     <aside className="w-full lg:w-70 bg-card p-5 rounded-lg ">
       <div className="flex items-center justify-center gap-2 mb-6 pb-4 border-b border-gray-200">
@@ -75,8 +78,8 @@ const FilterSidebar = ({
         </h3>
       </div>
 
-      <FilterSection title="Category">
-        <div className="space-y-2.5">
+      <FilterSection title="Category" defaultOpen={defaultOpen}>
+        <div className="flex flex-wrap gap-3 sm:flex-col sm:space-y-2.5 sm:gap-0">
           {loading ? (
             Array(5).fill(0).map((_, i) => (
               <div key={i} className="h-5 bg-gray-100 rounded animate-pulse w-3/4" />
@@ -86,7 +89,7 @@ const FilterSidebar = ({
               <div
                 key={category.id}
                 onClick={() => onCategoryChange(category.id)}
-                className="flex items-center gap-2.5 cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-2.5 cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
               >
                 <Checkbox
                   checked={selectedCategories.includes(category.id)}
@@ -98,7 +101,7 @@ const FilterSidebar = ({
         </div>
       </FilterSection>
 
-      <FilterSection title="Price">
+      <FilterSection title="Price" defaultOpen={defaultOpen}>
         <div className="space-y-3">
           {loading ? (
             <div className="space-y-2">
@@ -128,14 +131,11 @@ const FilterSidebar = ({
         </div>
       </FilterSection>
 
-      <FilterSection title="Color">
-        <div className="space-y-2.5">
+      <FilterSection title="Color" defaultOpen={defaultOpen}>
+        <div className="flex flex-wrap gap-3">
           {loading ? (
             Array(6).fill(0).map((_, i) => (
-              <div key={i} className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full bg-gray-100 animate-pulse" />
-                <div className="h-4 bg-gray-100 rounded w-1/2 animate-pulse" />
-              </div>
+              <div key={i} className="w-7 h-7 rounded-full bg-gray-100 animate-pulse" />
             ))
           ) : (
             availableColors.map((colorName) => {
@@ -148,18 +148,22 @@ const FilterSidebar = ({
                 <div
                   key={colorName}
                   onClick={() => onColorChange(colorName)}
-                  className="flex items-center gap-2.5 cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors"
+                  className="cursor-pointer transition-transform hover:scale-110"
+                  title={colorName}
                 >
                   <div
-                    className={`relative w-5 h-5 rounded-full flex items-center justify-center transition-all border ${isWhite ? "border-gray-300" : "border-transparent"}`}
+                    className={`relative w-7 h-7 rounded-full flex items-center justify-center transition-all border-2 ${isSelected
+                      ? 'border-[#205457] shadow-md'
+                      : isWhite
+                        ? 'border-gray-300'
+                        : 'border-transparent'
+                      }`}
                     style={{ backgroundColor: hex }}
-                    title={colorName} // Show name/hex on hover
                   >
                     {isSelected && (
-                      <Check className={`h-3 w-3 ${isWhite ? "text-gray-900" : "text-white"}`} />
+                      <Check className={`h-3.5 w-3.5 ${isWhite ? "text-gray-900" : "text-white"}`} strokeWidth={3} />
                     )}
                   </div>
-                  {!isHex && colorName}
                 </div>
               );
             })
@@ -167,8 +171,8 @@ const FilterSidebar = ({
         </div>
       </FilterSection>
 
-      <FilterSection title="Subcategory">
-        <div className="space-y-2.5">
+      <FilterSection title="Subcategory" defaultOpen={defaultOpen}>
+        <div className="flex flex-wrap gap-3 sm:flex-col sm:space-y-2.5 sm:gap-0">
           {loading ? (
             Array(4).fill(0).map((_, i) => (
               <div key={i} className="h-5 bg-gray-100 rounded animate-pulse w-2/3" />
@@ -178,7 +182,7 @@ const FilterSidebar = ({
               <div
                 key={sub.id}
                 onClick={() => onSubCategoryChange(sub.id)}
-                className="flex items-center gap-2.5 cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors"
+                className="flex items-center gap-2.5 cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors whitespace-nowrap"
               >
                 <Checkbox
                   checked={selectedSubCategories.includes(sub.id)}
@@ -190,8 +194,8 @@ const FilterSidebar = ({
         </div>
       </FilterSection>
 
-      <FilterSection title="Availability" defaultOpen={true}>
-        <div className="space-y-2.5">
+      <FilterSection title="Availability" defaultOpen={defaultOpen}>
+        <div className="flex flex-row gap-4 sm:flex-col sm:space-y-2.5 sm:gap-0">
           <div
             onClick={() => onStockChange(inStock === true ? null : true)}
             className="flex items-center gap-2.5 cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors"

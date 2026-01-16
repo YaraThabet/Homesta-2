@@ -646,8 +646,7 @@ const ProductDetail = () => {
             {availableColors.length > 0 && (
               <div className="mb-6">
                 <p className="text-sm text-foreground mb-3">
-                  <span className="font-medium">{t('selectedColor') || 'Selected Color'}: </span>
-                  <span className="text-[#205457] font-bold uppercase tracking-wide">{getColorName(selectedColor) || t('none')}</span>
+                  <span className="font-medium">{t('selectedColor') || 'Selected Color'} </span>
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {availableColors.map((colorVal, index) => {
